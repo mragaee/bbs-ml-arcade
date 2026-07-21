@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Level 1 — The Spam & Ham Classifier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&family=Cairo:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/core.css">
+</head>
+<body>
+<div class="wrap">
+  <section id="screen-l1" class="screen">
+    <div class="topbar">
+      <button class="btn teal" onclick="location.href='index.html'" data-i18n="back">← Arcade</button>
+      <h2><svg class="ic"><use href="#i-mail"/></svg> <span data-i18n="l1Name">The Spam &amp; Ham Classifier</span></h2>
+      <span class="tag teal" data-i18n="l1Tag">Supervised</span>
+    </div>
+
+    <details class="explain">
+      <summary><svg class="ic"><use href="#i-bulb"/></svg> <span data-i18n="explainTitle">What's the ML idea here?</span></summary>
+      <p data-i18n="l1Explain"><b>Supervised learning</b> means learning from examples that come with the correct answers (<b>labels</b>).
+      First you'll see <b>training data</b> — emails already stamped SPAM or HAM (not-spam). Your brain will pick up the
+      patterns (ALL CAPS, "FREE!!!", sketchy senders…). Then you'll classify <b>new, unlabeled</b> emails —
+      exactly what a trained spam filter does millions of times a day.</p>
+    </details>
+
+    <!-- intro -->
+    <div id="l1-intro" class="panel center email-stage">
+      <div class="res-icon" style="color:var(--teal)"><svg class="ic"><use href="#i-search"/></svg></div>
+      <h3 style="margin:10px 0 6px" data-i18n="l1Mission">Your mission</h3>
+      <p class="muted" style="max-width:460px;margin:0 auto 18px" data-i18n="l1MissionText">
+        Phase 1: study <b style="color:var(--text)">10 labeled training emails</b>.<br>
+        Phase 2: classify <b style="color:var(--text)">12 mystery emails</b> — 12 seconds each.<br>
+        +10 for a correct call, −5 for a wrong one. Misses count against your accuracy!
+      </p>
+      <div class="field" style="max-width:280px;margin:0 auto 18px">
+        <label data-i18n="diffLabel">Difficulty</label>
+        <select id="l1-diff" onchange="Difficulty.change(1, this.value)"></select>
+      </div>
+      <button class="btn teal primary big" onclick="SpamGame.startTraining()"><svg class="ic"><use href="#i-play"/></svg> <span data-i18n="l1Start">Start Training Phase</span></button>
+    </div>
+
+    <!-- training -->
+    <div id="l1-train" class="email-stage" style="display:none">
+      <div class="train-progress" id="l1-train-progress">Training example 1 / 10</div>
+      <div class="email-card" id="l1-train-card">
+        <span class="stamp ham" id="l1-train-stamp">HAM</span>
+        <div class="from" id="l1-train-from"></div>
+        <div class="body" id="l1-train-body"></div>
+      </div>
+      <p class="center muted" style="margin-top:12px" data-i18n="l1Memorize">The machine memorizes patterns from labeled examples…</p>
+      <div class="center" style="margin-top:14px">
+        <button class="btn teal" onclick="SpamGame.startClassify()"><svg class="ic"><use href="#i-skip"/></svg> <span data-i18n="l1Skip">Skip ahead — I've got the pattern</span></button>
+      </div>
+    </div>
+
+    <!-- classify -->
+    <div id="l1-play" class="email-stage" style="display:none">
+      <div class="hud" style="justify-content:center">
+        <span class="chip"><span data-i18n="l1ChipEmail">Email</span> <b id="l1-count">1/12</b></span>
+        <span class="chip"><span data-i18n="l1ChipScore">Score</span> <b id="l1-score">0</b></span>
+        <span class="chip"><span data-i18n="l1ChipStreak">Streak</span> <svg class="ic fill" style="color:var(--amber)"><use href="#i-flame"/></svg> <b id="l1-streak">0</b></span>
+      </div>
+      <div class="email-card" id="l1-card">
+        <div class="from" id="l1-from"></div>
+        <div class="body" id="l1-body"></div>
+      </div>
+      <div class="timer-track"><div class="timer-fill" id="l1-timer"></div></div>
+      <div class="sort-btns">
+        <button class="btn good big" id="l1-btn-ham" onclick="SpamGame.answer('ham')"><svg class="ic"><use href="#i-inbox"/></svg> <span data-i18n="l1Ham">HAM</span></button>
+        <button class="btn danger big" id="l1-btn-spam" onclick="SpamGame.answer('spam')"><svg class="ic"><use href="#i-trash"/></svg> <span data-i18n="l1Spam">SPAM</span></button>
+      </div>
+      <div class="feedback-line" id="l1-feedback"></div>
+      <div class="kbd-hint" data-i18n="l1Kbd">Keyboard: <kbd>←</kbd> HAM &nbsp;·&nbsp; <kbd>→</kbd> SPAM</div>
+    </div>
+
+    <!-- results -->
+    <div id="l1-results" class="panel center result-panel" style="display:none">
+      <div class="res-icon" id="l1-res-emoji"></div>
+      <h3 id="l1-res-title">Model trained!</h3>
+      <p class="muted" data-i18n="l1AccLabel">Your model's accuracy on unseen data:</p>
+      <div class="big-metric" id="l1-res-acc">0%</div>
+      <p class="muted" style="margin-top:4px"><span data-i18n="l1FinalScore">Final score:</span> <b id="l1-res-score" style="color:var(--text)">0</b></p>
+      <div class="confusion">
+        <div class="cell"><b id="l1-tp" style="color:var(--good)">0</b><span data-i18n="l1Tp">Spam caught </span></div>
+        <div class="cell"><b id="l1-fn" style="color:var(--bad)">0</b><span data-i18n="l1Fn">Spam let through </span></div>
+        <div class="cell"><b id="l1-fp" style="color:var(--bad)">0</b><span data-i18n="l1Fp">Good mail trashed </span></div>
+        <div class="cell"><b id="l1-tn" style="color:var(--good)">0</b><span data-i18n="l1Tn">Good mail kept </span></div>
+      </div>
+      <p class="muted" id="l1-res-note" style="font-size:14px"></p>
+      <div class="takeaway" data-i18n="l1Takeaway"><b>Takeaway:</b> Supervised learning = learning a mapping from <b>labeled examples</b> to answers, then applying it to data it has never seen. The labels ARE the teacher.</div>
+      <div class="result-actions">
+        <button class="btn teal primary" onclick="SpamGame.open()"><svg class="ic"><use href="#i-replay"/></svg> <span data-i18n="l1Again">Play Again</span></button>
+        <button class="btn teal" onclick="location.href='index.html'" data-i18n="backArcade">Back to Arcade</button>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="assets/core.js"></script>
+<script>
+"use strict";
+/* ════════════════════════════════════════════════════════════
+   LEVEL 1 — SUPERVISED: SPAM & HAM CLASSIFIER
+   ════════════════════════════════════════════════════════════ */
+const SpamGame = {
+  TRAIN: [
+    { from: "prince@lucky-win.biz", label: "spam",
+      en: "CONGRATULATIONS!!! You WON $5,000,000 in the international lottery! Click NOW to claim your prize!!!",
+      ar: "مبروووك!!! ربحت 5,000,000 دولار في اليانصيب العالمي! اضغط الآن لاستلام جائزتك!!!" },
+    { from: "sara@university.edu", label: "ham",
+      en: "Hey, are we still meeting at the library at 5 to study for the CS exam?",
+      ar: "أهلًا، هل ما زلنا سنلتقي في المكتبة الساعة 5 للمذاكرة لامتحان البرمجة؟" },
+    { from: "deals@free-stuff.xyz", label: "spam",
+      en: "FREE iPhone 17!!! Limited offer — act FAST and click here before it's GONE!!!",
+      ar: "آيفون 17 مجااانًا!!! عرض محدود — اضغط هنا بسرعة قبل نفاد الكمية!!!" },
+    { from: "prof.adams@university.edu", label: "ham",
+      en: "Reminder: the lab report is due Friday. Submit it on the course portal.",
+      ar: "تذكير: تقرير المعمل مطلوب يوم الجمعة. سلّمه عبر بوابة المقرر." },
+    { from: "security@paypa1-alerts.com", label: "spam",
+      en: "Your account has been LOCKED. Verify your password IMMEDIATELY at this link or lose access!",
+      ar: "تم قفل حسابك! أكّد كلمة المرور فورًا من هذا الرابط وإلا ستفقد حسابك نهائيًا!" },
+    { from: "mom@gmail.com", label: "ham",
+      en: "Don't forget grandma's birthday dinner on Sunday 💛 bring the cake!",
+      ar: "لا تنسَ عشاء عيد ميلاد الجدة يوم الأحد 💛 وأحضر التورتة!" },
+    { from: "match@luv4u.click", label: "spam",
+      en: "Hot singles in YOUR area want to meet you TONIGHT!!! Click to chat now!!!",
+      ar: "أشخاص بالقرب منك يريدون التعرف عليك الليلة!!! اضغط للدردشة الآن!!!" },
+    { from: "orders@bookstore.com", label: "ham",
+      en: "Your package has shipped. You can track it anytime in your account.",
+      ar: "تم شحن طلبك. يمكنك تتبعه في أي وقت من حسابك." },
+    { from: "jobs@easy-cash.top", label: "spam",
+      en: "Make $$$ working from home!!! No experience needed — start earning TODAY!!!",
+      ar: "اكسب $$$ من البيت!!! بدون أي خبرة — ابدأ الربح اليوم!!!" },
+    { from: "omar@company.com", label: "ham",
+      en: "Heads up: team standup moved to 10:30 tomorrow, same room.",
+      ar: "تنبيه: اجتماع الفريق أصبح الساعة 10:30 غدًا، في نفس القاعة." },
+  ],
+  TEST: [
+    { from: "travel@dream-trips.win", label: "spam",
+      en: "URGENT!!! Claim your FREE vacation to Hawaii — click NOW, only 3 spots left!!!",
+      ar: "عاجل!!! استلم رحلتك المجانية إلى هاواي — اضغط الآن، تبقّى 3 أماكن فقط!!!" },
+    { from: "nour@university.edu", label: "ham",
+      en: "Can you send me the notes from today's AI lecture? I missed the last part.",
+      ar: "هل يمكنك إرسال ملاحظات محاضرة الذكاء الاصطناعي اليوم؟ فاتني الجزء الأخير." },
+    { from: "rewards@mega-prizes.biz", label: "spam",
+      en: "You've been SELECTED for a $1,000 gift card!!! Act fast, offer expires in 10 minutes!!!",
+      ar: "تم اختيارك لبطاقة هدايا بقيمة 1,000 دولار!!! أسرع، العرض ينتهي خلال 10 دقائق!!!" },
+    { from: "prof.adams@university.edu", label: "ham",
+      en: "The practice quiz for Friday is now posted on the portal. Good luck!",
+      ar: "تم نشر اختبار التدريب ليوم الجمعة على البوابة. بالتوفيق!" },
+    { from: "alerts@secure-bank1.info", label: "spam",
+      en: "FINAL WARNING: your bank account will be CLOSED today. Verify your details NOW!",
+      ar: "تحذير أخير: سيتم إغلاق حسابك البنكي اليوم. أكّد بياناتك الآن!" },
+    { from: "karim@gmail.com", label: "ham",
+      en: "Lunch tomorrow? The new shawarma place just opened 🌯 my treat.",
+      ar: "غداء غدًا؟ مطعم الشاورما الجديد افتتح 🌯 وعلى حسابي." },
+    { from: "invest@moon-coins.click", label: "spam",
+      en: "Get RICH with crypto!!! 1000% returns GUARANTEED $$$ join before it moons!!!",
+      ar: "اغتنِ بالعملات الرقمية!!! أرباح 1000% مضمووونة $$$ انضم قبل الانفجار!!!" },
+    { from: "library@university.edu", label: "ham",
+      en: "Your library book is due in 3 days. You can renew it online if needed.",
+      ar: "كتاب المكتبة مستحق الإرجاع خلال 3 أيام. يمكنك التجديد عبر الإنترنت." },
+    { from: "prince.abdul@royal-mail.top", label: "spam",
+      en: "Hello dear friend, I am a prince and I urgently need your help moving $10,000,000...",
+      ar: "صديقي العزيز، أنا أمير وأحتاج مساعدتك العاجلة لنقل 10,000,000 دولار..." },
+    { from: "dina@company.com", label: "ham",
+      en: "Meeting notes attached — I highlighted your action items in yellow.",
+      ar: "ملاحظات الاجتماع مرفقة — ظلّلت المهام المطلوبة منك باللون الأصفر." },
+    { from: "contest@futbol-prize.xyz", label: "spam",
+      en: "WIN WIN WIN!!! FREE tickets to the World Cup final — click to enter NOW!!!",
+      ar: "اربح اربح اربح!!! تذاكر مجانية لنهائي كأس العالم — اضغط للاشتراك الآن!!!" },
+    { from: "orders@bookstore.com", label: "ham",
+      en: "Your order #4482 has been delivered. Thanks for shopping with us!",
+      ar: "طلبك رقم #4482 تم توصيله. شكرًا لتسوقك معنا!" },
+    /* tricky — mixed signals */
+    { from: "prof.adams@university.edu", label: "ham", tricky: true,
+      en: "URGENT: tomorrow's exam moved to 9 AM — check the portal NOW!",
+      ar: "عاجل: تم نقل امتحان الغد إلى 9 صباحًا — راجع البوابة الآن!" },
+    { from: "accounts@secure-pay-invoices.info", label: "spam", tricky: true,
+      en: "Hi, following up on our meeting — please review the attached invoice as soon as possible.",
+      ar: "مرحبًا، متابعةً لاجتماعنا — رجاءً راجع الفاتورة المرفقة بأسرع وقت ممكن." },
+    { from: "events@university.edu", label: "ham", tricky: true,
+      en: "You WON the department hackathon! 🎉 Prize pickup at the CS office this week.",
+      ar: "لقد فزت في هاكاثون القسم! 🎉 استلم جائزتك من مكتب علوم الحاسب هذا الأسبوع." },
+    { from: "billing@netfIix-support.com", label: "spam", tricky: true,
+      en: "Netflix: your payment failed. Update your billing info within 24 hours to keep watching.",
+      ar: "نتفليكس: فشل الدفع. حدّث بيانات الفوترة خلال 24 ساعة لمواصلة المشاهدة." },
+  ],
+
+  TIME_PER_CARD: 12000,   /* base ms to classify each email */
+  MIN_TIME: 5000,         /* floor — timer shrinks as your streak grows */
+  TRAIN_CARD_MS: 3000,    /* ms each training card stays up */
+  trainIdx: 0, trainTimer: null,
+  queue: [], idx: 0, score: 0, streak: 0, maxStreak: 0, answered: false,
+  timerInt: null, deadline: 0, curTime: 12000, baseTime: 12000, shave: 600,
+  tp: 0, tn: 0, fp: 0, fn: 0, misses: 0,
+
+  open() {
+    this.stopTimers();
+    App.show("screen-l1");
+    ["l1-train", "l1-play", "l1-results"].forEach(id => $(id).style.display = "none");
+    $("l1-intro").style.display = "block";
+  },
+  stopTimers() {
+    clearInterval(this.trainTimer); clearInterval(this.timerInt);
+    this.trainTimer = this.timerInt = null;
+  },
+  stampText(label) { return label === "spam" ? t("l1StampSpam") : t("l1StampHam"); },
+
+  /* ---- phase 1: training cards ---- */
+  startTraining() {
+    $("l1-intro").style.display = "none";
+    $("l1-train").style.display = "block";
+    this.trainIdx = 0;
+    this.showTrainCard();
+    this.trainTimer = setInterval(() => {
+      this.trainIdx++;
+      if (this.trainIdx >= this.TRAIN.length) this.startClassify();
+      else this.showTrainCard();
+    }, this.TRAIN_CARD_MS);
+  },
+  showTrainCard() {
+    const e = this.TRAIN[this.trainIdx];
+    $("l1-train-progress").textContent = t("l1TrainProgress", { i: this.trainIdx + 1, n: this.TRAIN.length });
+    $("l1-train-from").innerHTML = t("l1From") + " <b>" + e.from + "</b>";
+    $("l1-train-body").textContent = e[LANG] || e.en;
+    const stamp = $("l1-train-stamp");
+    stamp.textContent = this.stampText(e.label);
+    stamp.className = "stamp " + e.label;
+    const card = $("l1-train-card");
+    card.style.animation = "none"; void card.offsetWidth; card.style.animation = "";
+  },
+
+  /* ---- phase 2: classify ---- */
+  startClassify() {
+    if (this.counting) return;
+    this.stopTimers();
+    $("l1-train").style.display = "none";
+    $("l1-play").style.display = "block";
+    const d = Difficulty.get(1);
+    this.baseTime = clamp(21000 - d * 1700, 4000, 20000);
+    this.shave = 400 + d * 60;
+    const pool = d <= 4 ? this.TEST.filter(e => !e.tricky) : this.TEST;
+    const count = d <= 2 ? 10 : d <= 4 ? 12 : d <= 7 ? 14 : 16;
+    const spams = shuffle(pool.filter(e => e.label === "spam"));
+    const hams = shuffle(pool.filter(e => e.label === "ham"));
+    this.queue = shuffle(spams.slice(0, Math.ceil(count / 2)).concat(hams.slice(0, Math.floor(count / 2))));
+    this.idx = 0; this.score = 0; this.streak = 0; this.maxStreak = 0;
+    this.tp = this.tn = this.fp = this.fn = this.misses = 0;
+    $("l1-score").textContent = "0";
+    $("l1-streak").textContent = "0";
+    $("l1-streak").parentElement.classList.remove("hot");
+    this.counting = true;
+    countdown(() => {
+      this.counting = false;
+      if (document.getElementById("screen-l1").classList.contains("active")) this.nextCard();
+    });
+  },
+  nextCard() {
+    if (this.idx >= this.queue.length) return this.finish();
+    this.answered = false;
+    const e = this.queue[this.idx];
+    $("l1-count").textContent = `${this.idx + 1}/${this.queue.length}`;
+    $("l1-from").innerHTML = t("l1From") + " <b>" + e.from + "</b>";
+    $("l1-body").textContent = e[LANG] || e.en;
+    $("l1-feedback").textContent = ""; $("l1-feedback").className = "feedback-line";
+    const card = $("l1-card");
+    card.className = "email-card";
+    card.style.animation = "none"; void card.offsetWidth; card.style.animation = "";
+    $("l1-btn-ham").disabled = $("l1-btn-spam").disabled = false;
+
+    /* difficulty ramp: streak shaves time off the clock, floor scales with difficulty */
+    this.curTime = Math.max(Math.max(2500, this.baseTime * 0.35), this.baseTime - this.streak * this.shave);
+    this.deadline = performance.now() + this.curTime;
+    clearInterval(this.timerInt);
+    const bar = $("l1-timer");
+    bar.classList.remove("warn", "danger");
+    this.timerInt = setInterval(() => {
+      const left = this.deadline - performance.now();
+      const pct = left / this.curTime;
+      bar.style.width = clamp(pct * 100, 0, 100) + "%";
+      bar.classList.toggle("warn", pct < .5 && pct >= .25);
+      bar.classList.toggle("danger", pct < .25);
+      if (left <= 0) this.timeout();
+    }, 50);
+  },
+  answer(guess) {
+    if (this.answered) return;
+    this.answered = true;
+    clearInterval(this.timerInt);
+    $("l1-btn-ham").disabled = $("l1-btn-spam").disabled = true;
+    const truth = this.queue[this.idx].label;
+    const correct = guess === truth;
+    if (truth === "spam") { correct ? this.tp++ : this.fn++; } else { correct ? this.tn++ : this.fp++; }
+    const fb = $("l1-feedback");
+    if (correct) {
+      this.streak++;
+      this.maxStreak = Math.max(this.maxStreak, this.streak);
+      this.score += 10;
+      fb.textContent = t("l1Correct");
+      fb.classList.add("good");
+      $("l1-card").classList.add("flash-good");
+      Sound.good();
+      scorePop("+10", "var(--good)", $("l1-card"));
+    } else {
+      this.streak = 0;
+      this.score -= 5;
+      fb.textContent = truth === "spam" ? t("l1WrongSpam") : t("l1WrongHam");
+      fb.classList.add("bad");
+      $("l1-card").classList.add("flash-bad");
+      Sound.bad(); shake();
+      scorePop("−5", "var(--bad)", $("l1-card"));
+    }
+    $("l1-score").textContent = this.score;
+    $("l1-streak").textContent = this.streak;
+    $("l1-streak").parentElement.classList.toggle("hot", this.streak >= 3);
+    this.idx++;
+    setTimeout(() => this.nextCard(), 1000);
+  },
+  timeout() {
+    if (this.answered) return;
+    this.answered = true;
+    clearInterval(this.timerInt);
+    $("l1-btn-ham").disabled = $("l1-btn-spam").disabled = true;
+    const truth = this.queue[this.idx].label;
+    if (truth === "spam") this.fn++; else this.fp++;
+    this.misses++;
+    this.streak = 0;
+    $("l1-streak").textContent = "0";
+    $("l1-streak").parentElement.classList.remove("hot");
+    const fb = $("l1-feedback");
+    fb.textContent = t("l1TooSlow", { label: this.stampText(truth) });
+    fb.classList.add("bad");
+    $("l1-card").classList.add("flash-bad");
+    Sound.bad(); shake();
+    this.idx++;
+    setTimeout(() => this.nextCard(), 1000);
+  },
+  finish() {
+    this.stopTimers();
+    $("l1-play").style.display = "none";
+    $("l1-results").style.display = "block";
+    const total = this.queue.length;
+    const correct = this.tp + this.tn;
+    const acc = Math.round(correct / total * 100);
+    countUp($("l1-res-acc"), acc, v => v + "%");
+    $("l1-res-score").textContent = this.score;
+    $("l1-tp").textContent = this.tp; $("l1-tn").textContent = this.tn;
+    $("l1-fp").textContent = this.fp; $("l1-fn").textContent = this.fn;
+    const passed = acc >= 70;
+    if (acc >= 90) resIcon($("l1-res-emoji"), "trophy", "amber");
+    else if (passed) resIcon($("l1-res-emoji"), "checkc", "good");
+    else resIcon($("l1-res-emoji"), "flask", "muted");
+    $("l1-res-title").textContent = acc >= 90 ? t("l1TitleElite") : passed ? t("l1TitleTrained") : t("l1TitleNeeds");
+    $("l1-res-note").textContent =
+      this.fp > 0 ? t("l1NoteFp", { n: this.fp })
+      : this.fn > 0 ? t("l1NoteFn", { n: this.fn })
+      : t("l1NotePerfect");
+    if (passed) Sound.win();
+    if (acc === 100) Badges.award("perfectFilter");
+    if (this.maxStreak >= 8) Badges.award("streakLord");
+    App.complete(1, Difficulty.applyBonus(1, this.score), passed);
+  },
+};
+
+/* keyboard for level 1 */
+document.addEventListener("keydown", e => {
+  if (!document.getElementById("screen-l1").classList.contains("active")) return;
+  if ($("l1-play").style.display === "none") return;
+  if (e.key === "ArrowLeft") { e.preventDefault(); SpamGame.answer("ham"); }
+  if (e.key === "ArrowRight") { e.preventDefault(); SpamGame.answer("spam"); }
+});
+
+Core.boot();
+SpamGame.open();
+</script>
+</body>
+</html>

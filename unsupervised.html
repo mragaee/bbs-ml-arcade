@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Level 2 — The Cluster Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&family=Cairo:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/core.css">
+</head>
+<body>
+<div class="wrap">
+  <section id="screen-l2" class="screen">
+    <div class="topbar">
+      <button class="btn purple" onclick="location.href='index.html'" data-i18n="back">← Arcade</button>
+      <h2><svg class="ic"><use href="#i-nodes"/></svg> <span data-i18n="l2Name">The Cluster Finder</span></h2>
+      <span class="tag purple" data-i18n="l2Tag">Unsupervised</span>
+    </div>
+
+    <details class="explain">
+      <summary><svg class="ic"><use href="#i-bulb"/></svg> <span data-i18n="explainTitle">What's the ML idea here?</span></summary>
+      <p data-i18n="l2Explain"><b>Unsupervised learning</b> gets <b>no labels at all</b> — just raw data. The algorithm's job is to discover
+      hidden structure by itself. Here you'll run <b>K-Means</b>: drop K "centroids" (cluster centers), then each step
+      the algorithm ① assigns every point to its nearest centroid and ② moves each centroid to the middle of its points.
+      Repeat until nothing moves — the machine just <i>found groups nobody told it about</i>. (Real uses: customer
+      segments, galaxy types, playlist vibes.)</p>
+    </details>
+
+    <div class="cluster-layout">
+      <div>
+        <canvas id="l2-canvas" class="game" width="720" height="480"></canvas>
+        <div class="legend">
+          <span><span class="swatch" style="background:#9aa7c4"></span> <span data-i18n="l2LegPoint">unlabeled point</span></span>
+          <span><span class="swatch" style="background:var(--purple)"></span> <span data-i18n="l2LegCentroid">centroid</span></span>
+          <span data-i18n="l2LegTrue">dashed = hidden true groups (revealed at the end)</span>
+        </div>
+      </div>
+      <div class="ctrl-panel">
+        <div class="field">
+          <label data-i18n="diffLabel">Difficulty</label>
+          <select id="l2-diff" onchange="Difficulty.change(2, this.value)"></select>
+        </div>
+        <h4 data-i18n="l2KTitle">K — number of clusters</h4>
+        <div class="kpicker" id="l2-kpicker">
+          <button class="btn purple" data-k="2" onclick="ClusterGame.setK(2)">2</button>
+          <button class="btn purple sel" data-k="3" onclick="ClusterGame.setK(3)">3</button>
+          <button class="btn purple" data-k="4" onclick="ClusterGame.setK(4)">4</button>
+          <button class="btn purple" data-k="5" onclick="ClusterGame.setK(5)">5</button>
+          <button class="btn purple" data-k="6" onclick="ClusterGame.setK(6)">6</button>
+        </div>
+        <div class="status-line" id="l2-status"></div>
+        <div class="hud" style="margin:0">
+          <span class="chip"><span data-i18n="l2ChipIter">Iteration</span> <b id="l2-iter">0</b></span>
+          <span class="chip"><span data-i18n="l2ChipMess">Messiness</span> <b id="l2-inertia">—</b></span>
+        </div>
+        <button class="btn purple primary" id="l2-step" onclick="ClusterGame.manualStep()" disabled ><svg class="ic"><use href="#i-sliders"/></svg> <span data-i18n="l2Step">Run 1 K-Means Step</span></button>
+        <button class="btn purple" id="l2-auto" onclick="ClusterGame.autoRun()" disabled ><svg class="ic"><use href="#i-ff"/></svg> <span data-i18n="l2Auto">Auto-Run to Convergence</span></button>
+        <button class="btn purple" id="l2-clear" onclick="ClusterGame.clearCentroids()" ><svg class="ic"><use href="#i-x"/></svg> <span data-i18n="l2Clear">Clear Centroids</span></button>
+        <button class="btn purple" onclick="ClusterGame.open()"><svg class="ic"><use href="#i-shuffle"/></svg> <span data-i18n="l2New">New Random Data</span></button>
+        <p class="muted" style="font-size:13px" data-i18n="l2MessNote">Messiness = total distance from points to their centroid (inertia). <b style="color:var(--text)">Lower is better.</b></p>
+      </div>
+    </div>
+
+    <div id="l2-results" class="panel center result-panel" style="display:none">
+      <div class="res-icon" style="color:var(--purple)"><svg class="ic"><use href="#i-search"/></svg></div>
+      <h3 data-i18n="l2ResTitle">Clusters discovered!</h3>
+      <p class="muted" data-i18n="l2ResLabel">How close you got to the best possible grouping:</p>
+      <div class="big-metric" style="color:var(--purple);text-shadow:0 0 24px rgba(160,107,255,.45)" id="l2-res-score">0%</div>
+      <p class="muted" id="l2-res-note"></p>
+      <div class="takeaway" style="border-color:var(--purple)" data-i18n="l2Takeaway"><b>Takeaway:</b> Unsupervised learning = discovering structure in data with <b>zero labels</b>. Nobody said "these are the groups" — K-Means found them from geometry alone.</div>
+      <div class="result-actions">
+        <button class="btn purple primary" onclick="ClusterGame.open()"><svg class="ic"><use href="#i-shuffle"/></svg> <span data-i18n="l2AgainBtn">New Data, Go Again</span></button>
+        <button class="btn purple" onclick="location.href='index.html'" data-i18n="backArcade">Back to Arcade</button>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="assets/core.js"></script>
+<script>
+"use strict";
+/* ════════════════════════════════════════════════════════════
+   LEVEL 2 — UNSUPERVISED: K-MEANS CLUSTER FINDER
+   ════════════════════════════════════════════════════════════ */
+const ClusterGame = {
+  W: 720, H: 480,
+  COLORS: ["#00f2fe", "#ff4d8d", "#ffb703", "#7cff6b", "#ff9d3c", "#c084fc"],
+  K: 3,
+  points: [], trueCenters: [],
+  centroids: [],           // {x,y,tx,ty} in normalized [0,1] coords
+  assignments: [],
+  iter: 0, converged: false, started: false, finished: false,
+  autoTimer: null, rafId: null, optimalInertia: 0,
+  lastStatus: null,
+
+  open() {
+    this.stopAuto();
+    App.show("screen-l2");
+    $("l2-results").style.display = "none";
+    this.generateData();
+    this.clearCentroids();
+    this.startRenderLoop();
+  },
+  setStatus(key, vars) {
+    this.lastStatus = [key, vars];
+    $("l2-status").innerHTML = t(key, vars);
+  },
+
+  /* ---- data generation: 3 hidden gaussian blobs ---- */
+  generateData() {
+    const d = Difficulty.get(2);
+    const nBlobs = [3, 3, 3, 4, 4, 4, 5, 5, 6, 6][d - 1];
+    const sep = Math.max(0.17, 0.42 - d * 0.022);
+    const sigma = 0.04 + d * 0.004;
+    const perBlob = Math.max(9, Math.round(48 / nBlobs));
+    const nNoise = Math.round((d - 1) * 1.1);
+    this.trueCenters = [];
+    let guard = 0;
+    while (this.trueCenters.length < nBlobs && guard++ < 900) {
+      const c = { x: 0.14 + Math.random() * 0.72, y: 0.14 + Math.random() * 0.72 };
+      if (this.trueCenters.every(o => Math.hypot(o.x - c.x, o.y - c.y) > sep)) this.trueCenters.push(c);
+    }
+    while (this.trueCenters.length < nBlobs) this.trueCenters.push({ x: 0.1 + Math.random() * 0.8, y: 0.1 + Math.random() * 0.8 });
+    const gauss = () => {
+      let u = 0, v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    };
+    this.points = [];
+    for (const c of this.trueCenters) {
+      for (let i = 0; i < perBlob; i++) {
+        this.points.push({
+          x: clamp(c.x + gauss() * sigma, 0.03, 0.97),
+          y: clamp(c.y + gauss() * sigma, 0.03, 0.97),
+        });
+      }
+    }
+    for (let i = 0; i < nNoise; i++) this.points.push({ x: 0.03 + Math.random() * 0.94, y: 0.03 + Math.random() * 0.94 });
+    this.optimalInertia = this.computeOptimal(this.K);
+  },
+
+  /* best-achievable inertia for K via multi-restart k-means (pure math, no rendering) */
+  computeOptimal(K) {
+    let best = Infinity;
+    for (let r = 0; r < 14; r++) {
+      const idxs = shuffle(this.points.map((_, i) => i)).slice(0, K);
+      let cents = idxs.map(i => ({ x: this.points[i].x, y: this.points[i].y }));
+      for (let it = 0; it < 60; it++) {
+        const assign = this.points.map(p => this.nearest(p, cents));
+        const next = cents.map((c, k) => {
+          const mine = this.points.filter((_, i) => assign[i] === k);
+          if (!mine.length) return { x: c.x, y: c.y };
+          return { x: mine.reduce((s, p) => s + p.x, 0) / mine.length, y: mine.reduce((s, p) => s + p.y, 0) / mine.length };
+        });
+        const moved = Math.max(...cents.map((c, k) => Math.hypot(c.x - next[k].x, c.y - next[k].y)));
+        cents = next;
+        if (moved < 1e-7) break;
+      }
+      const assign = this.points.map(p => this.nearest(p, cents));
+      best = Math.min(best, this.inertiaOf(assign, cents));
+    }
+    return best;
+  },
+  nearest(p, cents) {
+    let bi = 0, bd = Infinity;
+    cents.forEach((c, i) => { const d = (p.x - c.x) ** 2 + (p.y - c.y) ** 2; if (d < bd) { bd = d; bi = i; } });
+    return bi;
+  },
+  inertiaOf(assign, cents) {
+    return this.points.reduce((s, p, i) => {
+      const c = cents[assign[i]];
+      return s + (p.x - c.x) ** 2 + (p.y - c.y) ** 2;
+    }, 0);
+  },
+
+  /* ---- controls ---- */
+  setK(k) {
+    if (this.started && !this.finished) return; // no switching mid-run
+    this.K = k;
+    document.querySelectorAll("#l2-kpicker .btn").forEach(b => b.classList.toggle("sel", +b.dataset.k === k));
+    this.optimalInertia = this.computeOptimal(k);
+    this.clearCentroids();
+  },
+  clearCentroids() {
+    this.stopAuto();
+    this.centroids = [];
+    this.assignments = this.points.map(() => -1);
+    this.iter = 0; this.converged = false; this.started = false; this.finished = false;
+    $("l2-results").style.display = "none";
+    $("l2-iter").textContent = "0";
+    $("l2-inertia").textContent = "—";
+    $("l2-step").disabled = $("l2-auto").disabled = true;
+    this.setStatus("l2StatusPlace", { k: this.K });
+  },
+  canvasClick(e) {
+    if (this.started || this.centroids.length >= this.K) return;
+    const cv = $("l2-canvas"), r = cv.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    this.centroids.push({ x, y, tx: x, ty: y });
+    const left = this.K - this.centroids.length;
+    if (left > 0) {
+      this.setStatus("l2StatusMore", { n: left, s: left > 1 ? "s" : "" });
+    } else {
+      $("l2-step").disabled = $("l2-auto").disabled = false;
+      this.setStatus("l2StatusReady", { k: this.K });
+    }
+  },
+
+  /* ---- k-means iteration (assign → move) ---- */
+  step() {
+    if (this.converged || this.centroids.length < this.K) return;
+    this.started = true;
+    this.iter++;
+    this.assignments = this.points.map(p => this.nearest(p, this.centroids.map(c => ({ x: c.tx, y: c.ty }))));
+    let moved = 0;
+    this.centroids.forEach((c, k) => {
+      const ptx = c.tx, pty = c.ty;
+      const mine = this.points.filter((_, i) => this.assignments[i] === k);
+      if (mine.length) {
+        c.tx = mine.reduce((s, p) => s + p.x, 0) / mine.length;
+        c.ty = mine.reduce((s, p) => s + p.y, 0) / mine.length;
+      }
+      moved = Math.max(moved, Math.hypot(ptx - c.tx, pty - c.ty));
+    });
+    const inertia = this.inertiaOf(this.assignments, this.centroids.map(c => ({ x: c.tx, y: c.ty })));
+    $("l2-iter").textContent = this.iter;
+    $("l2-inertia").textContent = Math.round(inertia * 1000);
+    this.setStatus("l2StatusStep", { i: this.iter });
+    if (moved < 0.002 && this.iter > 1) this.converged = true;
+    return inertia;
+  },
+  manualStep() {
+    this.stopAuto();
+    Sound.click();
+    this.step();
+    if (this.converged) this.finish();
+  },
+  autoRun() {
+    this.stopAuto();
+    const loop = () => {
+      this.step();
+      if (this.converged || this.iter >= 30) return this.finish();
+      this.autoTimer = setTimeout(loop, 650);
+    };
+    loop();
+  },
+  stopAuto() { clearTimeout(this.autoTimer); this.autoTimer = null; },
+
+  finish() {
+    if (this.finished) return;
+    this.finished = true;
+    this.stopAuto();
+    $("l2-step").disabled = $("l2-auto").disabled = true;
+    const finalInertia = this.inertiaOf(this.assignments, this.centroids.map(c => ({ x: c.tx, y: c.ty })));
+    const score = clamp(Math.round(this.optimalInertia / Math.max(finalInertia, 1e-9) * 100), 0, 100);
+    this.setStatus("l2StatusConverged", { i: this.iter });
+    countUp($("l2-res-score"), score, v => v + "%");
+    $("l2-res-note").textContent =
+      score >= 95 ? t("l2NoteHigh", { i: this.iter }) :
+      score >= 75 ? t("l2NoteMid", { i: this.iter }) :
+      t("l2NoteLow", { i: this.iter });
+    $("l2-results").style.display = "block";
+    $("l2-results").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    Sound.win();
+    if (this.iter <= 3 && score >= 95) Badges.award("clusterMaster");
+    App.complete(2, Difficulty.applyBonus(2, score), score >= 60);
+  },
+
+  /* ---- render loop ---- */
+  startRenderLoop() {
+    cancelAnimationFrame(this.rafId);
+    const cv = $("l2-canvas"), ctx = cv.getContext("2d");
+    const draw = () => {
+      if (!document.getElementById("screen-l2").classList.contains("active")) { this.rafId = null; return; }
+      ctx.clearRect(0, 0, this.W, this.H);
+      /* subtle grid */
+      ctx.strokeStyle = "rgba(160,107,255,.06)";
+      ctx.lineWidth = 1;
+      for (let gx = 0; gx <= this.W; gx += 48) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, this.H); ctx.stroke(); }
+      for (let gy = 0; gy <= this.H; gy += 48) { ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(this.W, gy); ctx.stroke(); }
+
+      /* reveal hidden true groups after finish */
+      if (this.finished) {
+        ctx.setLineDash([6, 6]);
+        ctx.strokeStyle = "rgba(232,238,251,.35)";
+        ctx.lineWidth = 1.5;
+        for (const c of this.trueCenters) {
+          ctx.beginPath();
+          ctx.arc(c.x * this.W, c.y * this.H, 0.13 * this.W, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+      }
+
+      /* points */
+      this.points.forEach((p, i) => {
+        const a = this.assignments[i];
+        ctx.beginPath();
+        ctx.arc(p.x * this.W, p.y * this.H, 6, 0, Math.PI * 2);
+        if (a >= 0 && this.started) {
+          ctx.fillStyle = this.COLORS[a];
+          ctx.shadowColor = this.COLORS[a];
+          ctx.shadowBlur = 8;
+        } else {
+          ctx.fillStyle = "#9aa7c4";
+          ctx.shadowBlur = 0;
+        }
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+
+      /* centroids (lerp toward targets) */
+      this.centroids.forEach((c, k) => {
+        c.x += (c.tx - c.x) * 0.12;
+        c.y += (c.ty - c.y) * 0.12;
+        const px = c.x * this.W, py = c.y * this.H;
+        ctx.strokeStyle = this.COLORS[k];
+        ctx.lineWidth = 3.5;
+        ctx.shadowColor = this.COLORS[k];
+        ctx.shadowBlur = 14;
+        ctx.beginPath();
+        ctx.moveTo(px - 11, py); ctx.lineTo(px + 11, py);
+        ctx.moveTo(px, py - 11); ctx.lineTo(px, py + 11);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.arc(px, py, 15, 0, Math.PI * 2);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+
+      /* placement hint */
+      if (!this.started && this.centroids.length < this.K) {
+        ctx.fillStyle = "rgba(232,238,251,.55)";
+        ctx.font = "600 16px 'Segoe UI', Tahoma, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(t("l2CanvasHint", { i: this.centroids.length + 1, k: this.K }), this.W / 2, this.H - 18);
+      }
+      this.rafId = requestAnimationFrame(draw);
+    };
+    this.rafId = requestAnimationFrame(draw);
+  },
+};
+$("l2-canvas").addEventListener("click", e => ClusterGame.canvasClick(e));
+
+Core.boot();
+ClusterGame.open();
+</script>
+</body>
+</html>

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Level 3 — The Bot Maze Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&family=Cairo:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/core.css">
+</head>
+<body>
+<div class="wrap">
+  <section id="screen-l3" class="screen">
+    <div class="topbar">
+      <button class="btn amber" onclick="location.href='index.html'" data-i18n="back">← Arcade</button>
+      <h2><svg class="ic"><use href="#i-cpu"/></svg> <span data-i18n="l3Name">The Bot Maze Trainer</span></h2>
+      <span class="tag amber" data-i18n="l3Tag">Reinforcement</span>
+    </div>
+
+    <details class="explain">
+      <summary><svg class="ic"><use href="#i-bulb"/></svg> <span data-i18n="explainTitle">What's the ML idea here?</span></summary>
+      <p data-i18n="l3Explain"><b>Reinforcement learning</b> = no labels, no answer key — just <b>rewards and penalties</b>. The bot wanders
+      by trial and error; every move updates its <b>Q-table</b> ("how good is action A in cell S?"). Watch the amber glow
+      spread <i>backwards</i> from the battery as knowledge propagates. Then try the evil experiment: set the fire
+      penalty to −1 and retrain — the bot will happily take the fiery shortcut, because <b>the bot learns whatever your
+      rewards actually say</b>, not what you meant. (This is how game AIs, robots, and chatbots get fine-tuned.)</p>
+    </details>
+
+    <div class="maze-layout">
+      <div>
+        <canvas id="l3-canvas" class="game" width="640" height="480"></canvas>
+        <div class="legend">
+          <span><svg class="ic" style="color:var(--teal)"><use href="#i-cpu"/></svg> <span data-i18n="l3LegAgent">agent</span></span><span><svg class="ic" style="color:var(--good)"><use href="#i-battery"/></svg> <span data-i18n="l3LegGoal">battery (goal)</span></span><span><svg class="ic fill" style="color:#ff7a3c"><use href="#i-flame"/></svg> <span data-i18n="l3LegFire">fire (penalty, passable)</span></span>
+          <span><span class="swatch" style="background:#2a3450"></span> <span data-i18n="l3LegWall">wall</span></span>
+          <span><span class="swatch" style="background:rgba(255,183,3,.5)"></span> <span data-i18n="l3LegHi">high Q (good)</span></span>
+          <span><span class="swatch" style="background:rgba(255,84,112,.5)"></span> <span data-i18n="l3LegLo">negative Q (bad)</span></span>
+        </div>
+      </div>
+      <div class="ctrl-panel">
+        <div class="field">
+          <label data-i18n="diffLabel">Difficulty</label>
+          <select id="l3-diff" onchange="Difficulty.change(3, this.value)"></select>
+        </div>
+        <h4 data-i18n="l3Panel">Reward Engineering</h4>
+        <div class="slider-row">
+          <label><span data-i18n="l3Rew">Battery reward</span> <b id="l3-rew-val">+10</b></label>
+          <input type="range" id="l3-rew" min="1" max="50" value="10" oninput="MazeGame.syncSliders()">
+        </div>
+        <div class="slider-row">
+          <label><span data-i18n="l3Pen">Fire penalty</span> <b id="l3-pen-val">−50</b></label>
+          <input type="range" id="l3-pen" min="1" max="100" value="50" oninput="MazeGame.syncSliders()">
+        </div>
+        <div class="slider-row">
+          <label><span data-i18n="l3StepCost">Step cost</span> <b data-i18n="l3StepFixed">−1 (fixed)</b></label>
+        </div>
+        <div class="slider-row">
+          <label><span data-i18n="l3Speed">Training speed</span> <b id="l3-speed-val">×20</b></label>
+          <input type="range" id="l3-speed" min="1" max="100" value="20" oninput="MazeGame.syncSliders()">
+        </div>
+        <div class="hud" style="margin:4px 0">
+          <span class="chip"><span data-i18n="l3ChipEp">Episodes</span> <b id="l3-episodes">0</b></span>
+          <span class="chip"><span data-i18n="l3ChipEps">ε explore</span> <b id="l3-eps">0.90</b></span>
+        </div>
+        <canvas id="rewardChart" width="256" height="56"></canvas>
+        <p class="muted" style="font-size:12px;margin-top:-6px" data-i18n="l3Chart">reward per episode (learning curve)</p>
+        <button class="btn amber primary" id="l3-train" onclick="MazeGame.toggleTrain()"><svg class="ic"><use href="#i-play"/></svg> <span id="l3-train-label">Train Bot</span></button>
+        <button class="btn amber" id="l3-test" onclick="MazeGame.testBot()"><svg class="ic"><use href="#i-target"/></svg> <span data-i18n="l3Test">Test Bot (greedy run)</span></button>
+        <button class="btn amber" onclick="MazeGame.resetBrain()"><svg class="ic"><use href="#i-refresh"/></svg> <span data-i18n="l3Reset">Reset Brain (clear Q-table)</span></button>
+        <div class="status-line" id="l3-status"></div>
+      </div>
+    </div>
+
+    <div id="l3-results" class="panel center result-panel" style="display:none">
+      <div class="res-icon" id="l3-res-emoji"></div>
+      <h3 id="l3-res-title">The bot made it!</h3>
+      <p class="muted" id="l3-res-detail"></p>
+      <div class="big-metric" style="color:var(--amber);text-shadow:0 0 24px rgba(255,183,3,.45)" id="l3-res-score">0</div>
+      <div class="takeaway" style="border-color:var(--amber)" data-i18n="l3Takeaway"><b>Takeaway:</b> Reinforcement learning = trial &amp; error guided by <b>rewards</b>. Change the rewards and you change the behavior — the bot optimizes what you <i>measure</i>, not what you <i>mean</i>.</div>
+      <div class="result-actions">
+        <button class="btn amber primary" onclick="MazeGame.closeResults()"><svg class="ic"><use href="#i-replay"/></svg> <span data-i18n="l3Keep">Keep Experimenting</span></button>
+        <button class="btn amber" onclick="location.href='index.html'" data-i18n="backArcade">Back to Arcade</button>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="assets/core.js"></script>
+<script>
+"use strict";
+/* ════════════════════════════════════════════════════════════
+   LEVEL 3 — REINFORCEMENT: Q-LEARNING MAZE BOT
+   ════════════════════════════════════════════════════════════ */
+const MazeGame = {
+  GW: 8, GH: 6, CELL: 80,
+  START: { x: 0, y: 0 }, GOAL: { x: 0, y: 5 },
+  WALLS: new Set(["0,2", "2,2", "3,2", "4,2", "5,2", "7,2", "3,4", "4,4"]),
+  BASE_FIRES: ["1,2", "3,1", "6,4", "5,5"],
+  EXTRA_FIRES: ["5,1", "7,0", "2,5", "4,5", "1,1", "6,5"],   /* never block or shorten the safe route */
+  FIRES: new Set(["1,2", "3,1", "6,4", "5,5"]),
+  SLIP: 0,
+  OPTIMAL_SAFE: 17, OPTIMAL_FIRE: 7,
+  ACTIONS: [{ dx: 0, dy: -1 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }, { dx: 1, dy: 0 }], // up down left right
+  ALPHA: 0.5, GAMMA: 0.9,
+
+  Q: [], episodes: 0, pos: { x: 0, y: 0 }, epSteps: 0, epReward: 0,
+  rewardHistory: [],
+  training: false, rafId: null, testTimer: null, testing: false,
+  trail: [],
+  lastStatus: null,
+
+  applyDifficulty() {
+    const d = Difficulty.get(3);
+    let fires = d <= 2 ? ["1,2", "5,5"] : this.BASE_FIRES.slice();
+    const nExtra = d <= 4 ? 0 : d <= 6 ? 2 : d <= 8 ? 4 : 6;
+    fires = fires.concat(this.EXTRA_FIRES.slice(0, nExtra));
+    this.FIRES = new Set(fires);
+    this.SLIP = d >= 9 ? 0.10 : d >= 7 ? 0.06 : d >= 5 ? 0.03 : 0;
+  },
+  open() {
+    App.show("screen-l3");
+    $("l3-results").style.display = "none";
+    this.applyDifficulty();
+    if (!this.Q.length) this.resetBrain(true);
+    if (!this.lastStatus) this.setStatus("l3StatusStart");
+    this.syncSliders();
+    this.draw();
+  },
+  setStatus(key, vars) {
+    this.lastStatus = [key, vars];
+    $("l3-status").innerHTML = t(key, vars);
+  },
+  key(x, y) { return x + "," + y; },
+  idx(x, y) { return y * this.GW + x; },
+  isWall(x, y) { return x < 0 || y < 0 || x >= this.GW || y >= this.GH || this.WALLS.has(this.key(x, y)); },
+  isFire(x, y) { return this.FIRES.has(this.key(x, y)); },
+  isGoal(x, y) { return x === this.GOAL.x && y === this.GOAL.y; },
+
+  resetBrain(silent) {
+    this.pauseTraining();
+    this.stopTest();
+    this.Q = Array.from({ length: this.GW * this.GH }, () => [0, 0, 0, 0]);
+    this.episodes = 0; this.rewardHistory = [];
+    this.pos = { ...this.START }; this.epSteps = 0; this.epReward = 0;
+    this.trail = [];
+    $("l3-episodes").textContent = "0";
+    $("l3-eps").textContent = this.epsilon().toFixed(2);
+    if (!silent) this.setStatus("l3StatusWiped");
+    this.drawChart();
+    this.draw();
+  },
+  syncSliders() {
+    $("l3-rew-val").textContent = "+" + $("l3-rew").value;
+    $("l3-pen-val").textContent = "−" + $("l3-pen").value;
+    $("l3-speed-val").textContent = "×" + $("l3-speed").value;
+  },
+  goalReward() { return +$("l3-rew").value; },
+  firePenalty() { return -$("l3-pen").value; },
+  epsilon() { return Math.max(0.05, 0.9 * Math.exp(-this.episodes / 80)); },
+
+  /* ---- one Q-learning step ---- */
+  qStep() {
+    const s = this.idx(this.pos.x, this.pos.y);
+    const eps = this.epsilon();
+    let a;
+    if (Math.random() < eps) a = Math.floor(Math.random() * 4);
+    else {
+      const q = this.Q[s];
+      const m = Math.max(...q);
+      const best = q.map((v, i) => [v, i]).filter(([v]) => v === m).map(([, i]) => i);
+      a = best[Math.floor(Math.random() * best.length)];
+    }
+    if (this.SLIP && Math.random() < this.SLIP) a = Math.floor(Math.random() * 4);   /* motor slip */
+    const d = this.ACTIONS[a];
+    let nx = this.pos.x + d.dx, ny = this.pos.y + d.dy;
+    if (this.isWall(nx, ny)) { nx = this.pos.x; ny = this.pos.y; }
+    let r = -1;
+    if (this.isFire(nx, ny)) r += this.firePenalty();
+    const terminal = this.isGoal(nx, ny);
+    if (terminal) r += this.goalReward();
+    const ns = this.idx(nx, ny);
+    const target = r + (terminal ? 0 : this.GAMMA * Math.max(...this.Q[ns]));
+    this.Q[s][a] += this.ALPHA * (target - this.Q[s][a]);
+    this.pos = { x: nx, y: ny };
+    this.epSteps++;
+    this.epReward += r;
+    if (terminal || this.epSteps >= 150) {
+      this.episodes++;
+      this.rewardHistory.push(this.epReward);
+      if (this.rewardHistory.length > 90) this.rewardHistory.shift();
+      this.pos = { ...this.START };
+      this.epSteps = 0; this.epReward = 0;
+      return true; // episode ended
+    }
+    return false;
+  },
+
+  toggleTrain() {
+    if (this.training) return this.pauseTraining();
+    this.stopTest();
+    this.training = true;
+    $("l3-train-label").textContent = t("l3Pause");
+    this.setStatus("l3StatusTraining");
+    const loop = () => {
+      if (!this.training) return;
+      const speed = +$("l3-speed").value;
+      const steps = Math.max(1, Math.round(speed * speed / 33)); // ×1 → 1 step/frame, ×100 → ~300
+      let ended = false;
+      for (let i = 0; i < steps; i++) ended = this.qStep() || ended;
+      $("l3-episodes").textContent = this.episodes;
+      $("l3-eps").textContent = this.epsilon().toFixed(2);
+      if (ended) this.drawChart();
+      this.draw();
+      this.rafId = requestAnimationFrame(loop);
+    };
+    this.rafId = requestAnimationFrame(loop);
+  },
+  pauseTraining() {
+    this.training = false;
+    cancelAnimationFrame(this.rafId);
+    const btn = $("l3-train-label");
+    if (btn) btn.textContent = t("l3Train");
+  },
+
+  /* ---- greedy test run ---- */
+  testBot() {
+    this.pauseTraining();
+    this.stopTest();
+    this.testing = true;
+    this.trail = [];
+    let p = { ...this.START }, steps = 0, fires = 0;
+    const visited = new Set();
+    this.setStatus("l3StatusGreedy");
+    this.testTimer = setInterval(() => {
+      const q = this.Q[this.idx(p.x, p.y)];
+      const m = Math.max(...q);
+      const a = q.indexOf(m);
+      const d = this.ACTIONS[a];
+      let nx = p.x + d.dx, ny = p.y + d.dy;
+      if (this.isWall(nx, ny)) { nx = p.x; ny = p.y; }
+      p = { x: nx, y: ny };
+      steps++;
+      this.trail.push({ ...p });
+      if (this.isFire(nx, ny)) { fires++; Sound.fire(); shake(); }
+      this.pos = { ...p };
+      this.draw();
+      const stuck = visited.has(this.key(nx, ny) + ":" + a);
+      visited.add(this.key(nx, ny) + ":" + a);
+      if (this.isGoal(nx, ny)) { this.stopTest(); this.testResult(true, steps, fires); }
+      else if (steps >= 60 || stuck && steps > 20) { this.stopTest(); this.testResult(false, steps, fires); }
+    }, 170);
+  },
+  stopTest() {
+    clearInterval(this.testTimer);
+    this.testTimer = null;
+    this.testing = false;
+  },
+  testResult(reachedGoal, steps, fires) {
+    const rp = $("l3-results");
+    if (!reachedGoal) {
+      resIcon($("l3-res-emoji"), "xc", "bad");
+      $("l3-res-title").textContent = t("l3LostTitle");
+      $("l3-res-detail").textContent = t("l3LostDetail", { steps });
+      $("l3-res-score").textContent = "—";
+      Sound.bad();
+      rp.style.display = "block";
+      rp.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      return;
+    }
+    let score, title, detail, emoji;
+    Sound.win();
+    if (fires > 0) Badges.award("fireWalker");
+    if (fires === 0 && steps <= this.OPTIMAL_SAFE + 2) {
+      score = 100; emoji = ["trophy", "amber"];
+      title = t("l3OptTitle");
+      detail = t("l3OptDetail", { steps, opt: this.OPTIMAL_SAFE });
+      Badges.award("optimalBot");
+    } else if (fires === 0) {
+      score = 80; emoji = ["battery", "good"];
+      title = t("l3SafeTitle");
+      detail = t("l3SafeDetail", { steps, opt: this.OPTIMAL_SAFE });
+    } else {
+      score = 60; emoji = ["flame", "bad"];
+      title = t("l3FireTitle");
+      detail = t("l3FireDetail", { steps, fires, pen: this.firePenalty() });
+    }
+    resIcon($("l3-res-emoji"), emoji[0], emoji[1]);
+    $("l3-res-title").textContent = title;
+    $("l3-res-detail").textContent = detail;
+    countUp($("l3-res-score"), score, v => v + " " + t("l3Pts"));
+    rp.style.display = "block";
+    rp.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    App.complete(3, Difficulty.applyBonus(3, score), true);
+  },
+  closeResults() {
+    $("l3-results").style.display = "none";
+    this.setStatus("l3StatusExperiment");
+  },
+
+  /* ---- flat vector sprites ---- */
+  drawFlame(ctx, cx, cy, C) {
+    const s = C * 0.30;
+    ctx.save();
+    ctx.translate(cx, cy + s * 0.15);
+    const g = ctx.createLinearGradient(0, -s, 0, s);
+    g.addColorStop(0, "#ff9d3c"); g.addColorStop(1, "#ff4d2e");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(0, -s);
+    ctx.bezierCurveTo(s * .9, -s * .2, s * .75, s * .55, 0, s * .8);
+    ctx.bezierCurveTo(-s * .75, s * .55, -s * .9, -s * .2, 0, -s);
+    ctx.fill();
+    ctx.fillStyle = "#ffd166";
+    ctx.beginPath();
+    ctx.moveTo(0, -s * .35);
+    ctx.bezierCurveTo(s * .4, 0, s * .35, s * .45, 0, s * .6);
+    ctx.bezierCurveTo(-s * .35, s * .45, -s * .4, 0, 0, -s * .35);
+    ctx.fill();
+    ctx.restore();
+  },
+  drawBattery(ctx, cx, cy, C) {
+    const w = C * 0.42, h = C * 0.26, r = 4;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.fillStyle = "#153524";
+    ctx.strokeStyle = "#3ddc84"; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, r); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#3ddc84";
+    ctx.fillRect(w / 2 + 1, -h * 0.22, 4, h * 0.44);
+    ctx.beginPath();                                     /* charge bolt */
+    ctx.moveTo(2, -h * 0.34); ctx.lineTo(-w * 0.18, h * 0.06); ctx.lineTo(-1, h * 0.06);
+    ctx.lineTo(-2, h * 0.34); ctx.lineTo(w * 0.18, -h * 0.06); ctx.lineTo(1, -h * 0.06);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  },
+  drawRobot(ctx, cx, cy, C) {
+    const s = C * 0.30;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.shadowColor = "rgba(0,242,254,.7)"; ctx.shadowBlur = 12;
+    ctx.fillStyle = "#0d3b44";
+    ctx.strokeStyle = "#00f2fe"; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.roundRect(-s, -s * 0.85, s * 2, s * 1.7, 7); ctx.fill(); ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.beginPath(); ctx.moveTo(0, -s * 0.85); ctx.lineTo(0, -s * 1.25); ctx.stroke();   /* antenna */
+    ctx.fillStyle = "#00f2fe";
+    ctx.beginPath(); ctx.arc(0, -s * 1.35, 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-s * 0.42, -s * 0.15, s * 0.18, 0, Math.PI * 2); ctx.fill(); /* eyes */
+    ctx.beginPath(); ctx.arc(s * 0.42, -s * 0.15, s * 0.18, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#00f2fe"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(-s * 0.4, s * 0.4); ctx.lineTo(s * 0.4, s * 0.4); ctx.stroke(); /* mouth */
+    ctx.restore();
+  },
+
+  /* ---- rendering ---- */
+  draw() {
+    const cv = $("l3-canvas"), ctx = cv.getContext("2d");
+    const C = this.CELL;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+
+    /* Q-value heatmap scaling */
+    let maxQ = 0, minQ = 0;
+    for (let y = 0; y < this.GH; y++) for (let x = 0; x < this.GW; x++) {
+      if (this.isWall(x, y)) continue;
+      const v = Math.max(...this.Q[this.idx(x, y)]);
+      if (v > maxQ) maxQ = v;
+      if (v < minQ) minQ = v;
+    }
+
+    for (let y = 0; y < this.GH; y++) {
+      for (let x = 0; x < this.GW; x++) {
+        const px = x * C, py = y * C;
+        if (this.WALLS.has(this.key(x, y))) {
+          ctx.fillStyle = "#2a3450";
+          ctx.fillRect(px + 2, py + 2, C - 4, C - 4);
+          continue;
+        }
+        /* base cell */
+        ctx.fillStyle = "#0e1524";
+        ctx.fillRect(px + 2, py + 2, C - 4, C - 4);
+        /* heat tint */
+        const q = this.Q[this.idx(x, y)];
+        const v = Math.max(...q);
+        if (v > 0.01 && maxQ > 0) {
+          ctx.fillStyle = `rgba(255,183,3,${0.08 + 0.42 * (v / maxQ)})`;
+          ctx.fillRect(px + 2, py + 2, C - 4, C - 4);
+        } else if (v < -0.01 && minQ < 0) {
+          ctx.fillStyle = `rgba(255,84,112,${0.08 + 0.35 * (v / minQ)})`;
+          ctx.fillRect(px + 2, py + 2, C - 4, C - 4);
+        }
+        /* best-action arrow */
+        if (q.some(val => Math.abs(val) > 0.01) && !this.isGoal(x, y)) {
+          const arrows = ["▲", "▼", "◀", "▶"];
+          const a = q.indexOf(Math.max(...q));
+          ctx.fillStyle = "rgba(232,238,251,.65)";
+          ctx.font = "600 13px 'Segoe UI', sans-serif";
+          ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText(arrows[a], px + C - 14, py + 14);
+        }
+      }
+    }
+
+    /* test-run trail */
+    if (this.trail.length) {
+      ctx.strokeStyle = "rgba(255,183,3,.7)";
+      ctx.lineWidth = 4; ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.beginPath();
+      ctx.moveTo(this.START.x * C + C / 2, this.START.y * C + C / 2);
+      for (const t of this.trail) ctx.lineTo(t.x * C + C / 2, t.y * C + C / 2);
+      ctx.stroke();
+    }
+
+    /* flat vector sprites */
+    for (const f of this.FIRES) {
+      const [fx, fy] = f.split(",").map(Number);
+      this.drawFlame(ctx, fx * C + C / 2, fy * C + C / 2, C);
+    }
+    this.drawBattery(ctx, this.GOAL.x * C + C / 2, this.GOAL.y * C + C / 2, C);
+    this.drawRobot(ctx, this.pos.x * C + C / 2, this.pos.y * C + C / 2, C);
+
+    /* grid lines */
+    ctx.strokeStyle = "rgba(36,48,77,.9)";
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= this.GW; x++) { ctx.beginPath(); ctx.moveTo(x * C, 0); ctx.lineTo(x * C, this.GH * C); ctx.stroke(); }
+    for (let y = 0; y <= this.GH; y++) { ctx.beginPath(); ctx.moveTo(0, y * C); ctx.lineTo(this.GW * C, y * C); ctx.stroke(); }
+  },
+
+  drawChart() {
+    const cv = $("rewardChart"), ctx = cv.getContext("2d");
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    const data = this.rewardHistory;
+    if (data.length < 2) return;
+    const lo = Math.min(...data), hi = Math.max(...data);
+    const span = Math.max(hi - lo, 1);
+    ctx.strokeStyle = "#ffb703";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    data.forEach((v, i) => {
+      const x = i / (data.length - 1) * (cv.width - 8) + 4;
+      const y = cv.height - 6 - (v - lo) / span * (cv.height - 12);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    /* zero line if visible */
+    if (lo < 0 && hi > 0) {
+      const zy = cv.height - 6 - (0 - lo) / span * (cv.height - 12);
+      ctx.strokeStyle = "rgba(139,152,184,.4)";
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath(); ctx.moveTo(0, zy); ctx.lineTo(cv.width, zy); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  },
+};
+
+Core.boot();
+MazeGame.open();
+</script>
+</body>
+</html>
