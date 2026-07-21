@@ -572,6 +572,10 @@
         Phase 2: classify <b style="color:var(--text)">12 mystery emails</b> — 12 seconds each.<br>
         +10 for a correct call, −5 for a wrong one. Misses count against your accuracy!
       </p>
+      <div class="field" style="max-width:280px;margin:0 auto 18px">
+        <label data-i18n="diffLabel">Difficulty</label>
+        <select id="l1-diff" onchange="Difficulty.change(1, this.value)"></select>
+      </div>
       <button class="btn teal primary big" onclick="SpamGame.startTraining()"><svg class="ic"><use href="#i-play"/></svg> <span data-i18n="l1Start">Start Training Phase</span></button>
     </div>
 
@@ -658,11 +662,17 @@
         </div>
       </div>
       <div class="ctrl-panel">
+        <div class="field">
+          <label data-i18n="diffLabel">Difficulty</label>
+          <select id="l2-diff" onchange="Difficulty.change(2, this.value)"></select>
+        </div>
         <h4 data-i18n="l2KTitle">K — number of clusters</h4>
         <div class="kpicker" id="l2-kpicker">
-          <button class="btn purple" data-k="2" onclick="ClusterGame.setK(2)">K=2</button>
-          <button class="btn purple sel" data-k="3" onclick="ClusterGame.setK(3)">K=3</button>
-          <button class="btn purple" data-k="4" onclick="ClusterGame.setK(4)">K=4</button>
+          <button class="btn purple" data-k="2" onclick="ClusterGame.setK(2)">2</button>
+          <button class="btn purple sel" data-k="3" onclick="ClusterGame.setK(3)">3</button>
+          <button class="btn purple" data-k="4" onclick="ClusterGame.setK(4)">4</button>
+          <button class="btn purple" data-k="5" onclick="ClusterGame.setK(5)">5</button>
+          <button class="btn purple" data-k="6" onclick="ClusterGame.setK(6)">6</button>
         </div>
         <div class="status-line" id="l2-status"></div>
         <div class="hud" style="margin:0">
@@ -719,6 +729,10 @@
         </div>
       </div>
       <div class="ctrl-panel">
+        <div class="field">
+          <label data-i18n="diffLabel">Difficulty</label>
+          <select id="l3-diff" onchange="Difficulty.change(3, this.value)"></select>
+        </div>
         <h4 data-i18n="l3Panel">Reward Engineering</h4>
         <div class="slider-row">
           <label><span data-i18n="l3Rew">Battery reward</span> <b id="l3-rew-val">+10</b></label>
@@ -913,7 +927,7 @@ const I18N = {
     l1Name: "The Spam &amp; Ham Classifier", l1Tag: "Supervised",
     l1Explain: `<b>Supervised learning</b> means learning from examples that come with the correct answers (<b>labels</b>). First you'll see <b>training data</b> — emails already stamped SPAM or HAM (not-spam). Your brain will pick up the patterns (ALL CAPS, "FREE!!!", sketchy senders…). Then you'll classify <b>new, unlabeled</b> emails — exactly what a trained spam filter does millions of times a day.`,
     l1Mission: "Your mission",
-    l1MissionText: `Phase 1: study <b style="color:var(--text)">10 labeled training emails</b>.<br>Phase 2: classify <b style="color:var(--text)">16 mystery emails</b> — 12 seconds each, and the clock <b style="color:var(--text)">shrinks as your streak grows</b>!<br>+10 for a correct call, −5 for a wrong one. Misses count against your accuracy!`,
+    l1MissionText: `Phase 1: study <b style="color:var(--text)">10 labeled training emails</b>.<br>Phase 2: classify the mystery emails before the clock runs out — it <b style="color:var(--text)">shrinks as your streak grows</b>!<br>+10 for a correct call, −5 for a wrong one. Higher difficulty = less time, more emails, trickier traps.`,
     l1Start: "Start Training Phase",
     l1TrainProgress: "Training example {i} / {n}",
     l1Memorize: "The machine memorizes patterns from labeled examples…",
@@ -1025,6 +1039,10 @@ const I18N = {
     runDone: "Arcade Run complete — {total} points!",
     badgeToast: "Badge unlocked: {name}!",
     gateLogin: "Log back in", countGo: "GO!",
+    diffLabel: "Difficulty",
+    diffNames: "Very Easy|Easy|Casual|Normal|Medium|Tricky|Hard|Very Hard|Extreme|Very Difficult",
+    diffSet: "Difficulty: {name}",
+    diffBonus: "Difficulty bonus \u00d7{m} \u2014 {pts} pts recorded!",
   },
 
   ar: {
@@ -1044,7 +1062,7 @@ const I18N = {
     l1Name: "مصنِّف السبام والرسائل السليمة", l1Tag: "تعلّم موجَّه",
     l1Explain: `<b>التعلّم الموجَّه</b> يعني التعلّم من أمثلة مرفقة بالإجابات الصحيحة (<b>التسميات</b>). أولًا سترى <b>بيانات التدريب</b> — رسائل مختومة مسبقًا «سبام» أو «سليم». سيلتقط عقلك الأنماط (حروف كبيرة، «مجاني!!!»، مرسِل مريب…). بعدها ستصنّف رسائل <b>جديدة بلا تسميات</b> — وهذا بالضبط ما يفعله فلتر السبام المدرَّب ملايين المرات يوميًا.`,
     l1Mission: "مهمتك",
-    l1MissionText: `المرحلة 1: ادرس <b style="color:var(--text)">10 رسائل تدريب معنونة</b>.<br>المرحلة 2: صنّف <b style="color:var(--text)">16 رسالة غامضة</b> — 12 ثانية لكل رسالة، والوقت <b style="color:var(--text)">يقصر كلما زاد تتابعك</b>!<br>+10 للإجابة الصحيحة و −5 للخاطئة. والتأخير يُحسب ضد دقّتك!`,
+    l1MissionText: `المرحلة 1: ادرس <b style="color:var(--text)">10 رسائل تدريب معنونة</b>.<br>المرحلة 2: صنّف الرسائل الغامضة قبل انتهاء الوقت — وهو <b style="color:var(--text)">يقصر كلما زاد تتابعك</b>!<br>+10 للإجابة الصحيحة و −5 للخاطئة. صعوبة أعلى = وقت أقل ورسائل أكثر وأفخاخ أذكى.`,
     l1Start: "ابدأ مرحلة التدريب",
     l1TrainProgress: "مثال التدريب {i} / {n}",
     l1Memorize: "الآلة تحفظ الأنماط من الأمثلة المعنونة…",
@@ -1156,6 +1174,10 @@ const I18N = {
     runDone: "اكتمل سباق الأركيد — {total} نقطة!",
     badgeToast: "وسام جديد: {name}!",
     gateLogin: "سجّل الدخول من جديد", countGo: "انطلق!",
+    diffLabel: "مستوى الصعوبة",
+    diffNames: "سهل جدًا|سهل|بسيط|عادي|متوسط|مخادع|صعب|صعب جدًا|قاسٍ|صعب للغاية",
+    diffSet: "الصعوبة: {name}",
+    diffBonus: "مكافأة الصعوبة \u00d7{m} \u2014 سُجِّلت {pts} نقطة!",
   },
 };
 
@@ -1184,6 +1206,7 @@ function setLang(lang) {
   if (ClusterGame.lastStatus) ClusterGame.setStatus(...ClusterGame.lastStatus);
   if (MazeGame.lastStatus) MazeGame.setStatus(...MazeGame.lastStatus);
   App.renderDash();
+  Difficulty.renderAll();
   if (document.getElementById("screen-badges").classList.contains("active")) Badges.render();
 }
 function toggleLang() { setLang(LANG === "ar" ? "en" : "ar"); }
@@ -1345,6 +1368,39 @@ const Starfield = {
       this.rafId = requestAnimationFrame(draw);
     };
     this.rafId = requestAnimationFrame(draw);
+  },
+};
+
+/* ════════════════════════════════════════════════════════════
+   DIFFICULTY — 1 (very easy) … 10 (very difficult), per game
+   ════════════════════════════════════════════════════════════ */
+const Difficulty = {
+  get(game) { return (App.state.diff && App.state.diff[game]) || 3; },
+  set(game, d) { (App.state.diff = App.state.diff || {})[game] = clamp(+d, 1, 10); App.save(); },
+  mult(d) { return 1 + (d - 1) / 9; },                       /* score bonus ×1.0 … ×2.0 */
+  names() { return t("diffNames").split("|"); },
+  change(game, v) {
+    this.set(game, v);
+    Sound.click();
+    toast(t("diffSet", { name: this.names()[this.get(game) - 1] }));
+    if (game === 2) ClusterGame.open();                       /* new data for new difficulty */
+    if (game === 3) { MazeGame.applyDifficulty(); MazeGame.resetBrain(); }
+  },
+  renderAll() {
+    const names = this.names();
+    [["l1-diff", 1], ["l2-diff", 2], ["l3-diff", 3]].forEach(([id, g]) => {
+      const sel = $(id);
+      if (!sel) return;
+      sel.innerHTML = names.map((n, i) => `<option value="${i + 1}">${i + 1} — ${n}</option>`).join("");
+      sel.value = this.get(g);
+    });
+  },
+  applyBonus(game, raw) {
+    const d = this.get(game);
+    if (raw <= 0 || d <= 1) return raw;
+    const boosted = Math.round(raw * this.mult(d));
+    if (boosted > raw) toast(t("diffBonus", { m: this.mult(d).toFixed(1), pts: boosted }));
+    return boosted;
   },
 };
 
@@ -1821,16 +1877,16 @@ const SpamGame = {
       en: "Your order #4482 has been delivered. Thanks for shopping with us!",
       ar: "طلبك رقم #4482 تم توصيله. شكرًا لتسوقك معنا!" },
     /* tricky — mixed signals */
-    { from: "prof.adams@university.edu", label: "ham",
+    { from: "prof.adams@university.edu", label: "ham", tricky: true,
       en: "URGENT: tomorrow's exam moved to 9 AM — check the portal NOW!",
       ar: "عاجل: تم نقل امتحان الغد إلى 9 صباحًا — راجع البوابة الآن!" },
-    { from: "accounts@secure-pay-invoices.info", label: "spam",
+    { from: "accounts@secure-pay-invoices.info", label: "spam", tricky: true,
       en: "Hi, following up on our meeting — please review the attached invoice as soon as possible.",
       ar: "مرحبًا، متابعةً لاجتماعنا — رجاءً راجع الفاتورة المرفقة بأسرع وقت ممكن." },
-    { from: "events@university.edu", label: "ham",
+    { from: "events@university.edu", label: "ham", tricky: true,
       en: "You WON the department hackathon! 🎉 Prize pickup at the CS office this week.",
       ar: "لقد فزت في هاكاثون القسم! 🎉 استلم جائزتك من مكتب علوم الحاسب هذا الأسبوع." },
-    { from: "billing@netfIix-support.com", label: "spam",
+    { from: "billing@netfIix-support.com", label: "spam", tricky: true,
       en: "Netflix: your payment failed. Update your billing info within 24 hours to keep watching.",
       ar: "نتفليكس: فشل الدفع. حدّث بيانات الفوترة خلال 24 ساعة لمواصلة المشاهدة." },
   ],
@@ -1840,7 +1896,7 @@ const SpamGame = {
   TRAIN_CARD_MS: 3000,    /* ms each training card stays up */
   trainIdx: 0, trainTimer: null,
   queue: [], idx: 0, score: 0, streak: 0, maxStreak: 0, answered: false,
-  timerInt: null, deadline: 0, curTime: 12000,
+  timerInt: null, deadline: 0, curTime: 12000, baseTime: 12000, shave: 600,
   tp: 0, tn: 0, fp: 0, fn: 0, misses: 0,
 
   open() {
@@ -1885,7 +1941,14 @@ const SpamGame = {
     this.stopTimers();
     $("l1-train").style.display = "none";
     $("l1-play").style.display = "block";
-    this.queue = shuffle(this.TEST);
+    const d = Difficulty.get(1);
+    this.baseTime = clamp(21000 - d * 1700, 4000, 20000);
+    this.shave = 400 + d * 60;
+    const pool = d <= 4 ? this.TEST.filter(e => !e.tricky) : this.TEST;
+    const count = d <= 2 ? 10 : d <= 4 ? 12 : d <= 7 ? 14 : 16;
+    const spams = shuffle(pool.filter(e => e.label === "spam"));
+    const hams = shuffle(pool.filter(e => e.label === "ham"));
+    this.queue = shuffle(spams.slice(0, Math.ceil(count / 2)).concat(hams.slice(0, Math.floor(count / 2))));
     this.idx = 0; this.score = 0; this.streak = 0; this.maxStreak = 0;
     this.tp = this.tn = this.fp = this.fn = this.misses = 0;
     $("l1-score").textContent = "0";
@@ -1910,8 +1973,8 @@ const SpamGame = {
     card.style.animation = "none"; void card.offsetWidth; card.style.animation = "";
     $("l1-btn-ham").disabled = $("l1-btn-spam").disabled = false;
 
-    /* difficulty ramp: each streak level shaves 800ms off the clock */
-    this.curTime = Math.max(this.MIN_TIME, this.TIME_PER_CARD - this.streak * 800);
+    /* difficulty ramp: streak shaves time off the clock, floor scales with difficulty */
+    this.curTime = Math.max(Math.max(2500, this.baseTime * 0.35), this.baseTime - this.streak * this.shave);
     this.deadline = performance.now() + this.curTime;
     clearInterval(this.timerInt);
     const bar = $("l1-timer");
@@ -2000,7 +2063,7 @@ const SpamGame = {
     if (passed) Sound.win();
     if (acc === 100) Badges.award("perfectFilter");
     if (this.maxStreak >= 8) Badges.award("streakLord");
-    App.complete(1, this.score, passed);
+    App.complete(1, Difficulty.applyBonus(1, this.score), passed);
   },
 };
 
@@ -2017,7 +2080,7 @@ document.addEventListener("keydown", e => {
    ════════════════════════════════════════════════════════════ */
 const ClusterGame = {
   W: 720, H: 480,
-  COLORS: ["#00f2fe", "#ff4d8d", "#ffb703", "#7cff6b"],
+  COLORS: ["#00f2fe", "#ff4d8d", "#ffb703", "#7cff6b", "#ff9d3c", "#c084fc"],
   K: 3,
   points: [], trueCenters: [],
   centroids: [],           // {x,y,tx,ty} in normalized [0,1] coords
@@ -2041,13 +2104,19 @@ const ClusterGame = {
 
   /* ---- data generation: 3 hidden gaussian blobs ---- */
   generateData() {
+    const d = Difficulty.get(2);
+    const nBlobs = [3, 3, 3, 4, 4, 4, 5, 5, 6, 6][d - 1];
+    const sep = Math.max(0.17, 0.42 - d * 0.022);
+    const sigma = 0.04 + d * 0.004;
+    const perBlob = Math.max(9, Math.round(48 / nBlobs));
+    const nNoise = Math.round((d - 1) * 1.1);
     this.trueCenters = [];
     let guard = 0;
-    while (this.trueCenters.length < 3 && guard++ < 500) {
-      const c = { x: 0.16 + Math.random() * 0.68, y: 0.16 + Math.random() * 0.68 };
-      if (this.trueCenters.every(o => Math.hypot(o.x - c.x, o.y - c.y) > 0.34)) this.trueCenters.push(c);
+    while (this.trueCenters.length < nBlobs && guard++ < 900) {
+      const c = { x: 0.14 + Math.random() * 0.72, y: 0.14 + Math.random() * 0.72 };
+      if (this.trueCenters.every(o => Math.hypot(o.x - c.x, o.y - c.y) > sep)) this.trueCenters.push(c);
     }
-    while (this.trueCenters.length < 3) this.trueCenters.push({ x: Math.random(), y: Math.random() });
+    while (this.trueCenters.length < nBlobs) this.trueCenters.push({ x: 0.1 + Math.random() * 0.8, y: 0.1 + Math.random() * 0.8 });
     const gauss = () => {
       let u = 0, v = 0;
       while (u === 0) u = Math.random();
@@ -2056,13 +2125,14 @@ const ClusterGame = {
     };
     this.points = [];
     for (const c of this.trueCenters) {
-      for (let i = 0; i < 15; i++) {
+      for (let i = 0; i < perBlob; i++) {
         this.points.push({
-          x: clamp(c.x + gauss() * 0.055, 0.03, 0.97),
-          y: clamp(c.y + gauss() * 0.055, 0.03, 0.97),
+          x: clamp(c.x + gauss() * sigma, 0.03, 0.97),
+          y: clamp(c.y + gauss() * sigma, 0.03, 0.97),
         });
       }
     }
+    for (let i = 0; i < nNoise; i++) this.points.push({ x: 0.03 + Math.random() * 0.94, y: 0.03 + Math.random() * 0.94 });
     this.optimalInertia = this.computeOptimal(this.K);
   },
 
@@ -2190,7 +2260,7 @@ const ClusterGame = {
     $("l2-results").scrollIntoView({ behavior: "smooth", block: "nearest" });
     Sound.win();
     if (this.iter <= 3 && score >= 95) Badges.award("clusterMaster");
-    App.complete(2, score, score >= 60);
+    App.complete(2, Difficulty.applyBonus(2, score), score >= 60);
   },
 
   /* ---- render loop ---- */
@@ -2277,7 +2347,10 @@ const MazeGame = {
   GW: 8, GH: 6, CELL: 80,
   START: { x: 0, y: 0 }, GOAL: { x: 0, y: 5 },
   WALLS: new Set(["0,2", "2,2", "3,2", "4,2", "5,2", "7,2", "3,4", "4,4"]),
+  BASE_FIRES: ["1,2", "3,1", "6,4", "5,5"],
+  EXTRA_FIRES: ["5,1", "7,0", "2,5", "4,5", "1,1", "6,5"],   /* never block or shorten the safe route */
   FIRES: new Set(["1,2", "3,1", "6,4", "5,5"]),
+  SLIP: 0,
   OPTIMAL_SAFE: 17, OPTIMAL_FIRE: 7,
   ACTIONS: [{ dx: 0, dy: -1 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }, { dx: 1, dy: 0 }], // up down left right
   ALPHA: 0.5, GAMMA: 0.9,
@@ -2288,9 +2361,18 @@ const MazeGame = {
   trail: [],
   lastStatus: null,
 
+  applyDifficulty() {
+    const d = Difficulty.get(3);
+    let fires = d <= 2 ? ["1,2", "5,5"] : this.BASE_FIRES.slice();
+    const nExtra = d <= 4 ? 0 : d <= 6 ? 2 : d <= 8 ? 4 : 6;
+    fires = fires.concat(this.EXTRA_FIRES.slice(0, nExtra));
+    this.FIRES = new Set(fires);
+    this.SLIP = d >= 9 ? 0.10 : d >= 7 ? 0.06 : d >= 5 ? 0.03 : 0;
+  },
   open() {
     App.show("screen-l3");
     $("l3-results").style.display = "none";
+    this.applyDifficulty();
     if (!this.Q.length) this.resetBrain(true);
     if (!this.lastStatus) this.setStatus("l3StatusStart");
     this.syncSliders();
@@ -2340,6 +2422,7 @@ const MazeGame = {
       const best = q.map((v, i) => [v, i]).filter(([v]) => v === m).map(([, i]) => i);
       a = best[Math.floor(Math.random() * best.length)];
     }
+    if (this.SLIP && Math.random() < this.SLIP) a = Math.floor(Math.random() * 4);   /* motor slip */
     const d = this.ACTIONS[a];
     let nx = this.pos.x + d.dx, ny = this.pos.y + d.dy;
     if (this.isWall(nx, ny)) { nx = this.pos.x; ny = this.pos.y; }
@@ -2459,7 +2542,7 @@ const MazeGame = {
     countUp($("l3-res-score"), score, v => v + " " + t("l3Pts"));
     rp.style.display = "block";
     rp.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    App.complete(3, score, true);
+    App.complete(3, Difficulty.applyBonus(3, score), true);
   },
   closeResults() {
     $("l3-results").style.display = "none";
@@ -2628,6 +2711,7 @@ MazeGame.resetBrain(true);
 MazeGame.setStatus("l3StatusStart");
 ClusterGame.setStatus("l2StatusPlace", { k: 3 });
 App.load();
+MazeGame.applyDifficulty();
 setLang(LANG);
 $("tc-photo").addEventListener("change", e => Team.handlePhoto(e.target.files[0]));
 Starfield.init();
