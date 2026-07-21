@@ -865,11 +865,11 @@ const Team = {
     App.save();
     App.renderDash();
   },
-  async pullProgress() {
+  async pullProgress(quiet) {
     if (!Net.ok() || !this.session || this.session.status !== "approved") return;
     try {
       const p = await Net.get("/teams/" + this.session.teamId + "/members/" + this.session.user + "/progress");
-      if (p) { this.mergeProgress(p); toast(t("progressRestored", { user: this.session.user })); }
+      if (p) { this.mergeProgress(p); if (!quiet) toast(t("progressRestored", { user: this.session.user })); }
       this.syncScores();
     } catch (e) {}
   },
@@ -1104,5 +1104,6 @@ const Core = {
     Difficulty.renderAll();
     const photo = $("tc-photo");
     if (photo) photo.addEventListener("change", e => Team.handlePhoto(e.target.files[0]));
+    if (Team.session && Team.session.status === "approved") Team.pullProgress(true);
   },
 };
