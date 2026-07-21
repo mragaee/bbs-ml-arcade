@@ -1045,6 +1045,42 @@ const Career = {
 };
 
 /* ════════════════════════════════════════════════════════════
+   REMOTE CONFIG — instructor switches in Firebase (/config, 1/0)
+     showML  : show/hide The ML Arcade wing
+     showLab : show/hide The Prompt Lab wing
+   ════════════════════════════════════════════════════════════ */
+const RemoteConfig = {
+  data: { showML: 1, showLab: 1 },
+  ML_PAGES: ["supervised.html", "unsupervised.html", "reinforcement.html"],
+  LAB_PAGES: ["ai-spotter.html", "llm.html", "prompt-forge.html", "hallucination.html"],
+  load() { try { Object.assign(this.data, JSON.parse(localStorage.getItem("mlArcadeCfg") || "{}")); } catch (e) {} },
+  save() { try { localStorage.setItem("mlArcadeCfg", JSON.stringify(this.data)); } catch (e) {} },
+  async fetch() {
+    if (!Net.ok()) return;
+    try {
+      const cfg = await Net.get("/config");
+      if (cfg) {
+        this.data.showML = cfg.showML === 0 ? 0 : 1;
+        this.data.showLab = cfg.showLab === 0 ? 0 : 1;
+        this.save();
+      }
+    } catch (e) {}
+    this.apply();
+  },
+  apply() {
+    document.querySelectorAll(".wing-ml").forEach(el => el.style.display = this.data.showML ? "" : "none");
+    document.querySelectorAll(".wing-lab").forEach(el => el.style.display = this.data.showLab ? "" : "none");
+    const runBtn = document.getElementById("btn-run");
+    if (runBtn) runBtn.style.display = this.data.showML ? "" : "none";
+    const page = ((location.pathname || "").split("/").pop() || "index.html").toLowerCase();
+    if ((!this.data.showML && this.ML_PAGES.includes(page)) ||
+        (!this.data.showLab && this.LAB_PAGES.includes(page))) {
+      location.href = "index.html";
+    }
+  },
+};
+
+/* ════════════════════════════════════════════════════════════
    CORE — shared page chrome + boot (call Core.boot() on every page)
    ════════════════════════════════════════════════════════════ */
 const Core = {
@@ -1105,5 +1141,8 @@ const Core = {
     const photo = $("tc-photo");
     if (photo) photo.addEventListener("change", e => Team.handlePhoto(e.target.files[0]));
     if (Team.session && Team.session.status === "approved") Team.pullProgress(true);
+    RemoteConfig.load();
+    RemoteConfig.apply();
+    RemoteConfig.fetch();
   },
 };

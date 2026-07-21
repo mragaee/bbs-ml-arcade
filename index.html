@@ -24,12 +24,12 @@
     <div class="team-bar" id="team-bar">
       <div class="who" id="team-bar-who"></div>
       <button class="btn teal" onclick="Team.open()"><svg class="ic"><use href="#i-users"/></svg> <span data-i18n="teamBtn">Teams</span></button>
-      <button class="btn amber" onclick="ArcadeRun.start()"><svg class="ic"><use href="#i-flag"/></svg> <span data-i18n="runBtn">Arcade Run</span></button>
+      <button class="btn amber" id="btn-run" onclick="ArcadeRun.start()"><svg class="ic"><use href="#i-flag"/></svg> <span data-i18n="runBtn">Arcade Run</span></button>
       <button class="btn purple" onclick="Board.open()"><svg class="ic"><use href="#i-trophy"/></svg> <span data-i18n="boardBtn">Leaderboard</span></button>
       <button class="btn teal" onclick="Badges.open()"><svg class="ic"><use href="#i-award"/></svg> <span data-i18n="badgesBtn">Badges</span></button>
     </div>
-    <p class="wing-title" data-i18n="wingML">The ML Arcade</p>
-    <div class="cards">
+    <p class="wing-title wing-ml" data-i18n="wingML">The ML Arcade</p>
+    <div class="cards wing-ml">
       <div class="card teal" id="card-1" onclick="location.href='supervised.html'">
         <span class="done-badge"><svg class="ic"><use href="#i-check"/></svg> <span data-i18n="done">DONE</span></span>
         <div class="lvl" data-i18n="lvl1">Level 1 · Supervised Learning</div>
@@ -59,8 +59,8 @@
       </div>
     </div>
 
-    <p class="wing-title" data-i18n="wingLab">The Prompt Lab</p>
-    <div class="cards">
+    <p class="wing-title wing-lab" data-i18n="wingLab">The Prompt Lab</p>
+    <div class="cards wing-lab">
       <div class="card green" id="card-4" onclick="location.href='ai-spotter.html'">
         <span class="done-badge"><svg class="ic"><use href="#i-check"/></svg> <span data-i18n="done">DONE</span></span>
         <div class="lvl" data-i18n="lvl4">Lab 1 · AI Fields</div>
