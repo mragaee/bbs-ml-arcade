@@ -28,6 +28,7 @@
       <button class="btn purple" onclick="Board.open()"><svg class="ic"><use href="#i-trophy"/></svg> <span data-i18n="boardBtn">Leaderboard</span></button>
       <button class="btn teal" onclick="Badges.open()"><svg class="ic"><use href="#i-award"/></svg> <span data-i18n="badgesBtn">Badges</span></button>
     </div>
+    <p class="wing-title" data-i18n="wingML">The ML Arcade</p>
     <div class="cards">
       <div class="card teal" id="card-1" onclick="location.href='supervised.html'">
         <span class="done-badge"><svg class="ic"><use href="#i-check"/></svg> <span data-i18n="done">DONE</span></span>
@@ -56,6 +57,54 @@
         <p data-i18n="card3Desc">Tune rewards and penalties, then train a Q-learning bot to find the battery — and watch it learn to fear the fire.</p>
         <div class="best"><svg class="ic" style="color:var(--amber)"><use href="#i-trophy"/></svg><span data-i18n="best">Best score:</span> <b id="best-3">—</b></div>
       </div>
+    </div>
+
+    <p class="wing-title" data-i18n="wingLab">The Prompt Lab</p>
+    <div class="cards">
+      <div class="card green" id="card-4" onclick="location.href='ai-spotter.html'">
+        <span class="done-badge"><svg class="ic"><use href="#i-check"/></svg> <span data-i18n="done">DONE</span></span>
+        <div class="lvl" data-i18n="lvl4">Lab 1 · AI Fields</div>
+        <div class="icon"><svg class="ic"><use href="#i-grid"/></svg></div>
+        <h3 data-i18n="card4Title">AI Spotter</h3>
+        <h4 data-i18n="card4Sub">Vision, language, learning or creating?</h4>
+        <p data-i18n="card4Desc">Sort real apps you use every day into the right AI field — then nail the AI vs ML vs Deep Learning nesting.</p>
+        <div class="best"><svg class="ic" style="color:var(--amber)"><use href="#i-trophy"/></svg><span data-i18n="best">Best score:</span> <b id="best-4">—</b></div>
+      </div>
+      <div class="card pink" id="card-5" onclick="location.href='llm.html'">
+        <span class="done-badge"><svg class="ic"><use href="#i-check"/></svg> <span data-i18n="done">DONE</span></span>
+        <div class="lvl" data-i18n="lvl5">Lab 2 · Generative AI</div>
+        <div class="icon"><svg class="ic"><use href="#i-bulb"/></svg></div>
+        <h3 data-i18n="card5Title">Think Like an LLM</h3>
+        <h4 data-i18n="card5Sub">Guess the next word</h4>
+        <p data-i18n="card5Desc">Be the language model: pick the most likely next word and watch the probability bars reveal how LLMs really think.</p>
+        <div class="best"><svg class="ic" style="color:var(--amber)"><use href="#i-trophy"/></svg><span data-i18n="best">Best score:</span> <b id="best-5">—</b></div>
+      </div>
+      <div class="card teal" id="card-6" onclick="location.href='prompt-forge.html'">
+        <span class="done-badge"><svg class="ic"><use href="#i-check"/></svg> <span data-i18n="done">DONE</span></span>
+        <div class="lvl" data-i18n="lvl6">Lab 3 · Prompt Engineering</div>
+        <div class="icon"><svg class="ic"><use href="#i-key"/></svg></div>
+        <h3 data-i18n="card6Title">The Prompt Forge</h3>
+        <h4 data-i18n="card6Sub">Role + Task + Context + Requirements + Format</h4>
+        <p data-i18n="card6Desc">Assemble prompts from parts, run them, and watch weak prompts produce hilariously generic output. Iterate and improve!</p>
+        <div class="best"><svg class="ic" style="color:var(--amber)"><use href="#i-trophy"/></svg><span data-i18n="best">Best score:</span> <b id="best-6">—</b></div>
+      </div>
+      <div class="card amber" id="card-7" onclick="location.href='hallucination.html'">
+        <span class="done-badge"><svg class="ic"><use href="#i-check"/></svg> <span data-i18n="done">DONE</span></span>
+        <div class="lvl" data-i18n="lvl7">Lab 4 · Responsible AI</div>
+        <div class="icon"><svg class="ic"><use href="#i-alert"/></svg></div>
+        <h3 data-i18n="card7Title">Hallucination Hunter</h3>
+        <h4 data-i18n="card7Sub">Trust or flag the AI</h4>
+        <p data-i18n="card7Desc">The AI sounds confident — but is it right? Catch hallucinations, bias, privacy traps and copyright slips before the timer.</p>
+        <div class="best"><svg class="ic" style="color:var(--amber)"><use href="#i-trophy"/></svg><span data-i18n="best">Best score:</span> <b id="best-7">—</b></div>
+      </div>
+    </div>
+
+    <div class="career-card" id="career-panel" style="display:none">
+      <svg class="ic" style="width:44px;height:44px;color:var(--amber)"><use href="#i-award"/></svg>
+      <p class="muted" data-i18n="careerTitle" style="letter-spacing:2px;text-transform:uppercase;font-size:13px;font-weight:800">Your AI Career Card</p>
+      <h3 id="career-name"></h3>
+      <p class="muted" id="career-desc" style="max-width:520px;margin:6px auto 0"></p>
+      <p class="muted" data-i18n="careerHint" style="font-size:12px;margin-top:10px">Based on your strongest games:</p>
     </div>
     <p class="footer-note" data-i18n="footer">BSS Tech Academy · "The AI Blueprint" lab · works offline, no installs, no mercy </p>
   </section>

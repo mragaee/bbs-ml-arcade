@@ -418,3 +418,54 @@
   .rank .medal-ic { width: 26px; height: 26px; }
   .board-card:nth-child(2) .rank { color: #c7d2e8; }
   .board-card:nth-child(3) .rank { color: #d29a6a; }
+
+/* ══════════════ PROMPT LAB ══════════════ */
+.wing-title { font-size: 15px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); margin: 30px 0 -8px; text-align: center; }
+.card.green  { --accent: var(--good); }
+.card.pink   { --accent: #ff4d8d; }
+.tag.green   { color: var(--good); border-color: var(--good); background: rgba(61,220,132,.08); }
+.tag.pink    { color: #ff4d8d; border-color: #ff4d8d; background: rgba(255,77,141,.08); }
+.btn.pink    { --accent: #ff4d8d; }
+.btn.green   { --accent: var(--good); }
+.sort-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+.sort-grid .btn { justify-content: center; font-size: 15px; padding: 13px 8px; }
+.prob-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+.prob-row .pword { width: 120px; font-weight: 700; text-align: start; }
+.prob-track { flex: 1; height: 22px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.prob-fill { height: 100%; width: 0; border-radius: 8px; background: linear-gradient(90deg, var(--purple-deep), var(--purple)); transition: width .8s cubic-bezier(.2,.8,.2,1); }
+.prob-row.winner .prob-fill { background: linear-gradient(90deg, #0a8f54, var(--good)); }
+.prob-row .ppct { width: 52px; font-family: "Orbitron", sans-serif; font-size: 13px; text-align: end; color: var(--muted); }
+.sentence-big { font-size: clamp(22px, 4vw, 32px); font-weight: 700; text-align: center; margin: 18px 0; line-height: 1.6; }
+.sentence-big .blank { color: var(--teal); border-bottom: 3px dashed var(--teal); padding: 0 18px; }
+.word-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.word-btns .btn { font-size: 18px; min-width: 120px; justify-content: center; }
+.slot-row { margin-bottom: 14px; }
+.slot-row h5 { font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
+.slot-opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+.slot-opts button {
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; color: var(--text);
+  padding: 10px 12px; font-size: 13.5px; cursor: pointer; text-align: start; font-family: inherit; line-height: 1.4;
+  transition: border-color .12s, transform .12s;
+}
+.slot-opts button:hover { transform: translateY(-2px); border-color: var(--teal); }
+.slot-opts button.sel { border-color: var(--teal); background: rgba(0,242,254,.09); box-shadow: 0 0 12px rgba(0,242,254,.2); }
+.mission-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.output-box { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 16px; text-align: start; font-size: 14.5px; margin: 12px 0; white-space: pre-line; }
+.output-box.good { border-color: var(--good); }
+.output-box.bad { border-color: var(--bad); }
+.quality-track { height: 14px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; }
+.quality-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--bad), var(--amber), var(--good)); transition: width .9s ease; }
+.chat-bubble {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 16px 16px 16px 4px;
+  padding: 18px; font-size: 16.5px; text-align: start; position: relative; min-height: 90px;
+}
+[dir="rtl"] .chat-bubble { border-radius: 16px 16px 4px 16px; }
+.chat-bubble .ai-tag { font-size: 11px; font-weight: 800; letter-spacing: 1.5px; color: var(--purple); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.why-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+.why-btns .btn { font-size: 13px; padding: 8px 12px; }
+.career-card {
+  border: 1px solid var(--amber); background: linear-gradient(140deg, rgba(255,183,3,.12), rgba(18,26,44,.7));
+  border-radius: var(--radius); padding: 26px; text-align: center; margin-top: 26px;
+  box-shadow: 0 0 34px rgba(255,183,3,.15);
+}
+.career-card h3 { font-family: "Orbitron", "Cairo", sans-serif; font-size: 24px; color: var(--amber); margin: 8px 0 4px; }

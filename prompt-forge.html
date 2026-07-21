@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lab 3 — The Prompt Forge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&family=Cairo:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/core.css">
+</head>
+<body>
+<div class="wrap">
+  <section id="screen-l6" class="screen active">
+    <div class="topbar">
+      <button class="btn teal" onclick="location.href='index.html'" data-i18n="back">← Arcade</button>
+      <h2><svg class="ic"><use href="#i-key"/></svg> <span data-i18n="card6Title">The Prompt Forge</span></h2>
+      <span class="tag teal" data-i18n="s6Tag">Prompt Engineering</span>
+    </div>
+
+    <details class="explain">
+      <summary><svg class="ic"><use href="#i-bulb"/></svg> <span data-i18n="explainTitle">What's the ML idea here?</span></summary>
+      <p data-i18n="s6Explain"></p>
+    </details>
+
+    <!-- mission picker -->
+    <div id="s6-missions" class="panel">
+      <h3 class="center" data-i18n="s6Pick" style="margin-bottom:6px">Pick your mission</h3>
+      <p class="center muted" style="font-size:14px;margin-bottom:16px" data-i18n="s6PickSub">The same 5-part formula works for text, images, music and video.</p>
+      <div class="field" style="max-width:280px;margin:0 auto 18px">
+        <label data-i18n="diffLabel">Difficulty</label>
+        <select id="l6-diff" onchange="Difficulty.change(6, this.value)"></select>
+      </div>
+      <div class="mission-grid" id="s6-mission-grid"></div>
+    </div>
+
+    <!-- forge -->
+    <div id="s6-forge" style="display:none">
+      <div class="panel">
+        <p class="center muted" style="font-size:13px;letter-spacing:1.5px;text-transform:uppercase" data-i18n="s6Goal">Mission</p>
+        <h3 class="center" id="s6-goal" style="margin-bottom:18px"></h3>
+        <div id="s6-slots"></div>
+        <div class="result-actions">
+          <button class="btn teal primary big" id="s6-run" onclick="ForgeGame.run()" disabled><svg class="ic"><use href="#i-play"/></svg> <span data-i18n="s6Run">Run Prompt</span></button>
+          <button class="btn teal" onclick="ForgeGame.open()" data-i18n="s6ChangeMission">← Change mission</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- output -->
+    <div id="s6-output" class="panel" style="display:none">
+      <h3 class="center" data-i18n="s6OutTitle">The AI ran your prompt…</h3>
+      <p class="muted" style="font-size:13px;margin:14px 0 4px" data-i18n="s6YourPrompt">Your prompt:</p>
+      <div class="output-box" id="s6-prompt-text" style="font-style:italic"></div>
+      <p class="muted" style="font-size:13px;margin:14px 0 4px" data-i18n="s6AiOut">AI output:</p>
+      <div class="output-box" id="s6-out-text"></div>
+      <p class="muted" style="font-size:13px;margin:14px 0 4px"><span data-i18n="s6Quality">Output quality</span> — <b id="s6-quality-pct" style="color:var(--text)">0%</b></p>
+      <div class="quality-track"><div class="quality-fill" id="s6-quality"></div></div>
+      <div class="result-actions">
+        <button class="btn amber" id="s6-iterate" onclick="ForgeGame.iterate()"><svg class="ic"><use href="#i-refresh"/></svg> <span data-i18n="s6Iterate">Iterate &amp; Improve (1 try)</span></button>
+        <button class="btn teal primary" id="s6-accept" onclick="ForgeGame.finish()"><svg class="ic"><use href="#i-check"/></svg> <span data-i18n="s6Accept">Accept Result</span></button>
+      </div>
+    </div>
+
+    <!-- results -->
+    <div id="s6-results" class="panel center result-panel" style="display:none">
+      <div class="res-icon" id="s6-res-icon"></div>
+      <h3 id="s6-res-title"></h3>
+      <p class="muted" data-i18n="s6ResLabel">Prompt quality score:</p>
+      <div class="big-metric" id="s6-res-score">0</div>
+      <p class="muted" id="s6-res-note" style="margin-top:6px"></p>
+      <div class="takeaway" data-i18n="s6Takeaway"></div>
+      <div class="result-actions">
+        <button class="btn teal primary" onclick="ForgeGame.open()"><svg class="ic"><use href="#i-replay"/></svg> <span data-i18n="s6NewMission">New Mission</span></button>
+        <button class="btn teal" onclick="location.href='index.html'" data-i18n="backArcade">Back to Arcade</button>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="assets/core.js"></script>
+<script>
+"use strict";
+Object.assign(I18N.en, {
+  s6Tag: "Prompt Engineering",
+  s6Explain: `A prompt is <b>the instruction you give an AI</b> — and the AI can only work with what you tell it. Every great prompt has 5 parts: <b>Role</b> (who should the AI be?) + <b>Task</b> (what do you want?) + <b>Context</b> (who is it for?) + <b>Requirements</b> (details &amp; constraints) + <b>Format</b> (how should the answer look?). Forge your prompt from parts, run it, and see the output quality — then <b>iterate and improve</b>, exactly like real prompt engineers do.`,
+  s6Pick: "Pick your mission", s6PickSub: "The same 5-part formula works for text, images, music and video.",
+  s6Goal: "Mission", s6Run: "Run Prompt", s6ChangeMission: "← Change mission",
+  s6OutTitle: "The AI ran your prompt…", s6YourPrompt: "Your prompt:", s6AiOut: "AI output:",
+  s6Quality: "Output quality", s6Iterate: "Iterate & Improve (1 try)", s6Accept: "Accept Result",
+  s6ResLabel: "Prompt quality score:", s6NewMission: "New Mission",
+  s6TitlePerfect: "Master Wordsmith!", s6TitleGood: "Strong prompt!", s6TitleNeeds: "Vague in, vague out…",
+  s6NoteImproved: "Iteration improved your prompt by {d} points — that's real prompt engineering (+10 bonus).",
+  s6NoteFirst: "Nailed on the first try.",
+  s6Note: "Strong picks: {n}/5 slots.",
+  s6SlotRole: "1 · Role — who should the AI be?", s6SlotTask: "2 · Task — what do you want?",
+  s6SlotContext: "3 · Context — who is it for?", s6SlotReq: "4 · Requirements — details & constraints",
+  s6SlotFormat: "5 · Format — how should it look?",
+  s6Takeaway: `<b>Takeaway:</b> Same AI, different prompt, wildly different result. Small prompt changes create huge output improvements — AI is only as good as the instructions you give it. Role + Task + Context + Requirements + Format, then iterate.`,
+});
+Object.assign(I18N.ar, {
+  s6Tag: "هندسة الأوامر",
+  s6Explain: `الأمر (البرومبت) هو <b>التعليمات التي تعطيها للذكاء الاصطناعي</b> — ولا يمكنه العمل إلا بما تخبره به. كل أمر عظيم له 5 أجزاء: <b>الدور</b> (من يكون الذكاء؟) + <b>المهمة</b> (ماذا تريد؟) + <b>السياق</b> (لمن؟) + <b>المتطلبات</b> (تفاصيل وقيود) + <b>التنسيق</b> (كيف تبدو الإجابة؟). ركّب أمرك من الأجزاء وشغّله وشاهد جودة المخرجات — ثم <b>كرر وحسّن</b> تمامًا كما يفعل مهندسو الأوامر الحقيقيون.`,
+  s6Pick: "اختر مهمتك", s6PickSub: "نفس معادلة الأجزاء الخمسة تعمل للنص والصور والموسيقى والفيديو.",
+  s6Goal: "المهمة", s6Run: "شغّل الأمر", s6ChangeMission: "→ غيّر المهمة",
+  s6OutTitle: "الذكاء الاصطناعي نفّذ أمرك…", s6YourPrompt: "أمرك:", s6AiOut: "مخرجات الذكاء الاصطناعي:",
+  s6Quality: "جودة المخرجات", s6Iterate: "كرر وحسّن (محاولة واحدة)", s6Accept: "اقبل النتيجة",
+  s6ResLabel: "نقاط جودة الأمر:", s6NewMission: "مهمة جديدة",
+  s6TitlePerfect: "حدّاد الكلمات!", s6TitleGood: "أمر قوي!", s6TitleNeeds: "غموض يدخل، غموض يخرج…",
+  s6NoteImproved: "التكرار حسّن أمرك بمقدار {d} نقطة — هذه هندسة أوامر حقيقية (+10 مكافأة).",
+  s6NoteFirst: "أتقنتها من أول محاولة.",
+  s6Note: "اختيارات قوية: {n}/5 خانات.",
+  s6SlotRole: "1 · الدور — من يكون الذكاء الاصطناعي؟", s6SlotTask: "2 · المهمة — ماذا تريد؟",
+  s6SlotContext: "3 · السياق — لمن؟", s6SlotReq: "4 · المتطلبات — التفاصيل والقيود",
+  s6SlotFormat: "5 · التنسيق — كيف تبدو النتيجة؟",
+  s6Takeaway: `<b>الخلاصة:</b> نفس الذكاء، أمر مختلف، نتيجة مختلفة جذريًا. تغييرات صغيرة في الأمر تصنع تحسينات هائلة في المخرجات — الذكاء الاصطناعي بجودة التعليمات التي تعطيها له فقط. دور + مهمة + سياق + متطلبات + تنسيق، ثم كرر.`,
+});
+
+const ForgeGame = {
+  SLOTS: ["role", "task", "context", "req", "format"],
+  SLOT_KEY: { role: "s6SlotRole", task: "s6SlotTask", context: "s6SlotContext", req: "s6SlotReq", format: "s6SlotFormat" },
+  MISSIONS: [
+    {
+      id: "text", icon: "mail",
+      title: { en: "Text: Explain Climate Change", ar: "نص: اشرح تغيّر المناخ" },
+      slots: {
+        role: [
+          { q: 2, en: "You are an environmental science teacher", ar: "أنت معلم علوم بيئية" },
+          { q: 1, en: "You are a helpful assistant", ar: "أنت مساعد لطيف" },
+          { q: 0, en: "You are a pirate captain", ar: "أنت قبطان قراصنة" }],
+        task: [
+          { q: 2, en: "Explain climate change clearly to first-year students", ar: "اشرح تغيّر المناخ بوضوح لطلاب السنة الأولى" },
+          { q: 1, en: "Write about climate change", ar: "اكتب عن تغيّر المناخ" },
+          { q: 0, en: "Say something about weather, I guess", ar: "قل أي شيء عن الطقس، مثلًا" }],
+        context: [
+          { q: 2, en: "Beginners who need a clear first introduction", ar: "مبتدئون يحتاجون مقدمة أولى واضحة" },
+          { q: 1, en: "For some readers somewhere", ar: "لبعض القرّاء في مكان ما" },
+          { q: 0, en: "No context — just start typing", ar: "بلا سياق — ابدأ الكتابة فحسب" }],
+        req: [
+          { q: 2, en: "Simple language, one real-world example, no jargon", ar: "لغة بسيطة، مثال واقعي واحد، بلا مصطلحات معقدة" },
+          { q: 1, en: "Make it interesting", ar: "اجعله مشوقًا" },
+          { q: 0, en: "Use maximum scientific terminology", ar: "استخدم أقصى قدر من المصطلحات العلمية" }],
+        format: [
+          { q: 2, en: "Bullet points, under 200 words", ar: "نقاط مختصرة، أقل من 200 كلمة" },
+          { q: 1, en: "A few paragraphs", ar: "بضع فقرات" },
+          { q: 0, en: "One giant wall of text", ar: "جدار نص عملاق واحد" }],
+      },
+      out: {
+        good: { en: "• Climate change = a long-term shift in Earth's temperatures.\n• Main cause: burning fossil fuels adds CO₂ that traps heat.\n• Real example: rising sea levels already threaten Alexandria's coast.\n• Effects: heatwaves, stronger storms, shifting seasons.\n\n(196 words, clear, ready to use — exactly what was asked.)", ar: "• تغيّر المناخ = تحوّل طويل المدى في درجات حرارة الأرض.\n• السبب الرئيسي: حرق الوقود الأحفوري يطلق CO₂ يحبس الحرارة.\n• مثال واقعي: ارتفاع مستوى البحر يهدد سواحل الإسكندرية بالفعل.\n• الآثار: موجات حر وعواصف أقوى وفصول متقلبة.\n\n(196 كلمة، واضحة وجاهزة للاستخدام — تمامًا كما طُلب.)" },
+        mid: { en: "Climate change is an important topic that affects everyone on our planet. There are many causes and many effects, and scientists all around the world study it every day. It is something we should all care about deeply...\n\n(A long, generic essay with no audience, no example, no structure.)", ar: "تغيّر المناخ موضوع مهم يؤثر على الجميع على كوكبنا. له أسباب كثيرة وآثار كثيرة، ويدرسه العلماء حول العالم كل يوم. إنه أمر يجب أن نهتم به جميعًا بعمق...\n\n(مقال طويل عام بلا جمهور ولا مثال ولا هيكل.)" },
+        bad: { en: "Arrr matey!! The weather, she be changin'!! ☠ Climate is when the sky does... things. Hot sometimes. Cold other times. The end.\n\n(The AI did exactly what you asked. That's the problem.)", ar: "أررر يا صديقي!! الطقس يتغير!! المناخ هو عندما تفعل السماء... أشياء. حار أحيانًا. بارد أحيانًا أخرى. النهاية.\n\n(الذكاء نفّذ ما طلبتَه بالضبط. وهذه هي المشكلة.)" },
+      },
+    },
+    {
+      id: "image", icon: "search",
+      title: { en: "Image: The Perfect Cat Photo", ar: "صورة: لقطة القطة المثالية" },
+      slots: {
+        role: [
+          { q: 2, en: "Professional wildlife photographer style", ar: "بأسلوب مصور محترف للحيوانات" },
+          { q: 1, en: "An artist of some kind", ar: "فنان من نوع ما" },
+          { q: 0, en: "A confused robot with a crayon", ar: "روبوت مرتبك يمسك قلم تلوين" }],
+        task: [
+          { q: 2, en: "A realistic orange cat sitting beside a rainy window", ar: "قطة برتقالية واقعية تجلس بجوار نافذة ممطرة" },
+          { q: 1, en: "Draw a nice cat", ar: "ارسم قطة جميلة" },
+          { q: 0, en: "Draw an animal, maybe", ar: "ارسم حيوانًا، ربما" }],
+        context: [
+          { q: 2, en: "Cozy indoor scene at sunset", ar: "مشهد داخلي دافئ وقت الغروب" },
+          { q: 1, en: "Somewhere indoors", ar: "في مكان ما داخل البيت" },
+          { q: 0, en: "Anywhere, whatever works", ar: "في أي مكان، لا يهم" }],
+        req: [
+          { q: 2, en: "Cinematic lighting, ultra detailed, shallow depth of field", ar: "إضاءة سينمائية، تفاصيل فائقة، عمق ميداني ضحل" },
+          { q: 1, en: "Make it look pretty", ar: "اجعلها تبدو جميلة" },
+          { q: 0, en: "Blurry, low quality, lighting optional", ar: "ضبابية، جودة منخفضة، الإضاءة اختيارية" }],
+        format: [
+          { q: 2, en: "8K photography, portrait orientation", ar: "تصوير 8K، اتجاه رأسي" },
+          { q: 1, en: "A normal-sized picture", ar: "صورة بحجم عادي" },
+          { q: 0, en: "A tiny pixelated icon", ar: "أيقونة صغيرة مبكسلة" }],
+      },
+      out: {
+        good: { en: "A stunning 8K portrait: an orange tabby silhouetted against golden sunset light, raindrops tracing the window, whiskers in razor-sharp focus while the room melts into soft bokeh.\n\n(Subject, mood, lighting and style — all under YOUR control.)", ar: "لقطة 8K مذهلة: قطة برتقالية أمام ضوء غروب ذهبي، قطرات المطر تنساب على النافذة، الشوارب بتركيز حاد بينما تذوب الغرفة في خلفية ناعمة.\n\n(الموضوع والمزاج والإضاءة والأسلوب — كلها تحت سيطرتك أنت.)" },
+        mid: { en: "A decent picture of... a cat. Gray? Orange-ish? Sitting somewhere. The lighting is flat but it is, undeniably, a cat.\n\n(You got 'a cat'. You asked for 'a cat'.)", ar: "صورة مقبولة لـ... قطة. رمادية؟ برتقالية تقريبًا؟ تجلس في مكان ما. الإضاءة مسطحة لكنها، بلا شك، قطة.\n\n(حصلت على «قطة». لأنك طلبت «قطة».)" },
+        bad: { en: "A 16×16 pixel smudge that might be a cat, a potato, or a regret. Three legs visible. Possibly five.\n\n(More details = more control. You gave it neither.)", ar: "لطخة 16×16 بكسل قد تكون قطة أو بطاطسة أو ندمًا. تظهر ثلاث أرجل. وربما خمس.\n\n(تفاصيل أكثر = تحكم أكثر. وأنت لم تعطه أيًا منهما.)" },
+      },
+    },
+    {
+      id: "music", icon: "vol",
+      title: { en: "Music: The Graduation Song", ar: "موسيقى: أغنية التخرج" },
+      slots: {
+        role: [
+          { q: 2, en: "Professional pop music producer", ar: "منتج موسيقى بوب محترف" },
+          { q: 1, en: "Someone who likes music", ar: "شخص يحب الموسيقى" },
+          { q: 0, en: "A broken washing machine", ar: "غسالة معطلة" }],
+        task: [
+          { q: 2, en: "Create a cheerful pop song about graduation", ar: "أنشئ أغنية بوب مبهجة عن التخرج" },
+          { q: 1, en: "Make a song", ar: "اصنع أغنية" },
+          { q: 0, en: "Make some sounds happen", ar: "أصدر بعض الأصوات" }],
+        context: [
+          { q: 2, en: "For a university graduation ceremony", ar: "لحفل تخرج جامعي" },
+          { q: 1, en: "For an event of some kind", ar: "لمناسبة من نوع ما" },
+          { q: 0, en: "No occasion. Songs need no reason", ar: "بلا مناسبة. الأغاني لا تحتاج سببًا" }],
+        req: [
+          { q: 2, en: "Acoustic guitar + piano, male & female vocals, upbeat", ar: "جيتار أكوستيك + بيانو، غناء رجالي ونسائي، إيقاع حيوي" },
+          { q: 1, en: "Add some instruments", ar: "أضف بعض الآلات" },
+          { q: 0, en: "All instruments at once, fighting", ar: "كل الآلات معًا، تتعارك" }],
+        format: [
+          { q: 2, en: "60 seconds, modern style, catchy chorus", ar: "60 ثانية، أسلوب عصري، لازمة جذابة" },
+          { q: 1, en: "Any length is fine", ar: "أي مدة مناسبة" },
+          { q: 0, en: "Four hours of continuous humming", ar: "أربع ساعات من الدندنة المتواصلة" }],
+      },
+      out: {
+        good: { en: "♪ 60 seconds of sunshine: warm acoustic strums, piano runs, a duet that lifts into a chorus the whole class will chant on stage.\n\n(Right theme, right length, right instruments, right mood.)", ar: "♪ 60 ثانية من البهجة: عزف جيتار دافئ وجمل بيانو، ودويتو يصعد إلى لازمة سيرددها الدفعة كلها على المسرح.\n\n(الموضوع الصحيح والمدة الصحيحة والآلات الصحيحة والمزاج الصحيح.)" },
+        mid: { en: "♪ A tune. Genre: unclear. Mood: shrug. It's not bad — it's just nothing in particular. Nobody will remember it tomorrow.\n\n(Generic in, generic out.)", ar: "♪ لحن ما. النوع: غير واضح. المزاج: هز كتفين. ليس سيئًا — لكنه لا شيء محدد. لن يتذكره أحد غدًا.\n\n(عام يدخل، عام يخرج.)" },
+        bad: { en: "♪ BZZZT-clank-clank-SPIN-CYCLE-drone... four hours remaining.\n\n(You did ask a washing machine for endless humming.)", ar: "♪ بزززت-طقطقة-طقطقة-دورة-عصر-طنين... باقي أربع ساعات.\n\n(لقد طلبت فعلًا من غسالة دندنة بلا نهاية.)" },
+      },
+    },
+    {
+      id: "video", icon: "ff",
+      title: { en: "Video: Neon City Drone Shot", ar: "فيديو: لقطة درون لمدينة نيون" },
+      slots: {
+        role: [
+          { q: 2, en: "Cinematic drone director", ar: "مخرج لقطات درون سينمائية" },
+          { q: 1, en: "Someone holding a camera", ar: "شخص يمسك كاميرا" },
+          { q: 0, en: "A sleepy goldfish", ar: "سمكة ذهبية نعسانة" }],
+        task: [
+          { q: 2, en: "A drone shot flying through futuristic Tokyo at night", ar: "لقطة درون تحلّق عبر طوكيو مستقبلية ليلًا" },
+          { q: 1, en: "A video of a city", ar: "فيديو لمدينة" },
+          { q: 0, en: "Film... something?", ar: "صوّر... شيئًا ما؟" }],
+        context: [
+          { q: 2, en: "Neon lights, rainy streets full of reflections", ar: "أضواء نيون وشوارع ممطرة مليئة بالانعكاسات" },
+          { q: 1, en: "In the evening, maybe", ar: "في المساء، ربما" },
+          { q: 0, en: "Lighting? Never heard of it", ar: "إضاءة؟ لم أسمع بها" }],
+        req: [
+          { q: 2, en: "Slow camera movement, realistic reflections", ar: "حركة كاميرا بطيئة وانعكاسات واقعية" },
+          { q: 1, en: "Make it smooth-ish", ar: "اجعله سلسًا نوعًا ما" },
+          { q: 0, en: "Shaky, occasionally upside-down", ar: "مهتز، ومقلوب أحيانًا" }],
+        format: [
+          { q: 2, en: "Ultra HD, exactly 10 seconds", ar: "دقة فائقة، 10 ثوانٍ بالضبط" },
+          { q: 1, en: "Standard quality", ar: "جودة عادية" },
+          { q: 0, en: "Potato quality, 3 total pixels", ar: "جودة بطاطس، 3 بكسلات إجمالًا" }],
+      },
+      out: {
+        good: { en: "▶ 10 flawless UHD seconds: the drone glides between neon towers, rain-slick streets mirroring pink and cyan, every reflection tack-sharp.\n\n(You directed the camera, the scene, and the mood.)", ar: "▶ 10 ثوانٍ فائقة الدقة بلا عيب: الدرون ينساب بين أبراج النيون، والشوارع الممطرة تعكس الوردي والسماوي، وكل انعكاس حاد الوضوح.\n\n(أنت من أخرج الكاميرا والمشهد والمزاج.)" },
+        mid: { en: "▶ A city. Some buildings. Daytime? Dusk? The camera wanders like a tourist without a map. Watchable, forgettable.\n\n(Random city, random angle, random time of day.)", ar: "▶ مدينة. بعض المباني. نهارًا؟ غسقًا؟ الكاميرا تتجول كسائح بلا خريطة. يمكن مشاهدته ونسيانه.\n\n(مدينة عشوائية وزاوية عشوائية وتوقيت عشوائي.)" },
+        bad: { en: "▶ Three beige pixels lurch sideways, flip upside-down, and drift into darkness. A masterpiece of chaos.\n\n(The goldfish did its best.)", ar: "▶ ثلاث بكسلات بيج تترنح جانبيًا، وتنقلب رأسًا على عقب، وتنجرف نحو الظلام. تحفة من الفوضى.\n\n(السمكة الذهبية بذلت قصارى جهدها.)" },
+      },
+    },
+  ],
+
+  mission: null, picks: {}, runsUsed: 0, firstScore: null, finalScore: 0, perfectSingleRun: false,
+
+  open() {
+    ["s6-forge", "s6-output", "s6-results"].forEach(id => $(id).style.display = "none");
+    $("s6-missions").style.display = "block";
+    const grid = $("s6-mission-grid");
+    grid.innerHTML = this.MISSIONS.map((m, i) => `
+      <div class="card teal" onclick="ForgeGame.pickMission(${i})" style="text-align:center">
+        <div class="icon"><svg class="ic"><use href="#i-${m.icon}"/></svg></div>
+        <h3 style="font-size:17px">${esc(m.title[LANG] || m.title.en)}</h3>
+      </div>`).join("");
+  },
+  pickMission(i) {
+    Sound.click();
+    this.mission = this.MISSIONS[i];
+    this.picks = {}; this.runsUsed = 0; this.firstScore = null; this.perfectSingleRun = false;
+    $("s6-missions").style.display = "none";
+    $("s6-forge").style.display = "block";
+    $("s6-goal").textContent = this.mission.title[LANG] || this.mission.title.en;
+    this.renderSlots();
+  },
+  renderSlots() {
+    const box = $("s6-slots");
+    box.innerHTML = this.SLOTS.map(slot => {
+      const opts = this.mission.slots[slot];
+      const order = this.orderFor(slot);
+      return `<div class="slot-row">
+        <h5>${t(this.SLOT_KEY[slot])}</h5>
+        <div class="slot-opts">${order.map(oi => `
+          <button class="${this.picks[slot] === oi ? "sel" : ""}" onclick="ForgeGame.pick('${slot}', ${oi})">${esc(opts[oi][LANG] || opts[oi].en)}</button>`).join("")}
+        </div></div>`;
+    }).join("");
+    $("s6-run").disabled = Object.keys(this.picks).length < 5;
+  },
+  orderFor(slot) {
+    /* stable shuffled order per slot per mission pick */
+    if (!this._orders) this._orders = {};
+    const key = this.mission.id + ":" + slot;
+    if (!this._orders[key]) this._orders[key] = shuffle([0, 1, 2]);
+    return this._orders[key];
+  },
+  pick(slot, oi) {
+    Sound.click();
+    this.picks[slot] = oi;
+    this.renderSlots();
+  },
+  run() {
+    this.runsUsed++;
+    const sum = this.SLOTS.reduce((s, slot) => s + this.mission.slots[slot][this.picks[slot]].q, 0);
+    const score = sum * 10;
+    if (this.firstScore === null) this.firstScore = score;
+    this.finalScore = score;
+    if (score === 100) this.perfectSingleRun = true;
+    const tier = sum >= 9 ? "good" : sum >= 5 ? "mid" : "bad";
+    $("s6-forge").style.display = "none";
+    $("s6-output").style.display = "block";
+    $("s6-prompt-text").textContent = "“" + this.SLOTS.map(slot => {
+      const o = this.mission.slots[slot][this.picks[slot]];
+      return (o[LANG] || o.en);
+    }).join(". ") + ".”";
+    const outBox = $("s6-out-text");
+    outBox.className = "output-box " + (tier === "good" ? "good" : tier === "bad" ? "bad" : "");
+    outBox.textContent = this.mission.out[tier][LANG] || this.mission.out[tier].en;
+    $("s6-quality-pct").textContent = score + "%";
+    const q = $("s6-quality");
+    q.style.width = "0";
+    requestAnimationFrame(() => requestAnimationFrame(() => q.style.width = score + "%"));
+    tier === "good" ? Sound.win() : tier === "bad" ? Sound.bad() : Sound.click();
+    /* iterate available only once and only if not perfect */
+    $("s6-iterate").style.display = (this.runsUsed < 2 && score < 100) ? "inline-flex" : "none";
+    $("s6-output").scrollIntoView({ behavior: "smooth", block: "start" });
+  },
+  iterate() {
+    Sound.click();
+    $("s6-output").style.display = "none";
+    $("s6-forge").style.display = "block";
+    this.renderSlots();
+  },
+  finish() {
+    let score = this.finalScore;
+    let note;
+    const improved = this.runsUsed > 1 && this.finalScore > this.firstScore;
+    if (improved) {
+      score = Math.min(100, score + 10);
+      note = t("s6NoteImproved", { d: this.finalScore - this.firstScore });
+    } else if (this.runsUsed === 1 && score === 100) {
+      note = t("s6NoteFirst");
+    } else {
+      const strong = this.SLOTS.filter(slot => this.mission.slots[slot][this.picks[slot]].q === 2).length;
+      note = t("s6Note", { n: strong });
+    }
+    $("s6-output").style.display = "none";
+    $("s6-results").style.display = "block";
+    countUp($("s6-res-score"), score);
+    const passed = score >= 60;
+    resIcon($("s6-res-icon"), score >= 100 ? "trophy" : passed ? "checkc" : "flask", score >= 100 ? "amber" : passed ? "good" : "muted");
+    $("s6-res-title").textContent = score >= 100 ? t("s6TitlePerfect") : passed ? t("s6TitleGood") : t("s6TitleNeeds");
+    $("s6-res-note").textContent = note;
+    if (passed) Sound.win();
+    if (this.perfectSingleRun) Badges.award("forgeMaster");
+    App.complete(6, Difficulty.applyBonus(6, score), passed);
+  },
+};
+
+Core.boot();
+ForgeGame.open();
+</script>
+</body>
+</html>

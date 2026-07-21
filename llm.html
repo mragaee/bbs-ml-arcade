@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lab 2 — Think Like an LLM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&family=Cairo:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/core.css">
+</head>
+<body>
+<div class="wrap">
+  <section id="screen-l5" class="screen active">
+    <div class="topbar">
+      <button class="btn pink" onclick="location.href='index.html'" data-i18n="back">← Arcade</button>
+      <h2><svg class="ic"><use href="#i-bulb"/></svg> <span data-i18n="card5Title">Think Like an LLM</span></h2>
+      <span class="tag pink" data-i18n="s5Tag">Generative AI</span>
+    </div>
+
+    <details class="explain">
+      <summary><svg class="ic"><use href="#i-bulb"/></svg> <span data-i18n="explainTitle">What's the ML idea here?</span></summary>
+      <p data-i18n="s5Explain"></p>
+    </details>
+
+    <div id="s5-intro" class="panel center email-stage">
+      <div class="res-icon" style="color:#ff4d8d"><svg class="ic"><use href="#i-bulb"/></svg></div>
+      <h3 style="margin:10px 0 6px" data-i18n="s5Mission">Be the language model</h3>
+      <p class="muted" style="max-width:480px;margin:0 auto 18px" data-i18n="s5MissionText"></p>
+      <div class="field" style="max-width:280px;margin:0 auto 18px">
+        <label data-i18n="diffLabel">Difficulty</label>
+        <select id="l5-diff" onchange="Difficulty.change(5, this.value)"></select>
+      </div>
+      <button class="btn pink primary big" onclick="LlmGame.start()"><svg class="ic"><use href="#i-play"/></svg> <span data-i18n="s5Start">Start Predicting</span></button>
+    </div>
+
+    <div id="s5-play" class="email-stage" style="display:none">
+      <div class="hud" style="justify-content:center">
+        <span class="chip"><span data-i18n="s5ChipRound">Round</span> <b id="s5-count">1/10</b></span>
+        <span class="chip"><span data-i18n="l1ChipScore">Score</span> <b id="s5-score">0</b></span>
+        <span class="chip"><span data-i18n="s5ChipTop">Top picks</span> <b id="s5-tops">0</b></span>
+      </div>
+      <div class="panel">
+        <p class="center muted" style="font-size:13px;letter-spacing:1.5px;text-transform:uppercase" data-i18n="s5Question">What word comes next?</p>
+        <div class="sentence-big" id="s5-sentence"></div>
+        <div class="timer-track" id="s5-timer-wrap" style="display:none"><div class="timer-fill" id="s5-timer"></div></div>
+        <div class="word-btns" id="s5-words"></div>
+        <div id="s5-probs" style="margin-top:16px;display:none"></div>
+        <div class="feedback-line" id="s5-feedback"></div>
+      </div>
+    </div>
+
+    <div id="s5-results" class="panel center result-panel" style="display:none">
+      <div class="res-icon" id="s5-res-icon"></div>
+      <h3 id="s5-res-title"></h3>
+      <p class="muted" data-i18n="s5ResLabel">Probability points collected:</p>
+      <div class="big-metric" style="color:#ff4d8d;text-shadow:0 0 24px rgba(255,77,141,.4)" id="s5-res-score">0</div>
+      <p class="muted" id="s5-res-note" style="margin-top:6px"></p>
+      <div class="takeaway" style="border-color:#ff4d8d" data-i18n="s5Takeaway"></div>
+      <div class="result-actions">
+        <button class="btn pink primary" onclick="LlmGame.open()"><svg class="ic"><use href="#i-replay"/></svg> <span data-i18n="l1Again">Play Again</span></button>
+        <button class="btn pink" onclick="location.href='index.html'" data-i18n="backArcade">Back to Arcade</button>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="assets/core.js"></script>
+<script>
+"use strict";
+Object.assign(I18N.en, {
+  s5Tag: "Generative AI",
+  s5Explain: `Large Language Models don't "know" answers — they <b>guess the most likely next word</b>, again and again, based on patterns from huge amounts of text. "The cat sat on the ___" → <b>mat 85%</b>, rug 10%, box 5%. Your job: think like the model and pick the highest-probability word. The closer your instinct is to the statistics, the more points you score.`,
+  s5Mission: "Be the language model",
+  s5MissionText: `Each round shows a sentence with a blank and 3 candidate words.<br>Pick the word an LLM would rate <b style="color:var(--text)">most likely</b> — points = that word's probability.<br>Then watch the real probability bars reveal.`,
+  s5Start: "Start Predicting", s5ChipRound: "Round", s5ChipTop: "Top picks",
+  s5Question: "What word comes next?",
+  s5TopPick: "Top pick! The model agrees with you.",
+  s5NotTop: `The model's favorite was "{w}" — you still earn your word's probability.`,
+  s5TooSlow: "Too slow — the model already predicted!",
+  s5ResLabel: "Probability points collected:",
+  s5TitleElite: "Probability Prophet!", s5TitleGood: "You think in tokens!", s5TitleNeeds: "The statistics disagree…",
+  s5Note: "You matched the model's top pick in {n} of {total} rounds.",
+  s5Takeaway: `<b>Takeaway:</b> Generative AI creates by <b>predicting the next token</b> — word after word, pixel after pixel, note after note. That's why it sounds fluent even when it's wrong: it optimizes for "likely", not "true".`,
+});
+Object.assign(I18N.ar, {
+  s5Tag: "ذكاء توليدي",
+  s5Explain: `النماذج اللغوية الكبيرة لا «تعرف» الإجابات — بل <b>تخمّن الكلمة التالية الأرجح</b> مرارًا وتكرارًا اعتمادًا على أنماط من كميات هائلة من النصوص. «القطة جلست على ال___» ← <b>سجادة 85%</b>، كنبة 10%، صندوق 5%. مهمتك: فكّر كالنموذج واختر الكلمة الأعلى احتمالًا. كلما اقترب حدسك من الإحصاء، زادت نقاطك.`,
+  s5Mission: "كن أنت النموذج اللغوي",
+  s5MissionText: `كل جولة تعرض جملة ناقصة و3 كلمات مرشحة.<br>اختر الكلمة التي يراها النموذج <b style="color:var(--text)">الأرجح</b> — النقاط = احتمال كلمتك.<br>ثم شاهد أشرطة الاحتمالات الحقيقية تنكشف.`,
+  s5Start: "ابدأ التنبؤ", s5ChipRound: "جولة", s5ChipTop: "اختيارات مثلى",
+  s5Question: "ما الكلمة التالية؟",
+  s5TopPick: "الاختيار الأمثل! النموذج يتفق معك.",
+  s5NotTop: "الكلمة المفضلة للنموذج كانت «{w}» — لكنك تكسب احتمال كلمتك.",
+  s5TooSlow: "متأخر — النموذج تنبأ قبلك!",
+  s5ResLabel: "نقاط الاحتمالات المجموعة:",
+  s5TitleElite: "نبي الاحتمالات!", s5TitleGood: "تفكر بالتوكنز!", s5TitleNeeds: "الإحصاء يخالفك الرأي…",
+  s5Note: "طابقت الاختيار الأمثل للنموذج في {n} من {total} جولات.",
+  s5Takeaway: `<b>الخلاصة:</b> الذكاء التوليدي يبتكر عبر <b>التنبؤ بالرمز التالي</b> — كلمة بعد كلمة، وبكسل بعد بكسل، ونغمة بعد نغمة. لهذا يبدو طليقًا حتى عندما يخطئ: فهو يحسّن «الأرجح» لا «الأصح».`,
+});
+
+const LlmGame = {
+  ROUNDS: {
+    en: [
+      { s: "The cat sat on the ___", o: [["mat", 70], ["sofa", 20], ["moon", 10]] },
+      { s: "Once upon a ___", o: [["time", 85], ["tree", 10], ["cloud", 5]] },
+      { s: "I'm so hungry I could eat a ___", o: [["horse", 60], ["sandwich", 30], ["rock", 10]] },
+      { s: "Please turn off the ___", o: [["lights", 55], ["music", 35], ["gravity", 10]] },
+      { s: "The students opened their ___", o: [["books", 60], ["laptops", 30], ["umbrellas", 10]] },
+      { s: "Rain falls from the ___", o: [["sky", 75], ["clouds", 20], ["ceiling", 5]] },
+      { s: "He scored the winning ___", o: [["goal", 70], ["point", 25], ["pizza", 5]] },
+      { s: "Artificial ___ is changing the world", o: [["intelligence", 90], ["sweetener", 7], ["grass", 3]] },
+      { s: "Good morning, how are ___", o: [["you", 92], ["they", 5], ["potatoes", 3]] },
+      { s: "The opposite of hot is ___", o: [["cold", 88], ["cool", 10], ["purple", 2]] },
+    ],
+    ar: [
+      { s: "القطة جلست على ال___", o: [["سجادة", 65], ["كنبة", 25], ["قمر", 10]] },
+      { s: "كان يا ما ___", o: [["كان", 90], ["مطر", 7], ["قمر", 3]] },
+      { s: "صباح ال___", o: [["خير", 85], ["فل", 12], ["جبنة", 3]] },
+      { s: "العلم ___", o: [["نور", 80], ["حلو", 15], ["مربع", 5]] },
+      { s: "الوقت من ___", o: [["ذهب", 85], ["فضة", 10], ["ماء", 5]] },
+      { s: "أطفئ ال___ من فضلك", o: [["نور", 60], ["موسيقى", 30], ["جاذبية", 10]] },
+      { s: "الذكاء ال___ يغيّر العالم", o: [["اصطناعي", 90], ["حلو", 6], ["أخضر", 4]] },
+      { s: "فتح الطلاب ___", o: [["كتبهم", 65], ["حواسيبهم", 25], ["مظلاتهم", 10]] },
+      { s: "سجّل الهدف ال___", o: [["حاسم", 70], ["أول", 25], ["لذيذ", 5]] },
+      { s: "عكس الساخن هو ال___", o: [["بارد", 88], ["معتدل", 9], ["بنفسجي", 2]] },
+    ],
+  },
+  queue: [], idx: 0, score: 0, tops: 0, answered: false,
+  timerInt: null, useTimer: false, counting: false, maxPossible: 0,
+
+  open() {
+    clearInterval(this.timerInt);
+    $("s5-play").style.display = $("s5-results").style.display = "none";
+    $("s5-intro").style.display = "block";
+  },
+  start() {
+    if (this.counting) return;
+    const d = Difficulty.get(5);
+    const rounds = d <= 3 ? 8 : 10;
+    this.useTimer = d >= 5;
+    this.timerMs = clamp(11000 - d * 700, 3500, 9000);
+    const pool = this.ROUNDS[LANG] || this.ROUNDS.en;
+    this.queue = shuffle(pool).slice(0, rounds);
+    this.maxPossible = this.queue.reduce((s, r) => s + Math.max(...r.o.map(x => x[1])), 0) / 5;
+    this.idx = 0; this.score = 0; this.tops = 0;
+    $("s5-intro").style.display = "none";
+    $("s5-play").style.display = "block";
+    $("s5-score").textContent = "0"; $("s5-tops").textContent = "0";
+    this.counting = true;
+    countdown(() => { this.counting = false; this.next(); });
+  },
+  next() {
+    if (this.idx >= this.queue.length) return this.finish();
+    this.answered = false;
+    const r = this.queue[this.idx];
+    $("s5-count").textContent = `${this.idx + 1}/${this.queue.length}`;
+    $("s5-sentence").innerHTML = esc(r.s).replace("___", '<span class="blank">&nbsp;?&nbsp;</span>');
+    $("s5-feedback").textContent = ""; $("s5-feedback").className = "feedback-line";
+    $("s5-probs").style.display = "none";
+    const order = shuffle(r.o.map((_, i) => i));
+    $("s5-words").innerHTML = order.map(i =>
+      `<button class="btn pink big" onclick="LlmGame.pick(${i})">${esc(r.o[i][0])}</button>`).join("");
+    $("s5-words").style.display = "flex";
+    if (this.useTimer) {
+      $("s5-timer-wrap").style.display = "block";
+      const bar = $("s5-timer");
+      bar.classList.remove("warn", "danger");
+      const deadline = performance.now() + this.timerMs;
+      clearInterval(this.timerInt);
+      this.timerInt = setInterval(() => {
+        const left = deadline - performance.now();
+        const pct = left / this.timerMs;
+        bar.style.width = clamp(pct * 100, 0, 100) + "%";
+        bar.classList.toggle("warn", pct < .5 && pct >= .25);
+        bar.classList.toggle("danger", pct < .25);
+        if (left <= 0) this.pick(-1);
+      }, 50);
+    } else $("s5-timer-wrap").style.display = "none";
+  },
+  pick(i) {
+    if (this.answered) return;
+    this.answered = true;
+    clearInterval(this.timerInt);
+    const r = this.queue[this.idx];
+    const best = r.o.reduce((m, x, k) => x[1] > r.o[m][1] ? k : m, 0);
+    const fb = $("s5-feedback");
+    let pts = 0;
+    if (i >= 0) {
+      pts = Math.round(r.o[i][1] / 5);
+      this.score += pts;
+      if (i === best) {
+        this.tops++;
+        fb.textContent = t("s5TopPick"); fb.classList.add("good");
+        Sound.good(); scorePop("+" + pts, "var(--good)", $("s5-sentence"));
+      } else {
+        fb.textContent = t("s5NotTop", { w: r.o[best][0] }); fb.classList.add("bad");
+        Sound.bad(); scorePop("+" + pts, "var(--amber)", $("s5-sentence"));
+      }
+    } else {
+      fb.textContent = t("s5TooSlow"); fb.classList.add("bad");
+      Sound.bad(); shake();
+    }
+    $("s5-score").textContent = this.score;
+    $("s5-tops").textContent = this.tops;
+    /* reveal probability bars */
+    $("s5-words").style.display = "none";
+    const probs = $("s5-probs");
+    probs.style.display = "block";
+    probs.innerHTML = r.o.map(([w, p], k) => `
+      <div class="prob-row${k === best ? " winner" : ""}">
+        <span class="pword">${esc(w)}${k === i ? " ←" : ""}</span>
+        <div class="prob-track"><div class="prob-fill" data-w="${p}"></div></div>
+        <span class="ppct">${p}%</span>
+      </div>`).join("");
+    requestAnimationFrame(() => requestAnimationFrame(() =>
+      probs.querySelectorAll(".prob-fill").forEach(el => el.style.width = el.dataset.w + "%")));
+    this.idx++;
+    setTimeout(() => this.next(), 2300);
+  },
+  finish() {
+    clearInterval(this.timerInt);
+    $("s5-play").style.display = "none";
+    $("s5-results").style.display = "block";
+    countUp($("s5-res-score"), this.score);
+    const total = this.queue.length;
+    const allTop = this.tops === total;
+    const good = this.tops >= Math.ceil(total * 0.7);
+    resIcon($("s5-res-icon"), allTop ? "trophy" : good ? "checkc" : "flask", allTop ? "amber" : good ? "good" : "muted");
+    $("s5-res-title").textContent = allTop ? t("s5TitleElite") : good ? t("s5TitleGood") : t("s5TitleNeeds");
+    $("s5-res-note").textContent = t("s5Note", { n: this.tops, total });
+    if (good) Sound.win();
+    if (allTop) Badges.award("llmProphet");
+    App.complete(5, Difficulty.applyBonus(5, this.score), good);
+  },
+};
+
+Core.boot();
+LlmGame.open();
+</script>
+</body>
+</html>

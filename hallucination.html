@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lab 4 — Hallucination Hunter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&family=Cairo:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/core.css">
+</head>
+<body>
+<div class="wrap">
+  <section id="screen-l7" class="screen active">
+    <div class="topbar">
+      <button class="btn amber" onclick="location.href='index.html'" data-i18n="back">← Arcade</button>
+      <h2><svg class="ic"><use href="#i-alert"/></svg> <span data-i18n="card7Title">Hallucination Hunter</span></h2>
+      <span class="tag amber" data-i18n="s7Tag">Responsible AI</span>
+    </div>
+
+    <details class="explain">
+      <summary><svg class="ic"><use href="#i-bulb"/></svg> <span data-i18n="explainTitle">What's the ML idea here?</span></summary>
+      <p data-i18n="s7Explain"></p>
+    </details>
+
+    <div id="s7-intro" class="panel center email-stage">
+      <div class="res-icon" style="color:var(--amber)"><svg class="ic"><use href="#i-alert"/></svg></div>
+      <h3 style="margin:10px 0 6px" data-i18n="s7Mission">Your mission</h3>
+      <p class="muted" style="max-width:480px;margin:0 auto 18px" data-i18n="s7MissionText"></p>
+      <div class="field" style="max-width:280px;margin:0 auto 18px">
+        <label data-i18n="diffLabel">Difficulty</label>
+        <select id="l7-diff" onchange="Difficulty.change(7, this.value)"></select>
+      </div>
+      <button class="btn amber primary big" onclick="HunterGame.start()"><svg class="ic"><use href="#i-play"/></svg> <span data-i18n="s7Start">Start Hunting</span></button>
+    </div>
+
+    <div id="s7-play" class="email-stage" style="display:none">
+      <div class="hud" style="justify-content:center">
+        <span class="chip"><span data-i18n="s7ChipMsg">Message</span> <b id="s7-count">1/14</b></span>
+        <span class="chip"><span data-i18n="l1ChipScore">Score</span> <b id="s7-score">0</b></span>
+        <span class="chip"><span data-i18n="l1ChipStreak">Streak</span> <svg class="ic fill" style="color:var(--amber)"><use href="#i-flame"/></svg> <b id="s7-streak">0</b></span>
+      </div>
+      <div class="chat-bubble" id="s7-card">
+        <div class="ai-tag"><svg class="ic"><use href="#i-cpu"/></svg> <span data-i18n="s7AiSays">AI ASSISTANT SAYS:</span></div>
+        <div id="s7-body"></div>
+      </div>
+      <div class="timer-track"><div class="timer-fill" id="s7-timer"></div></div>
+      <div class="sort-btns" id="s7-main-btns">
+        <button class="btn good big" id="s7-btn-trust" onclick="HunterGame.answer(false)"><svg class="ic"><use href="#i-check"/></svg> <span data-i18n="s7Trust">TRUST</span></button>
+        <button class="btn danger big" id="s7-btn-flag" onclick="HunterGame.answer(true)"><svg class="ic"><use href="#i-flag"/></svg> <span data-i18n="s7Flag">FLAG</span></button>
+      </div>
+      <div class="why-btns" id="s7-why" style="display:none"></div>
+      <div class="feedback-line" id="s7-feedback"></div>
+    </div>
+
+    <div id="s7-results" class="panel center result-panel" style="display:none">
+      <div class="res-icon" id="s7-res-icon"></div>
+      <h3 id="s7-res-title"></h3>
+      <p class="muted" data-i18n="s7AccLabel">Your fact-checking accuracy:</p>
+      <div class="big-metric" style="color:var(--amber);text-shadow:0 0 24px rgba(255,183,3,.4)" id="s7-res-acc">0%</div>
+      <p class="muted" style="margin-top:4px"><span data-i18n="l1FinalScore">Final score:</span> <b id="s7-res-score" style="color:var(--text)">0</b></p>
+      <p class="muted" id="s7-res-note" style="font-size:14px"></p>
+      <div class="takeaway" style="border-color:var(--amber)" data-i18n="s7Takeaway"></div>
+      <div class="result-actions">
+        <button class="btn amber primary" onclick="HunterGame.open()"><svg class="ic"><use href="#i-replay"/></svg> <span data-i18n="l1Again">Play Again</span></button>
+        <button class="btn amber" onclick="location.href='index.html'" data-i18n="backArcade">Back to Arcade</button>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="assets/core.js"></script>
+<script>
+"use strict";
+Object.assign(I18N.en, {
+  s7Tag: "Responsible AI",
+  s7Explain: `AI is powerful, but <b>not perfect</b> — and it always <i>sounds</i> confident. Know the four traps: <b>Hallucinations</b> (made-up facts and citations), <b>Bias</b> (unfair patterns copied from training data), <b>Privacy</b> (never share personal data), and <b>Copyright &amp; Recency</b> (it may repeat protected work or not know recent events). The golden rule: <b>always double-check AI's work</b>. You're in charge — AI is just a tool.`,
+  s7Mission: "Your mission",
+  s7MissionText: `An AI assistant sends you messages — some are solid, some are traps.<br><b style="color:var(--text)">TRUST</b> the good ones, <b style="color:var(--text)">FLAG</b> the bad ones before the timer runs out.<br>At difficulty 6+, you must also say WHY it's bad. +10 correct, −5 wrong.`,
+  s7Start: "Start Hunting", s7ChipMsg: "Message", s7AiSays: "AI ASSISTANT SAYS:",
+  s7Trust: "TRUST", s7Flag: "FLAG",
+  s7WhyTitle: "Why is it bad?",
+  s7wHallu: "Hallucination", s7wBias: "Bias", s7wPrivacy: "Privacy", s7wCopy: "Copyright / Recency",
+  s7Correct: "Correct! +10", s7HalfCorrect: "Flagged right — but the reason was {why}. +5",
+  s7WrongTrust: "You trusted a trap! It was {why}. −5",
+  s7WrongFlag: "That one was actually true! −5",
+  s7TooSlow: "Too slow — you let it through!",
+  s7AccLabel: "Your fact-checking accuracy:",
+  s7TitleElite: "Certified Fact Checker!", s7TitleGood: "Sharp skeptic!", s7TitleNeeds: "The AI fooled you…",
+  s7NotePerfect: "You caught every trap and trusted every truth. The golden rule is strong in you.",
+  s7Note: "Traps caught: {caught}/{traps} — truths trusted: {trusted}/{truths}.",
+  s7Takeaway: `<b>Takeaway:</b> The golden rule of AI — <b>always check its work</b>. It optimizes for "sounds right", not "is right". Never share private data, question confident claims, and remember: humans and AI work best together, with YOU in charge.`,
+});
+Object.assign(I18N.ar, {
+  s7Tag: "استخدام مسؤول",
+  s7Explain: `الذكاء الاصطناعي قوي لكنه <b>ليس معصومًا</b> — ودائمًا <i>يبدو</i> واثقًا. اعرف الأفخاخ الأربعة: <b>الهلوسات</b> (حقائق ومراجع مختلقة)، <b>التحيّز</b> (أنماط ظالمة منسوخة من بيانات التدريب)، <b>الخصوصية</b> (لا تشارك بياناتك الشخصية أبدًا)، و<b>حقوق النشر والحداثة</b> (قد يكرر أعمالًا محمية أو يجهل الأحداث الحديثة). القاعدة الذهبية: <b>راجع عمل الذكاء الاصطناعي دائمًا</b>. أنت المسؤول — الذكاء مجرد أداة.`,
+  s7Mission: "مهمتك",
+  s7MissionText: `مساعد ذكاء اصطناعي يرسل لك رسائل — بعضها سليم وبعضها أفخاخ.<br><b style="color:var(--text)">صدّق</b> الجيدة و<b style="color:var(--text)">بلّغ</b> عن السيئة قبل انتهاء الوقت.<br>من الصعوبة 6+، عليك تحديد سبب الخطأ أيضًا. +10 للصحيح و −5 للخطأ.`,
+  s7Start: "ابدأ الصيد", s7ChipMsg: "رسالة", s7AiSays: "المساعد الذكي يقول:",
+  s7Trust: "صدّق", s7Flag: "بلّغ",
+  s7WhyTitle: "لماذا هي سيئة؟",
+  s7wHallu: "هلوسة", s7wBias: "تحيّز", s7wPrivacy: "خصوصية", s7wCopy: "حقوق نشر / حداثة",
+  s7Correct: "صحيح! +10", s7HalfCorrect: "أصبت بالتبليغ — لكن السبب كان {why}. +5",
+  s7WrongTrust: "صدّقت فخًا! كان {why}. −5",
+  s7WrongFlag: "تلك كانت صحيحة فعلًا! −5",
+  s7TooSlow: "متأخر — تركتها تمر!",
+  s7AccLabel: "دقتك في تدقيق الحقائق:",
+  s7TitleElite: "مدقق حقائق معتمد!", s7TitleGood: "متشكك حاد الذكاء!", s7TitleNeeds: "الذكاء الاصطناعي خدعك…",
+  s7NotePerfect: "اصطدت كل فخ وصدّقت كل حقيقة. القاعدة الذهبية قوية فيك.",
+  s7Note: "أفخاخ مصطادة: {caught}/{traps} — حقائق مُصدّقة: {trusted}/{truths}.",
+  s7Takeaway: `<b>الخلاصة:</b> القاعدة الذهبية للذكاء الاصطناعي — <b>راجع عمله دائمًا</b>. فهو يحسّن «ما يبدو صحيحًا» لا «ما هو صحيح». لا تشارك بيانات خاصة، وشكك في الادعاءات الواثقة، وتذكّر: البشر والذكاء يعملان معًا بشكل أفضل — وأنت المسؤول.`,
+});
+
+const HunterGame = {
+  WHY: ["hallu", "bias", "privacy", "copy"],
+  WHY_KEY: { hallu: "s7wHallu", bias: "s7wBias", privacy: "s7wPrivacy", copy: "s7wCopy" },
+  ITEMS: [
+    { bad: null, en: "Water boils at 100°C at sea level.", ar: "الماء يغلي عند 100 درجة مئوية عند مستوى سطح البحر." },
+    { bad: null, en: "Paris is the capital of France.", ar: "باريس هي عاصمة فرنسا." },
+    { bad: null, en: "In Python, sorted(my_list) returns a new sorted list.", ar: "في بايثون، sorted(my_list) تعيد قائمة جديدة مرتبة." },
+    { bad: null, en: "The sun rises in the east and sets in the west.", ar: "الشمس تشرق من الشرق وتغرب في الغرب." },
+    { bad: null, en: "8 × 7 = 56.", ar: "8 × 7 = 56." },
+    { bad: null, en: "Cairo is the capital of Egypt.", ar: "القاهرة هي عاصمة مصر." },
+    { bad: "hallu", en: "The Eiffel Tower was built in 1789 by Napoleon himself as a birthday gift.", ar: "برج إيفل بناه نابليون بنفسه عام 1789 كهدية عيد ميلاد." },
+    { bad: "hallu", en: "According to a famous 2023 Harvard study, humans use only 10% of their brains.", ar: "وفقًا لدراسة شهيرة من هارفارد عام 2023، يستخدم البشر 10% فقط من أدمغتهم." },
+    { bad: "hallu", en: "The Great Wall of China is easily visible from the Moon with the naked eye.", ar: "سور الصين العظيم يُرى بسهولة من القمر بالعين المجردة." },
+    { bad: "bias", en: "Boys are naturally better at math than girls — it's just science.", ar: "الأولاد أفضل في الرياضيات من البنات بطبيعتهم — هذا علم بحت." },
+    { bad: "bias", en: "People from that neighborhood are all lazy; the data clearly proves it.", ar: "سكان ذلك الحي كلهم كسالى؛ البيانات تثبت ذلك بوضوح." },
+    { bad: "privacy", en: "Just paste your national ID number and password here — I'll fill in the form for you!", ar: "الصق رقم بطاقتك الشخصية وكلمة المرور هنا — سأملأ لك الاستمارة!" },
+    { bad: "privacy", en: "Share your home address and I'll show you which friends live nearby.", ar: "شارك عنوان منزلك وسأريك أي الأصدقاء يسكنون بالقرب منك." },
+    { bad: "copy", en: "Here are the full lyrics of that new hit song — paste them right into your school magazine!", ar: "إليك كلمات تلك الأغنية الجديدة كاملة — الصقها مباشرة في مجلة مدرستك!" },
+    { bad: "copy", en: "Sure! Yesterday's winning lottery numbers are 4, 8, 15, 16 and 23.", ar: "بالتأكيد! أرقام اليانصيب الرابحة أمس هي 4 و8 و15 و16 و23." },
+  ],
+
+  queue: [], idx: 0, score: 0, streak: 0, correct: 0,
+  caught: 0, traps: 0, trusted: 0, truths: 0,
+  answered: false, timerInt: null, curTime: 12000, askWhy: false, counting: false, pendingItem: null,
+
+  open() {
+    this.stopTimers();
+    $("s7-play").style.display = $("s7-results").style.display = "none";
+    $("s7-intro").style.display = "block";
+  },
+  stopTimers() { clearInterval(this.timerInt); this.timerInt = null; },
+
+  start() {
+    if (this.counting) return;
+    const d = Difficulty.get(7);
+    this.curTime = clamp(14000 - d * 900, 4500, 13000);
+    this.askWhy = d >= 6;
+    const count = d <= 2 ? 10 : d <= 5 ? 12 : 15;
+    const goods = shuffle(this.ITEMS.filter(i => !i.bad));
+    const bads = shuffle(this.ITEMS.filter(i => i.bad));
+    const nBad = Math.round(count * 0.55);
+    this.queue = shuffle(bads.slice(0, nBad).concat(goods.slice(0, count - nBad)));
+    this.traps = this.queue.filter(i => i.bad).length;
+    this.truths = this.queue.length - this.traps;
+    this.idx = 0; this.score = 0; this.streak = 0; this.correct = 0; this.caught = 0; this.trusted = 0;
+    $("s7-intro").style.display = "none";
+    $("s7-play").style.display = "block";
+    $("s7-score").textContent = "0"; $("s7-streak").textContent = "0";
+    this.counting = true;
+    countdown(() => { this.counting = false; this.next(); });
+  },
+  next() {
+    if (this.idx >= this.queue.length) return this.finish();
+    this.answered = false;
+    this.pendingItem = null;
+    const item = this.queue[this.idx];
+    $("s7-count").textContent = `${this.idx + 1}/${this.queue.length}`;
+    $("s7-body").textContent = item[LANG] || item.en;
+    $("s7-feedback").textContent = ""; $("s7-feedback").className = "feedback-line";
+    $("s7-why").style.display = "none";
+    $("s7-main-btns").style.display = "flex";
+    const card = $("s7-card");
+    card.classList.remove("flash-good", "flash-bad");
+    card.style.animation = "none"; void card.offsetWidth; card.style.animation = "slideIn .3s ease";
+    const bar = $("s7-timer");
+    bar.classList.remove("warn", "danger");
+    const deadline = performance.now() + this.curTime;
+    clearInterval(this.timerInt);
+    this.timerInt = setInterval(() => {
+      const left = deadline - performance.now();
+      const pct = left / this.curTime;
+      bar.style.width = clamp(pct * 100, 0, 100) + "%";
+      bar.classList.toggle("warn", pct < .5 && pct >= .25);
+      bar.classList.toggle("danger", pct < .25);
+      if (left <= 0) this.timeout();
+    }, 50);
+  },
+  answer(flagged) {
+    if (this.answered) return;
+    const item = this.queue[this.idx];
+    if (flagged && item.bad && this.askWhy) {
+      /* correct flag, but must name the trap */
+      this.answered = true;
+      clearInterval(this.timerInt);
+      this.pendingItem = item;
+      $("s7-main-btns").style.display = "none";
+      const why = $("s7-why");
+      why.style.display = "flex";
+      why.innerHTML = `<span class="muted" style="align-self:center;font-weight:700">${t("s7WhyTitle")}</span>` +
+        this.WHY.map(w => `<button class="btn amber" onclick="HunterGame.answerWhy('${w}')">${t(this.WHY_KEY[w])}</button>`).join("");
+      return;
+    }
+    this.answered = true;
+    clearInterval(this.timerInt);
+    const correct = flagged === !!item.bad;
+    this.grade(correct, item, correct && flagged ? 10 : correct ? 10 : -5, flagged);
+  },
+  answerWhy(w) {
+    const item = this.pendingItem;
+    $("s7-why").style.display = "none";
+    if (w === item.bad) this.grade(true, item, 10, true);
+    else this.gradeHalf(item, w);
+  },
+  grade(correct, item, delta, flagged) {
+    const fb = $("s7-feedback");
+    if (correct) {
+      this.correct++; this.streak++; this.score += 10;
+      if (item.bad) this.caught++; else this.trusted++;
+      fb.textContent = t("s7Correct"); fb.classList.add("good");
+      $("s7-card").classList.add("flash-good");
+      Sound.good(); scorePop("+10", "var(--good)", $("s7-card"));
+    } else {
+      this.streak = 0; this.score -= 5;
+      fb.textContent = item.bad ? t("s7WrongTrust", { why: t(this.WHY_KEY[item.bad]) }) : t("s7WrongFlag");
+      fb.classList.add("bad");
+      $("s7-card").classList.add("flash-bad");
+      Sound.bad(); shake(); scorePop("−5", "var(--bad)", $("s7-card"));
+    }
+    this.afterGrade();
+  },
+  gradeHalf(item, wrongWhy) {
+    /* flagged correctly, wrong category */
+    this.correct++; this.caught++;
+    this.streak = 0; this.score += 5;
+    const fb = $("s7-feedback");
+    fb.textContent = t("s7HalfCorrect", { why: t(this.WHY_KEY[item.bad]) });
+    fb.classList.add("bad");
+    Sound.click(); scorePop("+5", "var(--amber)", $("s7-card"));
+    this.afterGrade();
+  },
+  afterGrade() {
+    $("s7-score").textContent = this.score;
+    $("s7-streak").textContent = this.streak;
+    this.idx++;
+    setTimeout(() => this.next(), 1300);
+  },
+  timeout() {
+    if (this.answered) return;
+    this.answered = true;
+    clearInterval(this.timerInt);
+    this.streak = 0; $("s7-streak").textContent = "0";
+    const fb = $("s7-feedback");
+    fb.textContent = t("s7TooSlow"); fb.classList.add("bad");
+    $("s7-card").classList.add("flash-bad");
+    Sound.bad(); shake();
+    this.idx++;
+    setTimeout(() => this.next(), 1100);
+  },
+  finish() {
+    this.stopTimers();
+    $("s7-play").style.display = "none";
+    $("s7-results").style.display = "block";
+    const acc = Math.round(this.correct / this.queue.length * 100);
+    countUp($("s7-res-acc"), acc, v => v + "%");
+    $("s7-res-score").textContent = this.score;
+    const passed = acc >= 70;
+    resIcon($("s7-res-icon"), acc === 100 ? "trophy" : passed ? "checkc" : "xc", acc === 100 ? "amber" : passed ? "good" : "bad");
+    $("s7-res-title").textContent = acc === 100 ? t("s7TitleElite") : passed ? t("s7TitleGood") : t("s7TitleNeeds");
+    $("s7-res-note").textContent = acc === 100 ? t("s7NotePerfect")
+      : t("s7Note", { caught: this.caught, traps: this.traps, trusted: this.trusted, truths: this.truths });
+    if (passed) Sound.win();
+    if (acc === 100) Badges.award("factChecker");
+    App.complete(7, Difficulty.applyBonus(7, this.score), passed);
+  },
+};
+
+Core.boot();
+HunterGame.open();
+</script>
+</body>
+</html>

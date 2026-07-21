@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lab 1 — AI Spotter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&family=Cairo:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/core.css">
+</head>
+<body>
+<div class="wrap">
+  <section id="screen-l4" class="screen active">
+    <div class="topbar">
+      <button class="btn green" onclick="location.href='index.html'" data-i18n="back">← Arcade</button>
+      <h2><svg class="ic"><use href="#i-grid"/></svg> <span data-i18n="card4Title">AI Spotter</span></h2>
+      <span class="tag green" data-i18n="s4Tag">AI Fields</span>
+    </div>
+
+    <details class="explain">
+      <summary><svg class="ic"><use href="#i-bulb"/></svg> <span data-i18n="explainTitle">What's the ML idea here?</span></summary>
+      <p data-i18n="s4Explain"></p>
+    </details>
+
+    <div id="s4-intro" class="panel center email-stage">
+      <div class="res-icon" style="color:var(--good)"><svg class="ic"><use href="#i-grid"/></svg></div>
+      <h3 style="margin:10px 0 6px" data-i18n="s4Mission">Your mission</h3>
+      <p class="muted" style="max-width:480px;margin:0 auto 18px" data-i18n="s4MissionText"></p>
+      <div class="field" style="max-width:280px;margin:0 auto 18px">
+        <label data-i18n="diffLabel">Difficulty</label>
+        <select id="l4-diff" onchange="Difficulty.change(4, this.value)"></select>
+      </div>
+      <button class="btn green primary big" onclick="SpotterGame.start()"><svg class="ic"><use href="#i-play"/></svg> <span data-i18n="s4Start">Start Sorting</span></button>
+    </div>
+
+    <div id="s4-play" class="email-stage" style="display:none">
+      <div class="hud" style="justify-content:center">
+        <span class="chip"><span data-i18n="s4ChipItem">Item</span> <b id="s4-count">1/16</b></span>
+        <span class="chip"><span data-i18n="l1ChipScore">Score</span> <b id="s4-score">0</b></span>
+        <span class="chip"><span data-i18n="l1ChipStreak">Streak</span> <svg class="ic fill" style="color:var(--amber)"><use href="#i-flame"/></svg> <b id="s4-streak">0</b></span>
+      </div>
+      <div class="email-card" id="s4-card">
+        <div class="from" id="s4-phase"></div>
+        <div class="body" id="s4-body" style="font-size:19px"></div>
+      </div>
+      <div class="timer-track"><div class="timer-fill" id="s4-timer"></div></div>
+      <div class="sort-grid" id="s4-btns"></div>
+      <div class="feedback-line" id="s4-feedback"></div>
+    </div>
+
+    <div id="s4-results" class="panel center result-panel" style="display:none">
+      <div class="res-icon" id="s4-res-icon"></div>
+      <h3 id="s4-res-title"></h3>
+      <p class="muted" data-i18n="s4AccLabel">Your field-spotting accuracy:</p>
+      <div class="big-metric" style="color:var(--good);text-shadow:0 0 24px rgba(61,220,132,.4)" id="s4-res-acc">0%</div>
+      <p class="muted" style="margin-top:4px"><span data-i18n="l1FinalScore">Final score:</span> <b id="s4-res-score" style="color:var(--text)">0</b></p>
+      <div class="takeaway" style="border-color:var(--good)" data-i18n="s4Takeaway"></div>
+      <div class="result-actions">
+        <button class="btn green primary" onclick="SpotterGame.open()"><svg class="ic"><use href="#i-replay"/></svg> <span data-i18n="l1Again">Play Again</span></button>
+        <button class="btn green" onclick="location.href='index.html'" data-i18n="backArcade">Back to Arcade</button>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="assets/core.js"></script>
+<script>
+"use strict";
+Object.assign(I18N.en, {
+  s4Tag: "AI Fields",
+  s4Explain: `<b>AI is software, not magic</b> — it copies human skills one at a time: <b>Seeing</b> → Computer Vision, <b>Talking</b> → Natural Language Processing, <b>Learning</b> → Machine Learning, <b>Imagining</b> → Generative AI. You already use all four every day. Sort each real app into its field — then prove you know how AI ⊃ ML ⊃ Deep Learning nest inside each other.`,
+  s4Mission: "Your mission",
+  s4MissionText: `Round 1: sort <b style="color:var(--text)">real AI apps</b> into their field before the timer runs out.<br>Round 2: bonus questions on AI vs ML vs Deep Learning.<br>+10 correct, −5 wrong.`,
+  s4Start: "Start Sorting", s4ChipItem: "Item",
+  s4PhaseA: "Which AI field powers this?", s4PhaseB: "Bonus round — how does it all fit together?",
+  s4fCV: "Computer Vision", s4fNLP: "Language (NLP)", s4fML: "Machine Learning", s4fGEN: "Generative AI",
+  s4Correct: "Correct! +10", s4Wrong: "Nope — that was {field}! −5", s4TooSlow: "Too slow! It was {field}",
+  s4AccLabel: "Your field-spotting accuracy:",
+  s4TitleElite: "Field Marshal!", s4TitleGood: "Solid AI radar!", s4TitleNeeds: "The fields need more study…",
+  s4Takeaway: `<b>Takeaway:</b> AI is an umbrella of skills — <b>Vision</b> sees, <b>NLP</b> understands language, <b>ML</b> learns patterns from data, and <b>Generative AI</b> creates new things. And remember the nesting: all Deep Learning is ML, and all ML is AI — never the other way around.`,
+});
+Object.assign(I18N.ar, {
+  s4Tag: "مجالات الذكاء",
+  s4Explain: `<b>الذكاء الاصطناعي برمجيات، لا سحر</b> — يقلّد مهارات الإنسان واحدة تلو الأخرى: <b>الرؤية</b> ← الرؤية الحاسوبية، <b>الكلام</b> ← معالجة اللغة الطبيعية، <b>التعلّم</b> ← تعلّم الآلة، <b>الخيال</b> ← الذكاء التوليدي. أنت تستخدم الأربعة يوميًا. صنّف كل تطبيق حقيقي في مجاله — ثم أثبت أنك تعرف كيف يتداخل AI ⊃ ML ⊃ التعلّم العميق.`,
+  s4Mission: "مهمتك",
+  s4MissionText: `الجولة 1: صنّف <b style="color:var(--text)">تطبيقات ذكاء اصطناعي حقيقية</b> في مجالها قبل انتهاء الوقت.<br>الجولة 2: أسئلة إضافية عن تداخل AI و ML والتعلّم العميق.<br>+10 للصحيح و −5 للخطأ.`,
+  s4Start: "ابدأ التصنيف", s4ChipItem: "عنصر",
+  s4PhaseA: "أي مجال ذكاء اصطناعي يشغّل هذا؟", s4PhaseB: "جولة إضافية — كيف تتداخل المفاهيم؟",
+  s4fCV: "رؤية حاسوبية", s4fNLP: "لغة (NLP)", s4fML: "تعلّم آلة", s4fGEN: "ذكاء توليدي",
+  s4Correct: "صحيح! +10", s4Wrong: "لا — كان {field}! −5", s4TooSlow: "متأخر! كان {field}",
+  s4AccLabel: "دقتك في تمييز المجالات:",
+  s4TitleElite: "خبير المجالات!", s4TitleGood: "رادار ذكاء ممتاز!", s4TitleNeeds: "المجالات تحتاج مذاكرة أكثر…",
+  s4Takeaway: `<b>الخلاصة:</b> الذكاء الاصطناعي مظلة مهارات — <b>الرؤية</b> ترى، و<b>NLP</b> تفهم اللغة، و<b>تعلّم الآلة</b> يتعلم الأنماط من البيانات، و<b>الذكاء التوليدي</b> يبتكر أشياء جديدة. وتذكّر التداخل: كل تعلّم عميق هو تعلّم آلة، وكل تعلّم آلة هو ذكاء اصطناعي — وليس العكس أبدًا.`,
+});
+
+const SpotterGame = {
+  FIELDS: ["cv", "nlp", "ml", "gen"],
+  FIELD_ICON: { cv: "search", nlp: "mail", ml: "nodes", gen: "zap" },
+  ITEMS: [
+    { f: "cv", en: "Face ID unlocks your phone by recognizing you", ar: "بصمة الوجه تفتح هاتفك بالتعرف عليك" },
+    { f: "cv", en: "A self-driving car spots pedestrians on the road", ar: "سيارة ذاتية القيادة ترصد المشاة في الطريق" },
+    { f: "cv", en: "An X-ray scanner flags a possible fracture", ar: "جهاز أشعة يكتشف كسرًا محتملًا في الصورة" },
+    { f: "cv", en: "Your photo app groups pictures of the same person", ar: "تطبيق الصور يجمع صور نفس الشخص معًا" },
+    { f: "nlp", en: "A voice assistant understands \"set an alarm for 7\"", ar: "المساعد الصوتي يفهم «اضبط منبّهًا على السابعة»" },
+    { f: "nlp", en: "An app translates a message from Arabic to English", ar: "تطبيق يترجم رسالة من العربية إلى الإنجليزية" },
+    { f: "nlp", en: "A support chatbot understands your complaint", ar: "روبوت دعم يفهم شكواك المكتوبة" },
+    { f: "nlp", en: "Your keyboard autocorrects a misspelled word", ar: "لوحة المفاتيح تصحح كلمة كتبتها خطأ" },
+    { f: "ml", en: "Netflix recommends your next show from watch history", ar: "نتفليكس ترشح مسلسلك التالي من سجل مشاهدتك" },
+    { f: "ml", en: "Spotify builds your weekly playlist from your taste", ar: "سبوتيفاي يبني قائمة أسبوعية من ذوقك الموسيقي" },
+    { f: "ml", en: "A bank flags an unusual card payment as fraud", ar: "بنك يرصد عملية دفع غير معتادة كاحتيال" },
+    { f: "ml", en: "A website estimates a house price from its features", ar: "موقع يقدّر سعر منزل من مواصفاته" },
+    { f: "gen", en: "DALL·E paints a brand-new image from your text", ar: "DALL·E يرسم صورة جديدة كليًا من نصّك" },
+    { f: "gen", en: "Suno composes an original song for your event", ar: "Suno يؤلف أغنية أصلية لحفلتك" },
+    { f: "gen", en: "Copilot writes fresh code from a comment", ar: "Copilot يكتب كودًا جديدًا من تعليق تكتبه" },
+    { f: "gen", en: "An AI creates a 10-second video from a description", ar: "ذكاء اصطناعي يولّد فيديو 10 ثوانٍ من وصف" },
+  ],
+  BONUS: [
+    { en: "Which circle is the BIGGEST in the nesting?", ar: "أي دائرة هي الأكبر في التداخل؟",
+      opts: [{ en: "Artificial Intelligence", ar: "الذكاء الاصطناعي", ok: true }, { en: "Machine Learning", ar: "تعلّم الآلة" }, { en: "Deep Learning", ar: "التعلّم العميق" }] },
+    { en: "Deep Learning is a special kind of ___", ar: "التعلّم العميق نوع خاص من ___",
+      opts: [{ en: "Machine Learning", ar: "تعلّم الآلة", ok: true }, { en: "Traditional Programming", ar: "البرمجة التقليدية" }, { en: "Computer Vision", ar: "الرؤية الحاسوبية" }] },
+    { en: "A person writes every rule by hand. Which approach is that?", ar: "شخص يكتب كل قاعدة بيده. أي أسلوب هذا؟",
+      opts: [{ en: "Traditional Programming", ar: "البرمجة التقليدية", ok: true }, { en: "Machine Learning", ar: "تعلّم الآلة" }] },
+    { en: "Data + Answers go in, and the computer finds the rules itself. Which approach?", ar: "تدخل البيانات + الإجابات، والحاسوب يكتشف القواعد بنفسه. أي أسلوب؟",
+      opts: [{ en: "Machine Learning", ar: "تعلّم الآلة", ok: true }, { en: "Traditional Programming", ar: "البرمجة التقليدية" }] },
+  ],
+
+  queue: [], bonusQueue: [], idx: 0, phase: "a", score: 0, streak: 0, correct: 0, total: 0,
+  answered: false, timerInt: null, deadline: 0, curTime: 12000, counting: false,
+
+  open() {
+    this.stopTimers();
+    $("s4-play").style.display = $("s4-results").style.display = "none";
+    $("s4-intro").style.display = "block";
+  },
+  stopTimers() { clearInterval(this.timerInt); this.timerInt = null; },
+
+  start() {
+    if (this.counting) return;
+    const d = Difficulty.get(4);
+    this.curTime = clamp(15000 - d * 1100, 4000, 14000);
+    const count = d <= 2 ? 10 : d <= 4 ? 12 : d <= 7 ? 14 : 16;
+    this.queue = shuffle(this.ITEMS).slice(0, count);
+    this.bonusQueue = shuffle(this.BONUS);
+    this.total = this.queue.length + this.bonusQueue.length;
+    this.idx = 0; this.phase = "a"; this.score = 0; this.streak = 0; this.correct = 0;
+    $("s4-intro").style.display = "none";
+    $("s4-play").style.display = "block";
+    $("s4-score").textContent = "0"; $("s4-streak").textContent = "0";
+    this.counting = true;
+    countdown(() => { this.counting = false; this.next(); });
+  },
+
+  next() {
+    const done = this.phase === "a" ? this.idx >= this.queue.length : this.idx >= this.bonusQueue.length;
+    if (done) {
+      if (this.phase === "a") { this.phase = "b"; this.idx = 0; return this.next(); }
+      return this.finish();
+    }
+    this.answered = false;
+    const n = (this.phase === "a" ? this.idx : this.queue.length + this.idx) + 1;
+    $("s4-count").textContent = `${n}/${this.total}`;
+    $("s4-phase").textContent = t(this.phase === "a" ? "s4PhaseA" : "s4PhaseB");
+    $("s4-feedback").textContent = ""; $("s4-feedback").className = "feedback-line";
+    const card = $("s4-card");
+    card.className = "email-card";
+    card.style.animation = "none"; void card.offsetWidth; card.style.animation = "";
+
+    const btns = $("s4-btns");
+    if (this.phase === "a") {
+      const item = this.queue[this.idx];
+      $("s4-body").textContent = item[LANG] || item.en;
+      btns.innerHTML = this.FIELDS.map(f =>
+        `<button class="btn green" onclick="SpotterGame.answer('${f}')">${icon(this.FIELD_ICON[f])} ${t("s4f" + f.toUpperCase())}</button>`).join("");
+    } else {
+      const q = this.bonusQueue[this.idx];
+      $("s4-body").textContent = q[LANG] || q.en;
+      const opts = shuffle(q.opts.map((o, i) => i));
+      btns.innerHTML = opts.map(i =>
+        `<button class="btn green" onclick="SpotterGame.answerBonus(${i})">${esc(q.opts[i][LANG] || q.opts[i].en)}</button>`).join("");
+    }
+    this.startTimer(this.phase === "a" ? this.curTime : this.curTime * 1.5);
+  },
+  startTimer(ms) {
+    this.deadline = performance.now() + ms;
+    const bar = $("s4-timer");
+    bar.classList.remove("warn", "danger");
+    clearInterval(this.timerInt);
+    this.timerInt = setInterval(() => {
+      const left = this.deadline - performance.now();
+      const pct = left / ms;
+      bar.style.width = clamp(pct * 100, 0, 100) + "%";
+      bar.classList.toggle("warn", pct < .5 && pct >= .25);
+      bar.classList.toggle("danger", pct < .25);
+      if (left <= 0) this.timeout();
+    }, 50);
+  },
+  grade(ok, truthLabel) {
+    if (this.answered) return;
+    this.answered = true;
+    clearInterval(this.timerInt);
+    const fb = $("s4-feedback");
+    if (ok) {
+      this.correct++; this.streak++; this.score += 10;
+      fb.textContent = t("s4Correct"); fb.classList.add("good");
+      $("s4-card").classList.add("flash-good");
+      Sound.good(); scorePop("+10", "var(--good)", $("s4-card"));
+    } else {
+      this.streak = 0; this.score -= 5;
+      fb.textContent = t("s4Wrong", { field: truthLabel }); fb.classList.add("bad");
+      $("s4-card").classList.add("flash-bad");
+      Sound.bad(); shake(); scorePop("−5", "var(--bad)", $("s4-card"));
+    }
+    $("s4-score").textContent = this.score;
+    $("s4-streak").textContent = this.streak;
+    this.idx++;
+    setTimeout(() => this.next(), 1000);
+  },
+  answer(f) {
+    const item = this.queue[this.idx];
+    this.grade(f === item.f, t("s4f" + item.f.toUpperCase()));
+  },
+  answerBonus(i) {
+    const q = this.bonusQueue[this.idx];
+    const truth = q.opts.find(o => o.ok);
+    this.grade(!!q.opts[i].ok, truth[LANG] || truth.en);
+  },
+  timeout() {
+    if (this.answered) return;
+    this.answered = true;
+    clearInterval(this.timerInt);
+    let truth;
+    if (this.phase === "a") truth = t("s4f" + this.queue[this.idx].f.toUpperCase());
+    else { const o = this.bonusQueue[this.idx].opts.find(o => o.ok); truth = o[LANG] || o.en; }
+    this.streak = 0; $("s4-streak").textContent = "0";
+    const fb = $("s4-feedback");
+    fb.textContent = t("s4TooSlow", { field: truth }); fb.classList.add("bad");
+    $("s4-card").classList.add("flash-bad");
+    Sound.bad(); shake();
+    this.idx++;
+    setTimeout(() => this.next(), 1000);
+  },
+  finish() {
+    this.stopTimers();
+    $("s4-play").style.display = "none";
+    $("s4-results").style.display = "block";
+    const acc = Math.round(this.correct / this.total * 100);
+    countUp($("s4-res-acc"), acc, v => v + "%");
+    $("s4-res-score").textContent = this.score;
+    const passed = acc >= 70;
+    resIcon($("s4-res-icon"), acc === 100 ? "trophy" : passed ? "checkc" : "flask", acc === 100 ? "amber" : passed ? "good" : "muted");
+    $("s4-res-title").textContent = acc === 100 ? t("s4TitleElite") : passed ? t("s4TitleGood") : t("s4TitleNeeds");
+    if (passed) Sound.win();
+    if (acc === 100) Badges.award("spotterAce");
+    App.complete(4, Difficulty.applyBonus(4, this.score), passed);
+  },
+};
+
+Core.boot();
+SpotterGame.open();
+</script>
+</body>
+</html>

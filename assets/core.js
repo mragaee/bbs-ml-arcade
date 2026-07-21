@@ -143,6 +143,27 @@ const I18N = {
     diffNames: "Very Easy|Easy|Casual|Normal|Medium|Tricky|Hard|Very Hard|Extreme|Very Difficult",
     diffSet: "Difficulty: {name}",
     diffBonus: "Difficulty bonus \u00d7{m} \u2014 {pts} pts recorded!",
+    wingML: "The ML Arcade", wingLab: "The Prompt Lab",
+    lvl4: "Lab 1 \u00b7 AI Fields", lvl5: "Lab 2 \u00b7 Generative AI", lvl6: "Lab 3 \u00b7 Prompt Engineering", lvl7: "Lab 4 \u00b7 Responsible AI",
+    card4Title: "AI Spotter", card4Sub: "Vision, language, learning or creating?",
+    card4Desc: "Sort real apps you use every day into the right AI field \u2014 then nail the AI vs ML vs Deep Learning nesting.",
+    card5Title: "Think Like an LLM", card5Sub: "Guess the next word",
+    card5Desc: "Be the language model: pick the most likely next word and watch the probability bars reveal how LLMs really think.",
+    card6Title: "The Prompt Forge", card6Sub: "Role + Task + Context + Requirements + Format",
+    card6Desc: "Assemble prompts from parts, run them, and watch weak prompts produce hilariously generic output. Iterate and improve!",
+    card7Title: "Hallucination Hunter", card7Sub: "Trust or flag the AI",
+    card7Desc: "The AI sounds confident \u2014 but is it right? Catch hallucinations, bias, privacy traps and copyright slips before the timer.",
+    badge_spotterAce: "Field Marshal", badgeD_spotterAce: "Perfect run in AI Spotter",
+    badge_llmProphet: "Probability Prophet", badgeD_llmProphet: "Top-probability pick every round",
+    badge_forgeMaster: "Master Wordsmith", badgeD_forgeMaster: "A perfect 100-point prompt",
+    badge_factChecker: "Fact Checker", badgeD_factChecker: "Perfect score in Hallucination Hunter",
+    badge_polymath: "AI Polymath", badgeD_polymath: "Complete all 7 levels",
+    careerTitle: "Your AI Career Card", careerHint: "Based on your strongest games:",
+    career_dataScientist: "Data Scientist", careerD_dataScientist: "You find hidden patterns in data \u2014 cleaning it and building models that reveal what nobody else sees.",
+    career_mlEngineer: "Machine Learning Engineer", careerD_mlEngineer: "You train and ship models that act in the real world \u2014 agents, recommenders, robots.",
+    career_cvnlp: "Computer Vision / NLP Engineer", careerD_cvnlp: "You teach machines to see images and understand language \u2014 the senses of AI.",
+    career_researcher: "AI Researcher", careerD_researcher: "You map the whole field and push its frontier \u2014 discovering new methods and ideas.",
+    career_promptEngineer: "Prompt Engineer / AI Product Manager", careerD_promptEngineer: "You connect AI\u2019s abilities with what people need \u2014 and you know exactly how to talk to the machines.",
   },
 
   ar: {
@@ -278,6 +299,27 @@ const I18N = {
     diffNames: "سهل جدًا|سهل|بسيط|عادي|متوسط|مخادع|صعب|صعب جدًا|قاسٍ|صعب للغاية",
     diffSet: "الصعوبة: {name}",
     diffBonus: "مكافأة الصعوبة \u00d7{m} \u2014 سُجِّلت {pts} نقطة!",
+    wingML: "أركيد تعلّم الآلة", wingLab: "مختبر الأوامر",
+    lvl4: "مختبر 1 \u00b7 مجالات الذكاء الاصطناعي", lvl5: "مختبر 2 \u00b7 الذكاء التوليدي", lvl6: "مختبر 3 \u00b7 هندسة الأوامر", lvl7: "مختبر 4 \u00b7 الاستخدام المسؤول",
+    card4Title: "كاشف الذكاء الاصطناعي", card4Sub: "رؤية أم لغة أم تعلّم أم توليد؟",
+    card4Desc: "صنّف تطبيقات حقيقية تستخدمها يوميًا في مجال الذكاء الصحيح \u2014 ثم أتقن تداخل AI و ML و التعلّم العميق.",
+    card5Title: "فكّر كنموذج لغوي", card5Sub: "خمّن الكلمة التالية",
+    card5Desc: "كن أنت النموذج اللغوي: اختر الكلمة الأرجح وشاهد أشرطة الاحتمالات تكشف كيف تفكر النماذج فعلًا.",
+    card6Title: "مصنع الأوامر", card6Sub: "دور + مهمة + سياق + متطلبات + تنسيق",
+    card6Desc: "ركّب الأوامر من مكوناتها وشغّلها، وشاهد الأوامر الضعيفة تنتج مخرجات عامة مضحكة. كرر وحسّن!",
+    card7Title: "صائد الهلوسات", card7Sub: "صدّق أو بلّغ عن الذكاء الاصطناعي",
+    card7Desc: "الذكاء الاصطناعي يبدو واثقًا \u2014 لكن هل هو محق؟ اصطد الهلوسات والتحيز وأفخاخ الخصوصية قبل انتهاء الوقت.",
+    badge_spotterAce: "خبير المجالات", badgeD_spotterAce: "جولة مثالية في كاشف الذكاء الاصطناعي",
+    badge_llmProphet: "نبي الاحتمالات", badgeD_llmProphet: "اختيار الكلمة الأرجح في كل جولة",
+    badge_forgeMaster: "حدّاد الكلمات", badgeD_forgeMaster: "أمر مثالي بـ100 نقطة",
+    badge_factChecker: "مدقق الحقائق", badgeD_factChecker: "علامة كاملة في صائد الهلوسات",
+    badge_polymath: "موسوعي الذكاء الاصطناعي", badgeD_polymath: "أكمل المستويات السبعة كلها",
+    careerTitle: "بطاقة مهنتك في الذكاء الاصطناعي", careerHint: "بناءً على أقوى ألعابك:",
+    career_dataScientist: "عالِم بيانات", careerD_dataScientist: "تجد الأنماط الخفية في البيانات \u2014 تنظفها وتبني نماذج تكشف ما لا يراه غيرك.",
+    career_mlEngineer: "مهندس تعلّم آلة", careerD_mlEngineer: "تدرّب النماذج وتطلقها للعالم الحقيقي \u2014 وكلاء وتوصيات وروبوتات.",
+    career_cvnlp: "مهندس رؤية حاسوبية / معالجة لغة", careerD_cvnlp: "تعلّم الآلات أن ترى الصور وتفهم اللغة \u2014 حواس الذكاء الاصطناعي.",
+    career_researcher: "باحث ذكاء اصطناعي", careerD_researcher: "ترسم خريطة المجال كله وتدفع حدوده \u2014 تكتشف طرقًا وأفكارًا جديدة.",
+    career_promptEngineer: "مهندس أوامر / مدير منتجات ذكاء اصطناعي", careerD_promptEngineer: "تربط قدرات الذكاء الاصطناعي باحتياجات الناس \u2014 وتعرف تمامًا كيف تخاطب الآلات.",
   },
 };
 
@@ -317,13 +359,14 @@ function toggleLang() { setLang(LANG === "ar" ? "en" : "ar"); }
    ════════════════════════════════════════════════════════════ */
 const App = {
   KEY: "mlArcadeV1",
-  state: { 1: { best: null, done: false }, 2: { best: null, done: false }, 3: { best: null, done: false }, badges: {}, run: 0 },
+  state: { badges: {}, run: 0 },
 
   load() {
     try {
       const raw = localStorage.getItem(this.KEY);
       if (raw) Object.assign(this.state, JSON.parse(raw));
     } catch (e) { /* private mode etc. — play without persistence */ }
+    for (let g = 1; g <= 7; g++) if (!this.state[g]) this.state[g] = { best: null, done: false };
     this.renderDash();
   },
   save() {
@@ -346,17 +389,19 @@ const App = {
     this.save();
     this.renderDash();
     if (passed) this.confetti();
+    if ([1, 2, 3, 4, 5, 6, 7].every(g => this.state[g] && this.state[g].done)) Badges.award("polymath");
     Team.syncScores();
     ArcadeRun.record(level, score);
   },
   renderDash() {
-    for (const lvl of [1, 2, 3]) {
+    for (const lvl of [1, 2, 3, 4, 5, 6, 7]) {
       const s = this.state[lvl] || { best: null, done: false };
       const bestEl = document.getElementById("best-" + lvl);
       if (!bestEl) continue;
       bestEl.textContent = s.best === null ? "—" : s.best;
       document.getElementById("card-" + lvl).classList.toggle("completed", !!s.done);
     }
+    Career.check();
     const who = document.getElementById("team-bar-who");
     if (!who) return;
     if (Team.session && Team.session.status === "approved") {
@@ -492,7 +537,7 @@ const Difficulty = {
   },
   renderAll() {
     const names = this.names();
-    [["l1-diff", 1], ["l2-diff", 2], ["l3-diff", 3]].forEach(([id, g]) => {
+    [["l1-diff", 1], ["l2-diff", 2], ["l3-diff", 3], ["l4-diff", 4], ["l5-diff", 5], ["l6-diff", 6], ["l7-diff", 7]].forEach(([id, g]) => {
       const sel = $(id);
       if (!sel) return;
       sel.innerHTML = names.map((n, i) => `<option value="${i + 1}">${i + 1} — ${n}</option>`).join("");
@@ -786,13 +831,16 @@ const Team = {
 
   localScores() {
     const s = App.state;
-    return {
-      l1: Math.max(0, s[1].best || 0), l2: Math.max(0, s[2].best || 0),
-      l3: Math.max(0, s[3].best || 0), run: s.run || 0,
-      badges: Object.keys(s.badges || {}).length,
-    };
+    const out = { run: s.run || 0, badges: Object.keys(s.badges || {}).length };
+    for (let g = 1; g <= 7; g++) out["l" + g] = Math.max(0, (s[g] && s[g].best) || 0);
+    return out;
   },
-  totalOf(sc) { sc = sc || {}; return (sc.l1 || 0) + (sc.l2 || 0) + (sc.l3 || 0) + (sc.run || 0); },
+  totalOf(sc) {
+    sc = sc || {};
+    let sum = sc.run || 0;
+    for (let g = 1; g <= 7; g++) sum += sc["l" + g] || 0;
+    return sum;
+  },
   syncScores() {
     if (!Net.ok() || !this.session || this.session.status !== "approved") return;
     Net.patch("/teams/" + this.session.teamId + "/members/" + this.session.user, { scores: this.localScores() }).catch(() => {});
@@ -851,6 +899,9 @@ const Badges = {
     { id: "perfectFilter", icon: "crosshair" }, { id: "streakLord", icon: "flame" },
     { id: "clusterMaster", icon: "disc" }, { id: "fireWalker", icon: "flame" },
     { id: "optimalBot", icon: "cpu" }, { id: "arcadeChamp", icon: "crown" },
+    { id: "spotterAce", icon: "grid" }, { id: "llmProphet", icon: "bulb" },
+    { id: "forgeMaster", icon: "key" }, { id: "factChecker", icon: "search" },
+    { id: "polymath", icon: "star" },
   ],
   has(id) { return !!(App.state.badges || {})[id]; },
   award(id) {
@@ -906,6 +957,42 @@ const ArcadeRun = {
       App.confetti();
       Team.syncScores();
       setTimeout(() => location.href = "index.html", 2600);
+    }
+  },
+};
+
+/* ════════════════════════════════════════════════════════════
+   CAREER CARD — unlocked when all 7 levels are completed
+   ════════════════════════════════════════════════════════════ */
+const Career = {
+  /* rough max score per game, for normalizing strengths */
+  MAX: { 1: 160, 2: 100, 3: 100, 4: 200, 5: 150, 6: 100, 7: 140 },
+  compute() {
+    const s = App.state;
+    const norm = g => Math.min(1, ((s[g] && s[g].best) || 0) / this.MAX[g]);
+    const profile = {
+      dataScientist: norm(2),
+      mlEngineer: norm(3),
+      cvnlp: (norm(1) + norm(5)) / 2,
+      researcher: norm(4),
+      promptEngineer: (norm(6) + norm(7)) / 2,
+    };
+    return Object.entries(profile).sort((a, b) => b[1] - a[1])[0][0];
+  },
+  check() {
+    const panel = document.getElementById("career-panel");
+    if (!panel) return;
+    const allDone = [1, 2, 3, 4, 5, 6, 7].every(g => App.state[g] && App.state[g].done);
+    panel.style.display = allDone ? "block" : "none";
+    if (!allDone) return;
+    const id = this.compute();
+    document.getElementById("career-name").textContent = t("career_" + id);
+    document.getElementById("career-desc").textContent = t("careerD_" + id);
+    if (!App.state.careerShown) {
+      App.state.careerShown = true;
+      App.save();
+      App.confetti();
+      Sound.win();
     }
   },
 };
