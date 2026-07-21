@@ -27,6 +27,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>The ML Arcade — Learn Machine Learning by Playing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&family=Cairo:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
   /* ══════════════ THEME ══════════════ */
   :root {
@@ -329,15 +332,110 @@
     40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); }
   }
 
+  /* ══════════════ PRO POLISH ══════════════ */
+  body { font-family: "Rajdhani", "Segoe UI", Tahoma, sans-serif; font-size: 16.5px; }
+  html[lang="ar"] body, html[lang="ar"] .btn, html[lang="ar"] input, html[lang="ar"] select { font-family: "Cairo", Tahoma, sans-serif; }
+  .hero h1, .big-metric, .board-card .tscore, .board-card .rank, .chip b, .count-overlay span, .score-pop {
+    font-family: "Orbitron", "Cairo", sans-serif;
+  }
+  #stars { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+  ::selection { background: rgba(0,242,254,.3); }
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(var(--purple-deep), var(--teal)); border-radius: 999px; }
+
+  /* glassmorphism over the starfield */
+  .panel, .card, .ctrl-panel, .team-bar, .board-card, details.explain, .email-card {
+    background: rgba(18,26,44,.66);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  /* animated hero */
+  .hero h1 { background-size: 220% auto; animation: gradShift 7s ease-in-out infinite alternate; }
+  @keyframes gradShift { to { background-position: 100% center; } }
+
+  /* card shine sweep */
+  .card { overflow: hidden; }
+  .card::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.07) 50%, transparent 65%);
+    transform: translateX(-130%);
+  }
+  .card:hover::after { transform: translateX(130%); transition: transform .7s ease; }
+  .card .icon { display: inline-block; animation: floaty 3.4s ease-in-out infinite; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+  .btn:active:not(:disabled) { transform: scale(.96); }
+  .btn.primary { background: linear-gradient(140deg, color-mix(in srgb, var(--accent) 28%, var(--panel)), color-mix(in srgb, var(--accent) 10%, var(--panel))); }
+
+  /* timer urgency states */
+  .timer-fill.warn { background: linear-gradient(90deg, var(--amber), #ff8800); }
+  .timer-fill.danger { background: var(--bad); animation: barPulse .45s ease-in-out infinite alternate; }
+  @keyframes barPulse { from { opacity: 1; } to { opacity: .45; } }
+  .chip.hot { border-color: var(--amber); color: var(--amber); box-shadow: 0 0 16px rgba(255,183,3,.3); animation: barPulse .8s ease-in-out infinite alternate; }
+
+  /* floating score popups */
+  .score-pop {
+    position: fixed; z-index: 300; pointer-events: none; font-weight: 900; font-size: 28px;
+    transform: translate(-50%, 0); animation: popFloat .95s ease-out forwards;
+    text-shadow: 0 0 18px currentColor;
+  }
+  @keyframes popFloat {
+    from { opacity: 0; transform: translate(-50%, 8px) scale(.7); }
+    25% { opacity: 1; transform: translate(-50%, -14px) scale(1.18); }
+    to { opacity: 0; transform: translate(-50%, -64px) scale(1); }
+  }
+
+  /* 3-2-1-GO countdown */
+  .count-overlay {
+    position: fixed; inset: 0; z-index: 250; display: flex; align-items: center; justify-content: center;
+    background: rgba(11,15,25,.72); backdrop-filter: blur(5px);
+  }
+  .count-overlay span {
+    font-size: clamp(80px, 18vw, 130px); font-weight: 900; color: var(--teal);
+    text-shadow: 0 0 40px rgba(0,242,254,.6); animation: countPop .62s ease both;
+  }
+  .count-overlay span.go { color: var(--amber); text-shadow: 0 0 44px rgba(255,183,3,.65); }
+  @keyframes countPop { from { opacity: 0; transform: scale(2.1); } 60% { opacity: 1; transform: scale(.95); } to { transform: scale(1); } }
+
+  /* leaderboard entrances */
+  .board-card { animation: rowIn .4s ease both; }
+  @keyframes rowIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .board-card.top1 .rank { animation: floaty 2s ease-in-out infinite; }
+
+  /* avatar picker */
+  .avatar-pick { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .avatar-pick button {
+    font-size: 22px; padding: 7px 0; background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 10px; cursor: pointer; transition: transform .1s, border-color .1s;
+  }
+  .avatar-pick button:hover { transform: scale(1.12); }
+  .avatar-pick button.sel { border-color: var(--teal); box-shadow: 0 0 12px rgba(0,242,254,.35); background: rgba(0,242,254,.1); }
+
+  /* loading spinner */
+  .spinner { width: 30px; height: 30px; margin: 14px auto; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--teal); animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
   /* ══════════════ RESPONSIVE ══════════════ */
   @media (max-width: 860px) {
     .cluster-layout, .maze-layout { grid-template-columns: 1fr; }
     .ctrl-panel { order: 2; }
     .wrap { padding: 16px 14px 50px; }
   }
+  @media (max-width: 600px) {
+    .topbar { justify-content: center; text-align: center; }
+    .team-bar .btn { flex: 1 1 40%; justify-content: center; }
+    .sort-btns .btn { font-size: 16px; padding: 14px 8px; }
+    .confusion { grid-template-columns: repeat(2, 1fr); }
+    .lang-toggle { bottom: 12px; inset-inline-end: 12px; padding: 8px 14px; }
+    .sound-toggle { bottom: 12px; inset-inline-end: 92px; }
+  }
+  @media (pointer: coarse) { .kbd-hint { display: none; } }
 </style>
 </head>
 <body>
+<canvas id="stars"></canvas>
 <button class="lang-toggle" id="lang-toggle" onclick="toggleLang()">عربي</button>
 <button class="sound-toggle" id="sound-toggle" onclick="Sound.toggle()">🔊</button>
 <div class="wrap">
@@ -641,6 +739,7 @@
         <div class="field"><label data-i18n="fTeamName">Team name</label><input id="tc-name" maxlength="24" placeholder="The Overfitters"></div>
         <div class="field"><label data-i18n="fYourName">Your username (leader)</label><input id="tc-user" maxlength="16" placeholder="mina"></div>
         <div class="field"><label data-i18n="fPin">4-digit PIN</label><input id="tc-pin" inputmode="numeric" maxlength="4" placeholder="1234"></div>
+        <div class="field"><label data-i18n="fAvatar">Pick your avatar</label><div class="avatar-pick" id="tc-avatars"></div></div>
         <div class="field"><label data-i18n="fPhoto">Team photo</label><input id="tc-photo" type="file" accept="image/*"></div>
         <div class="center"><img id="tc-preview" class="team-photo lg" style="display:none" alt=""></div>
         <div class="center muted" id="tc-err" style="min-height:20px;font-size:14px;color:var(--bad)"></div>
@@ -658,6 +757,7 @@
         <div class="center" id="tj-picked"></div>
         <div class="field"><label data-i18n="fYourName2">Your username</label><input id="tj-user" maxlength="16" placeholder="sara"></div>
         <div class="field"><label data-i18n="fPin">4-digit PIN</label><input id="tj-pin" inputmode="numeric" maxlength="4" placeholder="1234"></div>
+        <div class="field"><label data-i18n="fAvatar">Pick your avatar</label><div class="avatar-pick" id="tj-avatars"></div></div>
         <div class="center muted" id="tj-err" style="min-height:20px;font-size:14px;color:var(--bad)"></div>
         <button class="btn purple primary big" onclick="Team.requestJoin()" data-i18n="joinBtn">📨 Request to Join</button>
         <p class="center muted" style="font-size:13px" data-i18n="joinRelogin">Already approved before? Same username + PIN logs you back in.</p>
@@ -863,6 +963,7 @@ const I18N = {
     runNext: "✅ Level done! Next up: {game}",
     runDone: "🏁 Arcade Run complete — {total} points!",
     badgeToast: "🎖️ Badge unlocked: {name}!",
+    fAvatar: "Pick your avatar", countGo: "GO!",
   },
 
   ar: {
@@ -993,6 +1094,7 @@ const I18N = {
     runNext: "✅ انتهى المستوى! التالي: {game}",
     runDone: "🏁 اكتمل سباق الأركيد — {total} نقطة!",
     badgeToast: "🎖️ وسام جديد: {name}!",
+    fAvatar: "اختر شخصيتك", countGo: "انطلق!",
   },
 };
 
@@ -1104,6 +1206,85 @@ function toast(msg) {
 }
 const shake = () => { document.body.classList.remove("shake"); void document.body.offsetWidth; document.body.classList.add("shake"); };
 
+/* floating score popup near an element */
+function scorePop(text, color, anchorEl) {
+  const d = document.createElement("div");
+  d.className = "score-pop"; d.textContent = text; d.style.color = color;
+  let x = window.innerWidth / 2, y = window.innerHeight / 2;
+  if (anchorEl) {
+    const r = anchorEl.getBoundingClientRect();
+    x = r.left + r.width / 2; y = r.top + 24;
+  }
+  d.style.left = x + "px"; d.style.top = y + "px";
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 1000);
+}
+
+/* 3-2-1-GO overlay */
+function countdown(cb) {
+  const ov = document.createElement("div");
+  ov.className = "count-overlay";
+  document.body.appendChild(ov);
+  const steps = ["3", "2", "1", t("countGo")];
+  let i = 0;
+  const tick = () => {
+    if (i >= steps.length) { ov.remove(); cb(); return; }
+    const isGo = i === steps.length - 1;
+    ov.innerHTML = `<span class="${isGo ? "go" : ""}">${steps[i]}</span>`;
+    Sound.beep(isGo ? 880 : 440, isGo ? .3 : .12, "triangle", .07);
+    i++;
+    setTimeout(tick, isGo ? 750 : 650);
+  };
+  tick();
+}
+
+/* animated number count-up on result screens */
+function countUp(el, target, fmt) {
+  fmt = fmt || (v => v);
+  const dur = 900, start = performance.now();
+  const frame = now => {
+    const p = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = fmt(Math.round(target * eased));
+    if (p < 1) requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+
+/* ════════════════════════════════════════════════════════════
+   STARFIELD — ambient animated background
+   ════════════════════════════════════════════════════════════ */
+const Starfield = {
+  stars: [], rafId: null,
+  init() {
+    const cv = $("stars"), ctx = cv.getContext("2d");
+    const size = () => { cv.width = window.innerWidth; cv.height = window.innerHeight; };
+    size();
+    window.addEventListener("resize", size);
+    this.stars = Array.from({ length: 130 }, () => ({
+      x: Math.random(), y: Math.random(),
+      r: .4 + Math.random() * 1.4,
+      s: .00003 + Math.random() * .00009,          /* drift speed */
+      p: Math.random() * Math.PI * 2,              /* twinkle phase */
+      hue: [Math.random() < .12, Math.random() < .12],
+    }));
+    const draw = now => {
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      for (const st of this.stars) {
+        st.y -= st.s * cv.height / 60;
+        if (st.y < -0.02) { st.y = 1.02; st.x = Math.random(); }
+        const tw = .35 + .65 * (0.5 + 0.5 * Math.sin(now / 900 + st.p));
+        ctx.beginPath();
+        ctx.arc(st.x * cv.width, st.y * cv.height, st.r, 0, Math.PI * 2);
+        ctx.fillStyle = st.hue[0] ? `rgba(0,242,254,${tw * .8})` : st.hue[1] ? `rgba(255,183,3,${tw * .7})` : `rgba(232,238,251,${tw * .55})`;
+        ctx.fill();
+      }
+      this.rafId = requestAnimationFrame(draw);
+    };
+    this.rafId = requestAnimationFrame(draw);
+  },
+};
+
 /* ════════════════════════════════════════════════════════════
    SOUND — WebAudio bleeps, no audio files
    ════════════════════════════════════════════════════════════ */
@@ -1171,6 +1352,23 @@ const Team = {
 
   load() { try { this.session = JSON.parse(localStorage.getItem("mlArcadeTeam") || "null"); } catch (e) {} },
   save() { try { localStorage.setItem("mlArcadeTeam", JSON.stringify(this.session)); } catch (e) {} },
+  picked: { tc: null, tj: null },
+  renderAvatarPickers() {
+    for (const key of ["tc", "tj"]) {
+      const box = $(key + "-avatars");
+      box.innerHTML = "";
+      this.AVATARS.forEach(a => {
+        const b = document.createElement("button");
+        b.type = "button"; b.textContent = a;
+        b.onclick = () => {
+          this.picked[key] = a;
+          box.querySelectorAll("button").forEach(x => x.classList.toggle("sel", x === b));
+          Sound.click();
+        };
+        box.appendChild(b);
+      });
+    }
+  },
   stopPolls() { clearInterval(this.waitTimer); clearInterval(this.homeTimer); this.waitTimer = this.homeTimer = null; },
   avatarFor(name) { let h = 0; for (const ch of name) h = (h * 31 + ch.codePointAt(0)) >>> 0; return this.AVATARS[h % this.AVATARS.length]; },
 
@@ -1227,7 +1425,7 @@ const Team = {
       const hash = await pinHash(pin);
       await Net.put("/teams/" + id, {
         name, photo: this.photoData || "", leader: user, created: Date.now(),
-        members: { [user]: { avatar: this.avatarFor(user), pinHash: hash, status: "leader", scores: this.localScores() } },
+        members: { [user]: { avatar: this.picked.tc || this.avatarFor(user), pinHash: hash, status: "leader", scores: this.localScores() } },
       });
       this.session = { teamId: id, teamName: name, user, role: "leader", status: "approved" };
       this.save();
@@ -1240,7 +1438,7 @@ const Team = {
 
   async loadTeams() {
     const list = $("tj-list");
-    list.innerHTML = "<div class='muted center'>…</div>";
+    list.innerHTML = "<div class='spinner'></div>";
     $("tj-form").style.display = "none";
     try {
       const teams = await Net.get("/teams") || {};
@@ -1288,7 +1486,7 @@ const Team = {
           status: existing.status === "pending" ? "pending" : "approved",
         };
       } else {                                            /* new join request */
-        await Net.put(path, { avatar: this.avatarFor(user), pinHash: hash, status: "pending", scores: this.localScores() });
+        await Net.put(path, { avatar: this.picked.tj || this.avatarFor(user), pinHash: hash, status: "pending", scores: this.localScores() });
         this.session = { teamId: this.joinPick.id, teamName: this.joinPick.name, user, role: "member", status: "pending" };
       }
       this.save();
@@ -1408,6 +1606,7 @@ const Board = {
   async refresh() {
     const list = $("board-list"), empty = $("board-empty");
     if (!Net.ok()) { list.innerHTML = ""; empty.style.display = "block"; empty.innerHTML = t("setupTitle"); return; }
+    if (!list.children.length) list.innerHTML = "<div class='spinner'></div>";
     try {
       const teams = await Net.get("/teams") || {};
       const rows = Object.keys(teams).map(id => {
@@ -1633,6 +1832,7 @@ const SpamGame = {
 
   /* ---- phase 2: classify ---- */
   startClassify() {
+    if (this.counting) return;
     this.stopTimers();
     $("l1-train").style.display = "none";
     $("l1-play").style.display = "block";
@@ -1641,7 +1841,12 @@ const SpamGame = {
     this.tp = this.tn = this.fp = this.fn = this.misses = 0;
     $("l1-score").textContent = "0";
     $("l1-streak").textContent = "🔥 0";
-    this.nextCard();
+    $("l1-streak").parentElement.classList.remove("hot");
+    this.counting = true;
+    countdown(() => {
+      this.counting = false;
+      if (document.getElementById("screen-l1").classList.contains("active")) this.nextCard();
+    });
   },
   nextCard() {
     if (this.idx >= this.queue.length) return this.finish();
@@ -1660,9 +1865,14 @@ const SpamGame = {
     this.curTime = Math.max(this.MIN_TIME, this.TIME_PER_CARD - this.streak * 800);
     this.deadline = performance.now() + this.curTime;
     clearInterval(this.timerInt);
+    const bar = $("l1-timer");
+    bar.classList.remove("warn", "danger");
     this.timerInt = setInterval(() => {
       const left = this.deadline - performance.now();
-      $("l1-timer").style.width = clamp(left / this.curTime * 100, 0, 100) + "%";
+      const pct = left / this.curTime;
+      bar.style.width = clamp(pct * 100, 0, 100) + "%";
+      bar.classList.toggle("warn", pct < .5 && pct >= .25);
+      bar.classList.toggle("danger", pct < .25);
       if (left <= 0) this.timeout();
     }, 50);
   },
@@ -1683,6 +1893,7 @@ const SpamGame = {
       fb.classList.add("good");
       $("l1-card").classList.add("flash-good");
       Sound.good();
+      scorePop("+10", "var(--good)", $("l1-card"));
     } else {
       this.streak = 0;
       this.score -= 5;
@@ -1690,9 +1901,11 @@ const SpamGame = {
       fb.classList.add("bad");
       $("l1-card").classList.add("flash-bad");
       Sound.bad(); shake();
+      scorePop("−5", "var(--bad)", $("l1-card"));
     }
     $("l1-score").textContent = this.score;
     $("l1-streak").textContent = "🔥 " + this.streak;
+    $("l1-streak").parentElement.classList.toggle("hot", this.streak >= 3);
     this.idx++;
     setTimeout(() => this.nextCard(), 1000);
   },
@@ -1706,6 +1919,7 @@ const SpamGame = {
     this.misses++;
     this.streak = 0;
     $("l1-streak").textContent = "🔥 0";
+    $("l1-streak").parentElement.classList.remove("hot");
     const fb = $("l1-feedback");
     fb.textContent = t("l1TooSlow", { label: this.stampText(truth) });
     fb.classList.add("bad");
@@ -1721,7 +1935,7 @@ const SpamGame = {
     const total = this.queue.length;
     const correct = this.tp + this.tn;
     const acc = Math.round(correct / total * 100);
-    $("l1-res-acc").textContent = acc + "%";
+    countUp($("l1-res-acc"), acc, v => v + "%");
     $("l1-res-score").textContent = this.score;
     $("l1-tp").textContent = this.tp; $("l1-tn").textContent = this.tn;
     $("l1-fp").textContent = this.fp; $("l1-fn").textContent = this.fn;
@@ -1916,7 +2130,7 @@ const ClusterGame = {
     const finalInertia = this.inertiaOf(this.assignments, this.centroids.map(c => ({ x: c.tx, y: c.ty })));
     const score = clamp(Math.round(this.optimalInertia / Math.max(finalInertia, 1e-9) * 100), 0, 100);
     this.setStatus("l2StatusConverged", { i: this.iter });
-    $("l2-res-score").textContent = score + "%";
+    countUp($("l2-res-score"), score, v => v + "%");
     $("l2-res-note").textContent =
       score >= 95 ? t("l2NoteHigh", { i: this.iter }) :
       score >= 75 ? t("l2NoteMid", { i: this.iter }) :
@@ -2191,7 +2405,7 @@ const MazeGame = {
     $("l3-res-emoji").textContent = emoji;
     $("l3-res-title").textContent = title;
     $("l3-res-detail").textContent = detail;
-    $("l3-res-score").textContent = score + " " + t("l3Pts");
+    countUp($("l3-res-score"), score, v => v + " " + t("l3Pts"));
     rp.style.display = "block";
     rp.scrollIntoView({ behavior: "smooth", block: "nearest" });
     App.complete(3, score, true);
@@ -2314,6 +2528,8 @@ ClusterGame.setStatus("l2StatusPlace", { k: 3 });
 App.load();
 setLang(LANG);
 $("tc-photo").addEventListener("change", e => Team.handlePhoto(e.target.files[0]));
+Starfield.init();
+Team.renderAvatarPickers();
 </script>
 </body>
 </html>
