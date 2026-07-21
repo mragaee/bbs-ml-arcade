@@ -143,6 +143,8 @@ const I18N = {
     diffNames: "Very Easy|Easy|Casual|Normal|Medium|Tricky|Hard|Very Hard|Extreme|Very Difficult",
     diffSet: "Difficulty: {name}",
     diffBonus: "Difficulty bonus \u00d7{m} \u2014 {pts} pts recorded!",
+    progressRestored: "Welcome back, {user} \u2014 your badges and scores are restored!",
+    loggedOutReset: "Logged out. This device is reset \u2014 your progress stays saved with your player.",
     wingML: "The ML Arcade", wingLab: "The Prompt Lab",
     lvl4: "Lab 1 \u00b7 AI Fields", lvl5: "Lab 2 \u00b7 Generative AI", lvl6: "Lab 3 \u00b7 Prompt Engineering", lvl7: "Lab 4 \u00b7 Responsible AI",
     card4Title: "AI Spotter", card4Sub: "Vision, language, learning or creating?",
@@ -299,6 +301,8 @@ const I18N = {
     diffNames: "سهل جدًا|سهل|بسيط|عادي|متوسط|مخادع|صعب|صعب جدًا|قاسٍ|صعب للغاية",
     diffSet: "الصعوبة: {name}",
     diffBonus: "مكافأة الصعوبة \u00d7{m} \u2014 سُجِّلت {pts} نقطة!",
+    progressRestored: "أهلًا بعودتك يا {user} \u2014 استُعيدت أوسمتك ونتائجك!",
+    loggedOutReset: "تم تسجيل الخروج. هذا الجهاز أصبح نظيفًا \u2014 تقدمك محفوظ مع لاعبك.",
     wingML: "أركيد تعلّم الآلة", wingLab: "مختبر الأوامر",
     lvl4: "مختبر 1 \u00b7 مجالات الذكاء الاصطناعي", lvl5: "مختبر 2 \u00b7 الذكاء التوليدي", lvl6: "مختبر 3 \u00b7 هندسة الأوامر", lvl7: "مختبر 4 \u00b7 الاستخدام المسؤول",
     card4Title: "كاشف الذكاء الاصطناعي", card4Sub: "رؤية أم لغة أم تعلّم أم توليد؟",
@@ -680,7 +684,7 @@ const Team = {
       const hash = await pinHash(pin);
       await Net.put("/teams/" + id, {
         name, photo: this.photoData || "", leader: user, created: Date.now(),
-        members: { [user]: { pinHash: hash, status: "leader", scores: this.localScores() } },
+        members: { [user]: { pinHash: hash, status: "leader", scores: this.localScores(), progress: this.progressPayload() } },
       });
       this.session = { teamId: id, teamName: name, user, role: "leader", status: "approved" };
       this.save();
@@ -741,12 +745,13 @@ const Team = {
           status: existing.status === "pending" ? "pending" : "approved",
         };
       } else {                                            /* new join request */
-        await Net.put(path, { pinHash: hash, status: "pending", scores: this.localScores() });
+        await Net.put(path, { pinHash: hash, status: "pending", scores: this.localScores(), progress: this.progressPayload() });
         this.session = { teamId: this.joinPick.id, teamName: this.joinPick.name, user, role: "member", status: "pending" };
       }
       this.save();
       App.renderDash();
       this.route();
+      this.pullProgress();
     } catch (e) { err.textContent = t("errNet"); }
   },
 
@@ -761,7 +766,7 @@ const Team = {
           this.save();
           Sound.win(); toast(t("approvedToast", { team: this.session.teamName }));
           App.renderDash();
-          this.syncScores();
+          this.pullProgress();
           this.route();
         } else if (!m || m.status === "rejected") {
           this.logout();
@@ -823,8 +828,13 @@ const Team = {
 
   logout() {
     this.stopPolls();
+    const wasLoggedIn = !!this.session;
     this.session = null;
     this.save();
+    if (wasLoggedIn) {
+      this.resetLocal();
+      toast(t("loggedOutReset"));
+    }
     App.renderDash();
     this.route();
   },
@@ -835,6 +845,42 @@ const Team = {
     for (let g = 1; g <= 7; g++) out["l" + g] = Math.max(0, (s[g] && s[g].best) || 0);
     return out;
   },
+  /* ---- per-player progress stored in the member's Firebase record ---- */
+  progressPayload() {
+    const s = App.state;
+    const games = {};
+    for (let g = 1; g <= 7; g++) games[g] = { best: (s[g] && s[g].best) || 0, done: !!(s[g] && s[g].done) };
+    return { games, run: s.run || 0, badges: s.badges || {} };
+  },
+  mergeProgress(p) {
+    if (!p) return;
+    for (let g = 1; g <= 7; g++) {
+      const sv = (p.games && p.games[g]) || {};
+      const loc = App.state[g] = App.state[g] || { best: null, done: false };
+      if (sv.best != null && sv.best > 0 && (loc.best === null || sv.best > loc.best)) loc.best = sv.best;
+      if (sv.done) loc.done = true;
+    }
+    if ((p.run || 0) > (App.state.run || 0)) App.state.run = p.run;
+    Object.assign(App.state.badges = App.state.badges || {}, p.badges || {});
+    App.save();
+    App.renderDash();
+  },
+  async pullProgress() {
+    if (!Net.ok() || !this.session || this.session.status !== "approved") return;
+    try {
+      const p = await Net.get("/teams/" + this.session.teamId + "/members/" + this.session.user + "/progress");
+      if (p) { this.mergeProgress(p); toast(t("progressRestored", { user: this.session.user })); }
+      this.syncScores();
+    } catch (e) {}
+  },
+  resetLocal() {
+    for (let g = 1; g <= 7; g++) App.state[g] = { best: null, done: false };
+    App.state.run = 0;
+    App.state.badges = {};
+    App.state.careerShown = false;
+    App.save();
+    App.renderDash();
+  },
   totalOf(sc) {
     sc = sc || {};
     let sum = sc.run || 0;
@@ -843,7 +889,8 @@ const Team = {
   },
   syncScores() {
     if (!Net.ok() || !this.session || this.session.status !== "approved") return;
-    Net.patch("/teams/" + this.session.teamId + "/members/" + this.session.user, { scores: this.localScores() }).catch(() => {});
+    Net.patch("/teams/" + this.session.teamId + "/members/" + this.session.user,
+      { scores: this.localScores(), progress: this.progressPayload() }).catch(() => {});
   },
 };
 
