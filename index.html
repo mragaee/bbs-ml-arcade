@@ -1,0 +1,1559 @@
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+  THE ML ARCADE — an interactive lab for learning Machine Learning paradigms
+  Supervised · Unsupervised · Reinforcement Learning  |  English + العربية
+  ═══════════════════════════════════════════════════════════════════════════
+
+  HOW TO SAVE & HOST ON GITHUB PAGES
+  ----------------------------------
+  1. Save this file as  index.html  (this single file is the whole app —
+     no build step, no dependencies, works offline).
+  2. Create a new GitHub repository (e.g. "ml-arcade") and upload index.html
+     to the repository root (drag & drop on github.com works fine).
+  3. In the repo go to  Settings → Pages → Source: "Deploy from a branch",
+     Branch: main, Folder: / (root) → Save.
+  4. Wait ~1 minute, then open  https://<your-username>.github.io/ml-arcade/
+  5. To test locally, just double-click the file, or run
+     `python3 -m http.server` in its folder and open http://localhost:8000
+
+  Built with pure HTML5 Canvas + CSS3 + Vanilla JavaScript (ES6+).
+  Language: use the floating AR/EN pill (bottom corner) to switch — the
+  choice is remembered, and Arabic flips the whole layout to RTL.
+  ═══════════════════════════════════════════════════════════════════════════
+-->
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The ML Arcade — Learn Machine Learning by Playing</title>
+<style>
+  /* ══════════════ THEME ══════════════ */
+  :root {
+    --bg: #0b0f19;
+    --panel: #121a2c;
+    --panel-2: #0e1524;
+    --line: #24304d;
+    --text: #e8eefb;
+    --muted: #8b98b8;
+    --teal: #00f2fe;
+    --purple: #a06bff;
+    --purple-deep: #7000ff;
+    --amber: #ffb703;
+    --good: #3ddc84;
+    --bad: #ff5470;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(112,0,255,.14), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(0,242,254,.10), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Tahoma, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+    min-height: 100%;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  .screen { display: none; animation: fadeIn .35s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* ══════════════ SHARED UI ══════════════ */
+  .btn {
+    --accent: var(--teal);
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s;
+    user-select: none;
+  }
+  .btn:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 35%, transparent); }
+  .btn:active:not(:disabled) { transform: translateY(0); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn.primary { background: color-mix(in srgb, var(--accent) 18%, var(--panel)); border-color: var(--accent); }
+  .btn.big { font-size: 17px; padding: 14px 26px; }
+  .btn.teal   { --accent: var(--teal); }
+  .btn.purple { --accent: var(--purple); }
+  .btn.amber  { --accent: var(--amber); }
+  .btn.danger { --accent: var(--bad); }
+  .btn.good   { --accent: var(--good); }
+
+  .lang-toggle {
+    position: fixed; bottom: 18px; inset-inline-end: 18px; z-index: 100;
+    background: var(--panel); border: 1px solid var(--teal); color: var(--teal);
+    border-radius: 999px; padding: 9px 18px; font-size: 15px; font-weight: 800;
+    cursor: pointer; font-family: inherit;
+    box-shadow: 0 4px 20px rgba(0,0,0,.5), 0 0 14px rgba(0,242,254,.25);
+    transition: transform .12s ease;
+  }
+  .lang-toggle:hover { transform: translateY(-2px); }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+  .topbar h2 { font-size: clamp(20px, 3vw, 28px); letter-spacing: .5px; }
+  .tag { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; border: 1px solid; }
+  .tag.teal   { color: var(--teal);   border-color: var(--teal);   background: rgba(0,242,254,.08); }
+  .tag.purple { color: var(--purple); border-color: var(--purple); background: rgba(160,107,255,.10); }
+  .tag.amber  { color: var(--amber);  border-color: var(--amber);  background: rgba(255,183,3,.08); }
+
+  .hud { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0; }
+  .chip {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px;
+    padding: 8px 14px; font-size: 14px; color: var(--muted);
+  }
+  .chip b { color: var(--text); font-size: 16px; margin-inline-start: 6px; }
+
+  details.explain {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 14px 18px; margin: 14px 0; color: var(--muted); font-size: 15px;
+  }
+  details.explain summary { cursor: pointer; color: var(--text); font-weight: 700; list-style: none; }
+  details.explain summary::before { content: "▸ "; }
+  details.explain[open] summary::before { content: "▾ "; }
+  details.explain p { margin-top: 10px; }
+  details.explain b { color: var(--text); }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+  .center { text-align: center; }
+  .muted { color: var(--muted); }
+
+  canvas.game { width: 100%; height: auto; display: block; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--line); touch-action: manipulation; }
+
+  /* ══════════════ DASHBOARD ══════════════ */
+  .hero { text-align: center; padding: 40px 0 26px; }
+  .hero h1 {
+    font-size: clamp(34px, 6vw, 58px); font-weight: 800; letter-spacing: 1px;
+    background: linear-gradient(92deg, var(--teal), var(--purple) 50%, var(--amber));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 22px rgba(0,242,254,.25));
+  }
+  .hero p { color: var(--muted); font-size: clamp(15px, 2vw, 18px); margin-top: 8px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 18px; margin-top: 26px; }
+  .card {
+    --accent: var(--teal);
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 24px 22px; cursor: pointer; position: relative;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s;
+  }
+  .card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 34px color-mix(in srgb, var(--accent) 25%, transparent); }
+  .card.teal   { --accent: var(--teal); }
+  .card.purple { --accent: var(--purple); }
+  .card.amber  { --accent: var(--amber); }
+  .card .lvl { font-size: 12px; font-weight: 800; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
+  .card .icon { font-size: 44px; margin: 12px 0 6px; }
+  .card h3 { font-size: 21px; margin-bottom: 2px; }
+  .card h4 { font-size: 15px; font-weight: 600; color: var(--accent); margin-bottom: 10px; }
+  .card p { font-size: 14px; color: var(--muted); }
+  .card .best {
+    margin-top: 14px; font-size: 13px; color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card .done-badge {
+    position: absolute; top: 14px; inset-inline-end: 14px; font-size: 13px; font-weight: 800;
+    color: var(--good); border: 1px solid var(--good); border-radius: 999px; padding: 3px 10px;
+    background: rgba(61,220,132,.1); display: none;
+  }
+  .card.completed .done-badge { display: inline-block; }
+  .footer-note { text-align: center; color: var(--muted); font-size: 13px; margin-top: 36px; }
+
+  /* ══════════════ LEVEL 1 — SPAM ══════════════ */
+  .email-stage { max-width: 620px; margin: 0 auto; }
+  .email-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 22px; position: relative; min-height: 170px;
+    animation: slideIn .3s ease;
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: none; } }
+  .email-card .from { font-size: 13px; color: var(--muted); margin-bottom: 10px; word-break: break-all; }
+  .email-card .from b { color: var(--text); direction: ltr; unicode-bidi: embed; }
+  .email-card .body { font-size: 17px; }
+  .email-card.flash-good { border-color: var(--good); box-shadow: 0 0 26px rgba(61,220,132,.35); }
+  .email-card.flash-bad  { border-color: var(--bad);  box-shadow: 0 0 26px rgba(255,84,112,.35); }
+  .stamp {
+    position: absolute; top: 14px; inset-inline-end: 16px; font-size: 15px; font-weight: 800;
+    letter-spacing: 1px; padding: 5px 14px; border: 2px solid; border-radius: 8px;
+    transform: rotate(8deg); text-transform: uppercase;
+  }
+  [dir="rtl"] .stamp { transform: rotate(-8deg); }
+  .stamp.spam { color: var(--bad); border-color: var(--bad); background: rgba(255,84,112,.1); }
+  .stamp.ham  { color: var(--good); border-color: var(--good); background: rgba(61,220,132,.1); }
+  .timer-track { height: 8px; background: var(--panel-2); border-radius: 999px; margin: 16px 0; overflow: hidden; border: 1px solid var(--line); }
+  .timer-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--teal), var(--purple)); border-radius: 999px; transition: width .05s linear; }
+  .sort-btns { display: flex; gap: 14px; justify-content: center; margin-top: 6px; }
+  .sort-btns .btn { flex: 1; max-width: 240px; justify-content: center; font-size: 18px; padding: 16px; }
+  .feedback-line { text-align: center; min-height: 28px; font-weight: 700; font-size: 17px; margin-top: 12px; }
+  .feedback-line.good { color: var(--good); }
+  .feedback-line.bad { color: var(--bad); }
+  .kbd-hint { text-align: center; color: var(--muted); font-size: 13px; margin-top: 10px; }
+  .kbd-hint kbd { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; font-family: inherit; }
+  .train-progress { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 10px; }
+  .confusion { display: grid; grid-template-columns: repeat(2, minmax(130px, 180px)); gap: 10px; justify-content: center; margin: 18px 0; }
+  .confusion .cell { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 12px; text-align: center; }
+  .confusion .cell b { display: block; font-size: 24px; }
+  .confusion .cell span { font-size: 12px; color: var(--muted); }
+  .big-metric { font-size: clamp(38px, 7vw, 64px); font-weight: 800; color: var(--teal); text-shadow: 0 0 24px rgba(0,242,254,.4); }
+
+  /* ══════════════ LEVEL 2 — CLUSTERS ══════════════ */
+  .cluster-layout { display: grid; grid-template-columns: 1fr 280px; gap: 18px; align-items: start; }
+  .ctrl-panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+  .ctrl-panel h4 { font-size: 14px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .kpicker { display: flex; gap: 8px; }
+  .kpicker .btn { flex: 1; justify-content: center; padding: 8px; }
+  .kpicker .btn.sel { border-color: var(--purple); background: rgba(160,107,255,.15); color: var(--purple); }
+  .status-line { font-size: 14px; color: var(--muted); min-height: 42px; }
+  .status-line b { color: var(--text); }
+
+  /* ══════════════ LEVEL 3 — MAZE ══════════════ */
+  .maze-layout { display: grid; grid-template-columns: 1fr 300px; gap: 18px; align-items: start; }
+  .slider-row { display: flex; flex-direction: column; gap: 4px; }
+  .slider-row label { font-size: 14px; color: var(--muted); display: flex; justify-content: space-between; }
+  .slider-row label b { color: var(--text); }
+  input[type=range] { width: 100%; accent-color: var(--amber); cursor: pointer; }
+  #rewardChart { width: 100%; height: 56px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+  /* ══════════════ RESULT OVERLAY ══════════════ */
+  .result-panel { max-width: 560px; margin: 20px auto 0; }
+  .result-panel h3 { font-size: 26px; margin-bottom: 8px; }
+  .takeaway {
+    margin-top: 16px; padding: 14px 16px; border-inline-start: 3px solid var(--teal);
+    background: var(--panel-2); border-radius: 0 12px 12px 0; font-size: 15px; color: var(--muted);
+  }
+  [dir="rtl"] .takeaway { border-radius: 12px 0 0 12px; }
+  .takeaway b { color: var(--text); }
+  .result-actions { display: flex; gap: 12px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+
+  /* confetti */
+  .confetti { position: fixed; top: -20px; width: 10px; height: 14px; z-index: 999; pointer-events: none; animation: cfall linear forwards; }
+  @keyframes cfall { to { transform: translateY(110vh) rotate(720deg); opacity: .2; } }
+
+  /* ══════════════ RESPONSIVE ══════════════ */
+  @media (max-width: 860px) {
+    .cluster-layout, .maze-layout { grid-template-columns: 1fr; }
+    .ctrl-panel { order: 2; }
+    .wrap { padding: 16px 14px 50px; }
+  }
+</style>
+</head>
+<body>
+<button class="lang-toggle" id="lang-toggle" onclick="toggleLang()">عربي</button>
+<div class="wrap">
+
+  <!-- ════════════════ DASHBOARD ════════════════ -->
+  <section id="screen-dash" class="screen active">
+    <div class="hero">
+      <h1>⚡ THE ML ARCADE</h1>
+      <p data-i18n="tagline">Train your brain to train the machines. Three paradigms. Three games. Let's go.</p>
+    </div>
+    <div class="cards">
+      <div class="card teal" id="card-1" onclick="SpamGame.open()">
+        <span class="done-badge" data-i18n="done">✓ DONE</span>
+        <div class="lvl" data-i18n="lvl1">Level 1 · Supervised Learning</div>
+        <div class="icon">📧</div>
+        <h3 data-i18n="card1Title">The Spam &amp; Ham Classifier</h3>
+        <h4 data-i18n="card1Sub">Learning from labeled data</h4>
+        <p data-i18n="card1Desc">Study labeled training emails, then classify a flood of new ones before the timer runs out. You <i>are</i> the model.</p>
+        <div class="best"><span data-i18n="best">🏆 Best score:</span> <b id="best-1">—</b></div>
+      </div>
+      <div class="card purple" id="card-2" onclick="ClusterGame.open()">
+        <span class="done-badge" data-i18n="done">✓ DONE</span>
+        <div class="lvl" data-i18n="lvl2">Level 2 · Unsupervised Learning</div>
+        <div class="icon">🌌</div>
+        <h3 data-i18n="card2Title">The Cluster Finder</h3>
+        <h4 data-i18n="card2Sub">Finding hidden patterns — no labels</h4>
+        <p data-i18n="card2Desc">A galaxy of unlabeled data points. Drop centroids and run K-Means to watch the machine discover groups on its own.</p>
+        <div class="best"><span data-i18n="best">🏆 Best score:</span> <b id="best-2">—</b></div>
+      </div>
+      <div class="card amber" id="card-3" onclick="MazeGame.open()">
+        <span class="done-badge" data-i18n="done">✓ DONE</span>
+        <div class="lvl" data-i18n="lvl3">Level 3 · Reinforcement Learning</div>
+        <div class="icon">🤖</div>
+        <h3 data-i18n="card3Title">The Bot Maze Trainer</h3>
+        <h4 data-i18n="card3Sub">Trial &amp; error with rewards</h4>
+        <p data-i18n="card3Desc">Tune rewards and penalties, then train a Q-learning bot to find the battery — and watch it learn to fear the fire.</p>
+        <div class="best"><span data-i18n="best">🏆 Best score:</span> <b id="best-3">—</b></div>
+      </div>
+    </div>
+    <p class="footer-note" data-i18n="footer">BSS Tech Academy · "The AI Blueprint" lab · works offline, no installs, no mercy 😎</p>
+  </section>
+
+  <!-- ════════════════ LEVEL 1 — SPAM & HAM ════════════════ -->
+  <section id="screen-l1" class="screen">
+    <div class="topbar">
+      <button class="btn teal" onclick="App.show('screen-dash')" data-i18n="back">← Arcade</button>
+      <h2 data-i18n="l1Name">📧 The Spam &amp; Ham Classifier</h2>
+      <span class="tag teal" data-i18n="l1Tag">Supervised</span>
+    </div>
+
+    <details class="explain">
+      <summary data-i18n="explainTitle">💡 What's the ML idea here?</summary>
+      <p data-i18n="l1Explain"><b>Supervised learning</b> means learning from examples that come with the correct answers (<b>labels</b>).
+      First you'll see <b>training data</b> — emails already stamped SPAM or HAM (not-spam). Your brain will pick up the
+      patterns (ALL CAPS, "FREE!!!", sketchy senders…). Then you'll classify <b>new, unlabeled</b> emails —
+      exactly what a trained spam filter does millions of times a day.</p>
+    </details>
+
+    <!-- intro -->
+    <div id="l1-intro" class="panel center email-stage">
+      <div style="font-size:52px">🕵️</div>
+      <h3 style="margin:10px 0 6px" data-i18n="l1Mission">Your mission</h3>
+      <p class="muted" style="max-width:460px;margin:0 auto 18px" data-i18n="l1MissionText">
+        Phase 1: study <b style="color:var(--text)">10 labeled training emails</b>.<br>
+        Phase 2: classify <b style="color:var(--text)">12 mystery emails</b> — 12 seconds each.<br>
+        +10 for a correct call, −5 for a wrong one. Misses count against your accuracy!
+      </p>
+      <button class="btn teal primary big" onclick="SpamGame.startTraining()" data-i18n="l1Start">▶ Start Training Phase</button>
+    </div>
+
+    <!-- training -->
+    <div id="l1-train" class="email-stage" style="display:none">
+      <div class="train-progress" id="l1-train-progress">Training example 1 / 10</div>
+      <div class="email-card" id="l1-train-card">
+        <span class="stamp ham" id="l1-train-stamp">HAM</span>
+        <div class="from" id="l1-train-from"></div>
+        <div class="body" id="l1-train-body"></div>
+      </div>
+      <p class="center muted" style="margin-top:12px" data-i18n="l1Memorize">🧠 The machine memorizes patterns from labeled examples…</p>
+      <div class="center" style="margin-top:14px">
+        <button class="btn teal" onclick="SpamGame.startClassify()" data-i18n="l1Skip">Skip ahead — I've got the pattern ⏭</button>
+      </div>
+    </div>
+
+    <!-- classify -->
+    <div id="l1-play" class="email-stage" style="display:none">
+      <div class="hud" style="justify-content:center">
+        <span class="chip"><span data-i18n="l1ChipEmail">Email</span> <b id="l1-count">1/12</b></span>
+        <span class="chip"><span data-i18n="l1ChipScore">Score</span> <b id="l1-score">0</b></span>
+        <span class="chip"><span data-i18n="l1ChipStreak">Streak</span> <b id="l1-streak">🔥 0</b></span>
+      </div>
+      <div class="email-card" id="l1-card">
+        <div class="from" id="l1-from"></div>
+        <div class="body" id="l1-body"></div>
+      </div>
+      <div class="timer-track"><div class="timer-fill" id="l1-timer"></div></div>
+      <div class="sort-btns">
+        <button class="btn good big" id="l1-btn-ham" onclick="SpamGame.answer('ham')" data-i18n="l1Ham">✉️ HAM</button>
+        <button class="btn danger big" id="l1-btn-spam" onclick="SpamGame.answer('spam')" data-i18n="l1Spam">🗑️ SPAM</button>
+      </div>
+      <div class="feedback-line" id="l1-feedback"></div>
+      <div class="kbd-hint" data-i18n="l1Kbd">Keyboard: <kbd>←</kbd> HAM &nbsp;·&nbsp; <kbd>→</kbd> SPAM</div>
+    </div>
+
+    <!-- results -->
+    <div id="l1-results" class="panel center result-panel" style="display:none">
+      <div style="font-size:48px" id="l1-res-emoji">🎉</div>
+      <h3 id="l1-res-title">Model trained!</h3>
+      <p class="muted" data-i18n="l1AccLabel">Your model's accuracy on unseen data:</p>
+      <div class="big-metric" id="l1-res-acc">0%</div>
+      <p class="muted" style="margin-top:4px"><span data-i18n="l1FinalScore">Final score:</span> <b id="l1-res-score" style="color:var(--text)">0</b></p>
+      <div class="confusion">
+        <div class="cell"><b id="l1-tp" style="color:var(--good)">0</b><span data-i18n="l1Tp">Spam caught ✅</span></div>
+        <div class="cell"><b id="l1-fn" style="color:var(--bad)">0</b><span data-i18n="l1Fn">Spam let through 😬</span></div>
+        <div class="cell"><b id="l1-fp" style="color:var(--bad)">0</b><span data-i18n="l1Fp">Good mail trashed 🗑️💀</span></div>
+        <div class="cell"><b id="l1-tn" style="color:var(--good)">0</b><span data-i18n="l1Tn">Good mail kept ✅</span></div>
+      </div>
+      <p class="muted" id="l1-res-note" style="font-size:14px"></p>
+      <div class="takeaway" data-i18n="l1Takeaway">🔑 <b>Takeaway:</b> Supervised learning = learning a mapping from <b>labeled examples</b> to answers, then applying it to data it has never seen. The labels ARE the teacher.</div>
+      <div class="result-actions">
+        <button class="btn teal primary" onclick="SpamGame.open()" data-i18n="l1Again">↻ Play Again</button>
+        <button class="btn teal" onclick="App.show('screen-dash')" data-i18n="backArcade">Back to Arcade</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════ LEVEL 2 — CLUSTER FINDER ════════════════ -->
+  <section id="screen-l2" class="screen">
+    <div class="topbar">
+      <button class="btn purple" onclick="App.show('screen-dash')" data-i18n="back">← Arcade</button>
+      <h2 data-i18n="l2Name">🌌 The Cluster Finder</h2>
+      <span class="tag purple" data-i18n="l2Tag">Unsupervised</span>
+    </div>
+
+    <details class="explain">
+      <summary data-i18n="explainTitle">💡 What's the ML idea here?</summary>
+      <p data-i18n="l2Explain"><b>Unsupervised learning</b> gets <b>no labels at all</b> — just raw data. The algorithm's job is to discover
+      hidden structure by itself. Here you'll run <b>K-Means</b>: drop K "centroids" (cluster centers), then each step
+      the algorithm ① assigns every point to its nearest centroid and ② moves each centroid to the middle of its points.
+      Repeat until nothing moves — the machine just <i>found groups nobody told it about</i>. (Real uses: customer
+      segments, galaxy types, playlist vibes.)</p>
+    </details>
+
+    <div class="cluster-layout">
+      <div>
+        <canvas id="l2-canvas" class="game" width="720" height="480"></canvas>
+        <div class="legend">
+          <span><span class="swatch" style="background:#9aa7c4"></span> <span data-i18n="l2LegPoint">unlabeled point</span></span>
+          <span><span class="swatch" style="background:var(--purple)"></span> <span data-i18n="l2LegCentroid">✛ centroid</span></span>
+          <span data-i18n="l2LegTrue">⭕ dashed = hidden true groups (revealed at the end)</span>
+        </div>
+      </div>
+      <div class="ctrl-panel">
+        <h4 data-i18n="l2KTitle">K — number of clusters</h4>
+        <div class="kpicker" id="l2-kpicker">
+          <button class="btn purple" data-k="2" onclick="ClusterGame.setK(2)">K=2</button>
+          <button class="btn purple sel" data-k="3" onclick="ClusterGame.setK(3)">K=3</button>
+          <button class="btn purple" data-k="4" onclick="ClusterGame.setK(4)">K=4</button>
+        </div>
+        <div class="status-line" id="l2-status"></div>
+        <div class="hud" style="margin:0">
+          <span class="chip"><span data-i18n="l2ChipIter">Iteration</span> <b id="l2-iter">0</b></span>
+          <span class="chip"><span data-i18n="l2ChipMess">Messiness</span> <b id="l2-inertia">—</b></span>
+        </div>
+        <button class="btn purple primary" id="l2-step" onclick="ClusterGame.manualStep()" disabled data-i18n="l2Step">⚙️ Run 1 K-Means Step</button>
+        <button class="btn purple" id="l2-auto" onclick="ClusterGame.autoRun()" disabled data-i18n="l2Auto">⏩ Auto-Run to Convergence</button>
+        <button class="btn purple" id="l2-clear" onclick="ClusterGame.clearCentroids()" data-i18n="l2Clear">✖ Clear Centroids</button>
+        <button class="btn purple" onclick="ClusterGame.open()" data-i18n="l2New">🎲 New Random Data</button>
+        <p class="muted" style="font-size:13px" data-i18n="l2MessNote">Messiness = total distance from points to their centroid (inertia). <b style="color:var(--text)">Lower is better.</b></p>
+      </div>
+    </div>
+
+    <div id="l2-results" class="panel center result-panel" style="display:none">
+      <div style="font-size:48px">🔭</div>
+      <h3 data-i18n="l2ResTitle">Clusters discovered!</h3>
+      <p class="muted" data-i18n="l2ResLabel">How close you got to the best possible grouping:</p>
+      <div class="big-metric" style="color:var(--purple);text-shadow:0 0 24px rgba(160,107,255,.45)" id="l2-res-score">0%</div>
+      <p class="muted" id="l2-res-note"></p>
+      <div class="takeaway" style="border-color:var(--purple)" data-i18n="l2Takeaway">🔑 <b>Takeaway:</b> Unsupervised learning = discovering structure in data with <b>zero labels</b>. Nobody said "these are the groups" — K-Means found them from geometry alone.</div>
+      <div class="result-actions">
+        <button class="btn purple primary" onclick="ClusterGame.open()" data-i18n="l2AgainBtn">🎲 New Data, Go Again</button>
+        <button class="btn purple" onclick="App.show('screen-dash')" data-i18n="backArcade">Back to Arcade</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════ LEVEL 3 — BOT MAZE ════════════════ -->
+  <section id="screen-l3" class="screen">
+    <div class="topbar">
+      <button class="btn amber" onclick="App.show('screen-dash')" data-i18n="back">← Arcade</button>
+      <h2 data-i18n="l3Name">🤖 The Bot Maze Trainer</h2>
+      <span class="tag amber" data-i18n="l3Tag">Reinforcement</span>
+    </div>
+
+    <details class="explain">
+      <summary data-i18n="explainTitle">💡 What's the ML idea here?</summary>
+      <p data-i18n="l3Explain"><b>Reinforcement learning</b> = no labels, no answer key — just <b>rewards and penalties</b>. The bot wanders
+      by trial and error; every move updates its <b>Q-table</b> ("how good is action A in cell S?"). Watch the amber glow
+      spread <i>backwards</i> from the battery as knowledge propagates. Then try the evil experiment: set the fire
+      penalty to −1 and retrain — the bot will happily take the fiery shortcut, because <b>the bot learns whatever your
+      rewards actually say</b>, not what you meant. (This is how game AIs, robots, and chatbots get fine-tuned.)</p>
+    </details>
+
+    <div class="maze-layout">
+      <div>
+        <canvas id="l3-canvas" class="game" width="640" height="480"></canvas>
+        <div class="legend">
+          <span data-i18n="l3LegAgent">🤖 agent</span><span data-i18n="l3LegGoal">🔋 battery (goal)</span><span data-i18n="l3LegFire">🔥 fire (penalty, passable)</span>
+          <span><span class="swatch" style="background:#2a3450"></span> <span data-i18n="l3LegWall">wall</span></span>
+          <span><span class="swatch" style="background:rgba(255,183,3,.5)"></span> <span data-i18n="l3LegHi">high Q (good)</span></span>
+          <span><span class="swatch" style="background:rgba(255,84,112,.5)"></span> <span data-i18n="l3LegLo">negative Q (bad)</span></span>
+        </div>
+      </div>
+      <div class="ctrl-panel">
+        <h4 data-i18n="l3Panel">Reward Engineering</h4>
+        <div class="slider-row">
+          <label><span data-i18n="l3Rew">🔋 Battery reward</span> <b id="l3-rew-val">+10</b></label>
+          <input type="range" id="l3-rew" min="1" max="50" value="10" oninput="MazeGame.syncSliders()">
+        </div>
+        <div class="slider-row">
+          <label><span data-i18n="l3Pen">🔥 Fire penalty</span> <b id="l3-pen-val">−50</b></label>
+          <input type="range" id="l3-pen" min="1" max="100" value="50" oninput="MazeGame.syncSliders()">
+        </div>
+        <div class="slider-row">
+          <label><span data-i18n="l3StepCost">👣 Step cost</span> <b data-i18n="l3StepFixed">−1 (fixed)</b></label>
+        </div>
+        <div class="slider-row">
+          <label><span data-i18n="l3Speed">⚡ Training speed</span> <b id="l3-speed-val">×20</b></label>
+          <input type="range" id="l3-speed" min="1" max="100" value="20" oninput="MazeGame.syncSliders()">
+        </div>
+        <div class="hud" style="margin:4px 0">
+          <span class="chip"><span data-i18n="l3ChipEp">Episodes</span> <b id="l3-episodes">0</b></span>
+          <span class="chip"><span data-i18n="l3ChipEps">ε explore</span> <b id="l3-eps">0.90</b></span>
+        </div>
+        <canvas id="rewardChart" width="256" height="56"></canvas>
+        <p class="muted" style="font-size:12px;margin-top:-6px" data-i18n="l3Chart">reward per episode (learning curve)</p>
+        <button class="btn amber primary" id="l3-train" onclick="MazeGame.toggleTrain()">🏋️ Train Bot</button>
+        <button class="btn amber" id="l3-test" onclick="MazeGame.testBot()" data-i18n="l3Test">🎯 Test Bot (greedy run)</button>
+        <button class="btn amber" onclick="MazeGame.resetBrain()" data-i18n="l3Reset">🧠 Reset Brain (clear Q-table)</button>
+        <div class="status-line" id="l3-status"></div>
+      </div>
+    </div>
+
+    <div id="l3-results" class="panel center result-panel" style="display:none">
+      <div style="font-size:48px" id="l3-res-emoji">🔋</div>
+      <h3 id="l3-res-title">The bot made it!</h3>
+      <p class="muted" id="l3-res-detail"></p>
+      <div class="big-metric" style="color:var(--amber);text-shadow:0 0 24px rgba(255,183,3,.45)" id="l3-res-score">0</div>
+      <div class="takeaway" style="border-color:var(--amber)" data-i18n="l3Takeaway">🔑 <b>Takeaway:</b> Reinforcement learning = trial &amp; error guided by <b>rewards</b>. Change the rewards and you change the behavior — the bot optimizes what you <i>measure</i>, not what you <i>mean</i>.</div>
+      <div class="result-actions">
+        <button class="btn amber primary" onclick="MazeGame.closeResults()" data-i18n="l3Keep">↻ Keep Experimenting</button>
+        <button class="btn amber" onclick="App.show('screen-dash')" data-i18n="backArcade">Back to Arcade</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+"use strict";
+/* ════════════════════════════════════════════════════════════
+   I18N — English / العربية
+   ════════════════════════════════════════════════════════════ */
+const I18N = {
+  en: {
+    tagline: "Train your brain to train the machines. Three paradigms. Three games. Let's go.",
+    done: "✓ DONE", best: "🏆 Best score:", back: "← Arcade", backArcade: "Back to Arcade",
+    explainTitle: "💡 What's the ML idea here?",
+    footer: `BSS Tech Academy · "The AI Blueprint" lab · works offline, no installs, no mercy 😎`,
+    lvl1: "Level 1 · Supervised Learning", lvl2: "Level 2 · Unsupervised Learning", lvl3: "Level 3 · Reinforcement Learning",
+    card1Title: "The Spam &amp; Ham Classifier", card1Sub: "Learning from labeled data",
+    card1Desc: "Study labeled training emails, then classify a flood of new ones before the timer runs out. You <i>are</i> the model.",
+    card2Title: "The Cluster Finder", card2Sub: "Finding hidden patterns — no labels",
+    card2Desc: "A galaxy of unlabeled data points. Drop centroids and run K-Means to watch the machine discover groups on its own.",
+    card3Title: "The Bot Maze Trainer", card3Sub: "Trial &amp; error with rewards",
+    card3Desc: "Tune rewards and penalties, then train a Q-learning bot to find the battery — and watch it learn to fear the fire.",
+
+    /* Level 1 */
+    l1Name: "📧 The Spam &amp; Ham Classifier", l1Tag: "Supervised",
+    l1Explain: `<b>Supervised learning</b> means learning from examples that come with the correct answers (<b>labels</b>). First you'll see <b>training data</b> — emails already stamped SPAM or HAM (not-spam). Your brain will pick up the patterns (ALL CAPS, "FREE!!!", sketchy senders…). Then you'll classify <b>new, unlabeled</b> emails — exactly what a trained spam filter does millions of times a day.`,
+    l1Mission: "Your mission",
+    l1MissionText: `Phase 1: study <b style="color:var(--text)">10 labeled training emails</b>.<br>Phase 2: classify <b style="color:var(--text)">12 mystery emails</b> — 12 seconds each.<br>+10 for a correct call, −5 for a wrong one. Misses count against your accuracy!`,
+    l1Start: "▶ Start Training Phase",
+    l1TrainProgress: "Training example {i} / {n}",
+    l1Memorize: "🧠 The machine memorizes patterns from labeled examples…",
+    l1Skip: "Skip ahead — I've got the pattern ⏭",
+    l1ChipEmail: "Email", l1ChipScore: "Score", l1ChipStreak: "Streak",
+    l1From: "From:", l1Ham: "✉️ HAM", l1Spam: "🗑️ SPAM",
+    l1StampSpam: "SPAM", l1StampHam: "HAM",
+    l1Kbd: "Keyboard: <kbd>←</kbd> HAM &nbsp;·&nbsp; <kbd>→</kbd> SPAM",
+    l1Correct: "✅ Correct! +10",
+    l1WrongSpam: "❌ That was SPAM! −5", l1WrongHam: "❌ That was legit HAM! −5",
+    l1TooSlow: "⏰ Too slow! It was {label}",
+    l1TitleElite: "Elite spam filter!", l1TitleTrained: "Model trained!", l1TitleNeeds: "Model needs more training…",
+    l1AccLabel: "Your model's accuracy on unseen data:", l1FinalScore: "Final score:",
+    l1Tp: "Spam caught ✅", l1Fn: "Spam let through 😬", l1Fp: "Good mail trashed 🗑️💀", l1Tn: "Good mail kept ✅",
+    l1NoteFp: "⚠️ {n} false positive(s) — you trashed real mail. In production, that's the costly mistake!",
+    l1NoteFn: "⚠️ {n} spam slipped into the inbox. Tighten that filter!",
+    l1NotePerfect: "💎 Perfect confusion matrix — zero false positives, zero false negatives!",
+    l1Takeaway: "🔑 <b>Takeaway:</b> Supervised learning = learning a mapping from <b>labeled examples</b> to answers, then applying it to data it has never seen. The labels ARE the teacher.",
+    l1Again: "↻ Play Again",
+
+    /* Level 2 */
+    l2Name: "🌌 The Cluster Finder", l2Tag: "Unsupervised",
+    l2Explain: `<b>Unsupervised learning</b> gets <b>no labels at all</b> — just raw data. The algorithm's job is to discover hidden structure by itself. Here you'll run <b>K-Means</b>: drop K "centroids" (cluster centers), then each step the algorithm ① assigns every point to its nearest centroid and ② moves each centroid to the middle of its points. Repeat until nothing moves — the machine just <i>found groups nobody told it about</i>. (Real uses: customer segments, galaxy types, playlist vibes.)`,
+    l2LegPoint: "unlabeled point", l2LegCentroid: "✛ centroid", l2LegTrue: "⭕ dashed = hidden true groups (revealed at the end)",
+    l2KTitle: "K — number of clusters",
+    l2StatusPlace: "<b>Click the canvas</b> to place your {k} centroids. No answer key — just guess where the groups are!",
+    l2StatusMore: "Nice. <b>{n} more centroid{s}</b> to place.",
+    l2StatusReady: "All {k} centroids placed. Hit <b>Run 1 K-Means Step</b> (or Auto-Run) and watch the machine work.",
+    l2StatusStep: "Step {i}: points grabbed by nearest centroid → centroids slide to their cluster's <b>mean</b>.",
+    l2StatusConverged: "<b>Converged in {i} steps!</b> Nothing moves anymore — the clusters are stable. Dashed rings show the hidden true groups.",
+    l2ChipIter: "Iteration", l2ChipMess: "Messiness",
+    l2Step: "⚙️ Run 1 K-Means Step", l2Auto: "⏩ Auto-Run to Convergence", l2Clear: "✖ Clear Centroids", l2New: "🎲 New Random Data",
+    l2MessNote: `Messiness = total distance from points to their centroid (inertia). <b style="color:var(--text)">Lower is better.</b>`,
+    l2ResTitle: "Clusters discovered!", l2ResLabel: "How close you got to the best possible grouping:",
+    l2NoteHigh: "Converged in {i} iterations — you found the same grouping the algorithm finds from the best possible start. Flawless.",
+    l2NoteMid: `Converged in {i} iterations. Close to optimal! K-Means can get stuck in "local optima" depending on where centroids start — try new starting spots.`,
+    l2NoteLow: "Converged in {i} iterations, but in a weak local optimum. Bad starting centroids → bad clusters. Clear and try dropping them nearer the blobs!",
+    l2Takeaway: `🔑 <b>Takeaway:</b> Unsupervised learning = discovering structure in data with <b>zero labels</b>. Nobody said "these are the groups" — K-Means found them from geometry alone.`,
+    l2AgainBtn: "🎲 New Data, Go Again",
+    l2CanvasHint: "👆 click to place centroid {i} of {k}",
+
+    /* Level 3 */
+    l3Name: "🤖 The Bot Maze Trainer", l3Tag: "Reinforcement",
+    l3Explain: `<b>Reinforcement learning</b> = no labels, no answer key — just <b>rewards and penalties</b>. The bot wanders by trial and error; every move updates its <b>Q-table</b> ("how good is action A in cell S?"). Watch the amber glow spread <i>backwards</i> from the battery as knowledge propagates. Then try the evil experiment: set the fire penalty to −1 and retrain — the bot will happily take the fiery shortcut, because <b>the bot learns whatever your rewards actually say</b>, not what you meant. (This is how game AIs, robots, and chatbots get fine-tuned.)`,
+    l3LegAgent: "🤖 agent", l3LegGoal: "🔋 battery (goal)", l3LegFire: "🔥 fire (penalty, passable)",
+    l3LegWall: "wall", l3LegHi: "high Q (good)", l3LegLo: "negative Q (bad)",
+    l3Panel: "Reward Engineering",
+    l3Rew: "🔋 Battery reward", l3Pen: "🔥 Fire penalty", l3StepCost: "👣 Step cost", l3StepFixed: "−1 (fixed)", l3Speed: "⚡ Training speed",
+    l3ChipEp: "Episodes", l3ChipEps: "ε explore",
+    l3Chart: "reward per episode (learning curve)",
+    l3Train: "🏋️ Train Bot", l3Pause: "⏸ Pause Training", l3Test: "🎯 Test Bot (greedy run)", l3Reset: "🧠 Reset Brain (clear Q-table)",
+    l3StatusStart: "Hit <b>Train Bot</b> and watch it stumble, learn, and conquer.",
+    l3StatusWiped: "🧠 Brain wiped. The bot knows <b>nothing</b> again. Train it!",
+    l3StatusTraining: "🏋️ Training… watch the <b>amber glow spread backwards from the battery</b> — that's the Q-values propagating.",
+    l3StatusGreedy: "🎯 Greedy run — no exploring, the bot only uses what it <b>learned</b>.",
+    l3StatusExperiment: "🧪 Experiment: set 🔥 penalty to <b>−1</b>, hit <b>Reset Brain</b>, retrain, and test again…",
+    l3LostTitle: "The bot got lost!",
+    l3LostDetail: "It wandered {steps} steps and never found the battery. It needs more training episodes — hit Train Bot and let ε-greedy exploration do its thing.",
+    l3OptTitle: "Optimal path — fully trained!",
+    l3OptDetail: "Battery reached in {steps} steps with zero fire damage. That's the best safe route (optimal = {opt}).",
+    l3SafeTitle: "Safe... but scenic.",
+    l3SafeDetail: "Battery reached in {steps} steps, no fire — but the optimal safe route is {opt}. More training tightens the path.",
+    l3FireTitle: "It walked through FIRE.",
+    l3FireDetail: "Battery reached in {steps} steps, taking {fires} fire hit(s). With your fire penalty at {pen}, the shortcut was mathematically worth it. The bot learned YOUR values — crank the penalty to −50+ and retrain to see it change its mind.",
+    l3Takeaway: "🔑 <b>Takeaway:</b> Reinforcement learning = trial &amp; error guided by <b>rewards</b>. Change the rewards and you change the behavior — the bot optimizes what you <i>measure</i>, not what you <i>mean</i>.",
+    l3Keep: "↻ Keep Experimenting", l3Pts: "pts",
+  },
+
+  ar: {
+    tagline: "درّب عقلك لتدرّب الآلات. ثلاثة أنماط تعلّم. ثلاث ألعاب. يلا بينا!",
+    done: "✓ تم", best: "🏆 أفضل نتيجة:", back: "→ الأركيد", backArcade: "العودة إلى الأركيد",
+    explainTitle: "💡 ما فكرة تعلّم الآلة هنا؟",
+    footer: "أكاديمية BSS التقنية · معمل «مخطط الذكاء الاصطناعي» · يعمل بدون إنترنت، بدون تثبيت، بدون رحمة 😎",
+    lvl1: "المستوى 1 · التعلّم الموجَّه", lvl2: "المستوى 2 · التعلّم غير الموجَّه", lvl3: "المستوى 3 · التعلّم المعزَّز",
+    card1Title: "مصنِّف السبام والرسائل السليمة", card1Sub: "التعلّم من بيانات معنونة",
+    card1Desc: "ادرس رسائل تدريب معنونة، ثم صنّف سيلًا من الرسائل الجديدة قبل انتهاء الوقت. أنت <i>نفسك</i> النموذج!",
+    card2Title: "مكتشف العناقيد", card2Sub: "اكتشاف الأنماط الخفية — بدون تسميات",
+    card2Desc: "مجرّة من نقاط بيانات بلا تسميات. ضع المراكز وشغّل K-Means لترى الآلة تكتشف المجموعات بنفسها.",
+    card3Title: "مدرّب روبوت المتاهة", card3Sub: "التجربة والخطأ مع المكافآت",
+    card3Desc: "اضبط المكافآت والعقوبات ثم درّب روبوت Q-Learning ليصل إلى البطارية — وشاهده يتعلّم الخوف من النار.",
+
+    /* المستوى 1 */
+    l1Name: "📧 مصنِّف السبام والرسائل السليمة", l1Tag: "تعلّم موجَّه",
+    l1Explain: `<b>التعلّم الموجَّه</b> يعني التعلّم من أمثلة مرفقة بالإجابات الصحيحة (<b>التسميات</b>). أولًا سترى <b>بيانات التدريب</b> — رسائل مختومة مسبقًا «سبام» أو «سليم». سيلتقط عقلك الأنماط (حروف كبيرة، «مجاني!!!»، مرسِل مريب…). بعدها ستصنّف رسائل <b>جديدة بلا تسميات</b> — وهذا بالضبط ما يفعله فلتر السبام المدرَّب ملايين المرات يوميًا.`,
+    l1Mission: "مهمتك",
+    l1MissionText: `المرحلة 1: ادرس <b style="color:var(--text)">10 رسائل تدريب معنونة</b>.<br>المرحلة 2: صنّف <b style="color:var(--text)">12 رسالة غامضة</b> — 12 ثانية لكل رسالة.<br>+10 للإجابة الصحيحة و −5 للخاطئة. والتأخير يُحسب ضد دقّتك!`,
+    l1Start: "▶ ابدأ مرحلة التدريب",
+    l1TrainProgress: "مثال التدريب {i} / {n}",
+    l1Memorize: "🧠 الآلة تحفظ الأنماط من الأمثلة المعنونة…",
+    l1Skip: "تخطَّ — فهمت النمط ⏭",
+    l1ChipEmail: "رسالة", l1ChipScore: "النقاط", l1ChipStreak: "التتابع",
+    l1From: "من:", l1Ham: "✉️ سليم", l1Spam: "🗑️ سبام",
+    l1StampSpam: "سبام", l1StampHam: "سليم",
+    l1Kbd: "لوحة المفاتيح: <kbd>←</kbd> سليم &nbsp;·&nbsp; <kbd>→</kbd> سبام",
+    l1Correct: "✅ صح! +10",
+    l1WrongSpam: "❌ كانت سبام! −5", l1WrongHam: "❌ كانت رسالة سليمة! −5",
+    l1TooSlow: "⏰ متأخر! كانت {label}",
+    l1TitleElite: "فلتر سبام أسطوري!", l1TitleTrained: "تم تدريب النموذج!", l1TitleNeeds: "النموذج يحتاج مزيدًا من التدريب…",
+    l1AccLabel: "دقّة نموذجك على بيانات لم يرها من قبل:", l1FinalScore: "النتيجة النهائية:",
+    l1Tp: "سبام تم اصطياده ✅", l1Fn: "سبام تسلّل للبريد 😬", l1Fp: "رسائل سليمة في القمامة 🗑️💀", l1Tn: "رسائل سليمة سلِمت ✅",
+    l1NoteFp: "⚠️ {n} إنذار كاذب — رميت بريدًا حقيقيًا في القمامة. في الأنظمة الحقيقية هذا هو الخطأ الأغلى!",
+    l1NoteFn: "⚠️ {n} رسالة سبام تسلّلت إلى البريد. شدّد الفلتر!",
+    l1NotePerfect: "💎 مصفوفة ارتباك مثالية — صفر إنذارات كاذبة وصفر سبام متسلّل!",
+    l1Takeaway: "🔑 <b>الخلاصة:</b> التعلّم الموجَّه = تعلّم قاعدة من <b>أمثلة معنونة</b> إلى إجابات، ثم تطبيقها على بيانات جديدة لم يرها النموذج. التسميات هي المعلّم.",
+    l1Again: "↻ العب مرة أخرى",
+
+    /* المستوى 2 */
+    l2Name: "🌌 مكتشف العناقيد", l2Tag: "غير موجَّه",
+    l2Explain: `<b>التعلّم غير الموجَّه</b> لا يحصل على <b>أي تسميات</b> — فقط بيانات خام، ومهمة الخوارزمية اكتشاف البنية الخفية بنفسها. هنا ستشغّل <b>K-Means</b>: ضع K «مراكز»، وفي كل خطوة ① تُسنَد كل نقطة لأقرب مركز ② ينتقل كل مركز إلى منتصف نقاطه. كرّر حتى يتوقف كل شيء عن الحركة — الآلة <i>اكتشفت مجموعات لم يخبرها بها أحد</i>! (استخدامات حقيقية: شرائح العملاء، أنواع المجرات، أجواء قوائم التشغيل.)`,
+    l2LegPoint: "نقطة بلا تسمية", l2LegCentroid: "✛ مركز العنقود", l2LegTrue: "⭕ المتقطّع = المجموعات الحقيقية المخفية (تنكشف في النهاية)",
+    l2KTitle: "K — عدد العناقيد",
+    l2StatusPlace: "<b>اضغط على اللوحة</b> لوضع مراكزك الـ{k}. لا يوجد مفتاح إجابة — خمّن أماكن المجموعات!",
+    l2StatusMore: "جميل. تبقّى وضع <b>{n}</b> من المراكز.",
+    l2StatusReady: "تم وضع المراكز الـ{k}. اضغط <b>شغّل خطوة K-Means</b> (أو التشغيل التلقائي) وشاهد الآلة تعمل.",
+    l2StatusStep: "الخطوة {i}: كل نقطة انجذبت لأقرب مركز ← المراكز تنزلق إلى <b>متوسط</b> عنقودها.",
+    l2StatusConverged: "<b>تقارُب بعد {i} خطوات!</b> لا شيء يتحرك — العناقيد استقرت. الدوائر المتقطعة تُظهر المجموعات الحقيقية المخفية.",
+    l2ChipIter: "التكرار", l2ChipMess: "الفوضى",
+    l2Step: "⚙️ شغّل خطوة K-Means", l2Auto: "⏩ تشغيل تلقائي حتى التقارُب", l2Clear: "✖ مسح المراكز", l2New: "🎲 بيانات عشوائية جديدة",
+    l2MessNote: `الفوضى = مجموع مسافات النقاط عن مراكزها (Inertia). <b style="color:var(--text)">الأقل أفضل.</b>`,
+    l2ResTitle: "تم اكتشاف العناقيد!", l2ResLabel: "مدى قربك من أفضل تجميع ممكن:",
+    l2NoteHigh: "تقارُب في {i} تكرارات — وصلت لنفس التجميع الذي تجده الخوارزمية من أفضل بداية ممكنة. ممتاز!",
+    l2NoteMid: "تقارُب في {i} تكرارات. قريب من الأمثل! قد تعلق K-Means في «حل محلي» حسب أماكن البداية — جرّب أماكن بداية جديدة.",
+    l2NoteLow: "تقارُب في {i} تكرارات لكن في حل محلي ضعيف. بداية سيئة ← عناقيد سيئة. امسح المراكز وضعها أقرب للتجمعات!",
+    l2Takeaway: "🔑 <b>الخلاصة:</b> التعلّم غير الموجَّه = اكتشاف البنية في البيانات <b>بدون أي تسميات</b>. لم يقل أحد «هذه هي المجموعات» — وجدتها K-Means من الهندسة وحدها.",
+    l2AgainBtn: "🎲 بيانات جديدة، من جديد",
+    l2CanvasHint: "👆 اضغط لوضع المركز {i} من {k}",
+
+    /* المستوى 3 */
+    l3Name: "🤖 مدرّب روبوت المتاهة", l3Tag: "تعلّم معزَّز",
+    l3Explain: `<b>التعلّم المعزَّز</b> = لا تسميات ولا مفتاح إجابة — فقط <b>مكافآت وعقوبات</b>. يتجول الروبوت بالتجربة والخطأ؛ وكل حركة تحدّث <b>جدول Q</b> («ما مدى جودة الفعل A في الخلية S؟»). راقب التوهج الكهرماني ينتشر <i>للخلف</i> من البطارية — هكذا تنتقل المعرفة. ثم جرّب التجربة الشريرة: اجعل عقوبة النار −1 وأعد التدريب — سيأخذ الروبوت الطريق المختصر عبر النار بكل سرور، لأن <b>الروبوت يتعلم ما تقوله مكافآتك فعلًا</b>، لا ما تقصده. (هكذا تُدرَّب وكلاء الألعاب والروبوتات وروبوتات المحادثة.)`,
+    l3LegAgent: "🤖 الوكيل", l3LegGoal: "🔋 البطارية (الهدف)", l3LegFire: "🔥 نار (عقوبة، يمكن عبورها)",
+    l3LegWall: "جدار", l3LegHi: "قيمة Q عالية (جيد)", l3LegLo: "قيمة Q سالبة (سيئ)",
+    l3Panel: "هندسة المكافآت",
+    l3Rew: "🔋 مكافأة البطارية", l3Pen: "🔥 عقوبة النار", l3StepCost: "👣 تكلفة الخطوة", l3StepFixed: "−1 (ثابتة)", l3Speed: "⚡ سرعة التدريب",
+    l3ChipEp: "الحلقات", l3ChipEps: "ε استكشاف",
+    l3Chart: "المكافأة لكل حلقة (منحنى التعلّم)",
+    l3Train: "🏋️ درّب الروبوت", l3Pause: "⏸ أوقف التدريب", l3Test: "🎯 اختبر الروبوت (جولة جشعة)", l3Reset: "🧠 امسح الدماغ (جدول Q)",
+    l3StatusStart: "اضغط <b>درّب الروبوت</b> وشاهده يتعثر ويتعلم وينتصر.",
+    l3StatusWiped: "🧠 تم مسح الدماغ. الروبوت لا يعرف <b>شيئًا</b> من جديد. درّبه!",
+    l3StatusTraining: "🏋️ جارٍ التدريب… راقب <b>التوهج الكهرماني ينتشر للخلف من البطارية</b> — هذه قيم Q تنتقل.",
+    l3StatusGreedy: "🎯 جولة جشعة — بلا استكشاف، الروبوت يستخدم فقط ما <b>تعلّمه</b>.",
+    l3StatusExperiment: "🧪 تجربة: اجعل عقوبة 🔥 <b>−1</b>، اضغط <b>امسح الدماغ</b>، درّب من جديد، ثم اختبر…",
+    l3LostTitle: "الروبوت تاه!",
+    l3LostDetail: "تجوّل {steps} خطوة ولم يجد البطارية. يحتاج مزيدًا من حلقات التدريب — اضغط «درّب الروبوت» ودع استكشاف ε-greedy يقوم بعمله.",
+    l3OptTitle: "مسار مثالي — تدريب كامل!",
+    l3OptDetail: "وصل للبطارية في {steps} خطوة بدون أي ضرر من النار. هذا أفضل مسار آمن (الأمثل = {opt}).",
+    l3SafeTitle: "آمن… لكنه طريق سياحي.",
+    l3SafeDetail: "وصل للبطارية في {steps} خطوة بلا نار — لكن المسار الآمن الأمثل هو {opt} خطوة. مزيد من التدريب يقصّر الطريق.",
+    l3FireTitle: "مشى وسط النار!",
+    l3FireDetail: "وصل للبطارية في {steps} خطوة متلقيًا {fires} ضربة نار. بعقوبة نار = {pen}، كان الاختصار مربحًا رياضيًا. الروبوت تعلّم قيمك أنت — ارفع العقوبة إلى −50 أو أكثر وأعد التدريب ليغيّر رأيه.",
+    l3Takeaway: "🔑 <b>الخلاصة:</b> التعلّم المعزَّز = تجربة وخطأ تقودهما <b>المكافآت</b>. غيّر المكافآت يتغيّر السلوك — الروبوت يحسّن ما <i>تقيسه</i>، لا ما <i>تقصده</i>.",
+    l3Keep: "↻ واصل التجارب", l3Pts: "نقطة",
+  },
+};
+
+let LANG = "en";
+try { LANG = localStorage.getItem("mlArcadeLang") || "en"; } catch (e) {}
+if (!I18N[LANG]) LANG = "en";
+
+function t(key, vars) {
+  let s = (I18N[LANG] && I18N[LANG][key]) ?? I18N.en[key] ?? key;
+  if (vars) for (const k of Object.keys(vars)) s = s.split("{" + k + "}").join(vars[k]);
+  return s;
+}
+function applyI18n() {
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+}
+function setLang(lang) {
+  LANG = I18N[lang] ? lang : "en";
+  try { localStorage.setItem("mlArcadeLang", LANG); } catch (e) {}
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = LANG === "ar" ? "rtl" : "ltr";
+  document.getElementById("lang-toggle").textContent = LANG === "ar" ? "English" : "عربي";
+  applyI18n();
+  /* refresh dynamic/state-dependent text */
+  const trainBtn = document.getElementById("l3-train");
+  trainBtn.textContent = MazeGame.training ? t("l3Pause") : t("l3Train");
+  if (ClusterGame.lastStatus) ClusterGame.setStatus(...ClusterGame.lastStatus);
+  if (MazeGame.lastStatus) MazeGame.setStatus(...MazeGame.lastStatus);
+}
+function toggleLang() { setLang(LANG === "ar" ? "en" : "ar"); }
+
+/* ════════════════════════════════════════════════════════════
+   APP SHELL — screen router, persistence, confetti
+   ════════════════════════════════════════════════════════════ */
+const App = {
+  KEY: "mlArcadeV1",
+  state: { 1: { best: null, done: false }, 2: { best: null, done: false }, 3: { best: null, done: false } },
+
+  load() {
+    try {
+      const raw = localStorage.getItem(this.KEY);
+      if (raw) Object.assign(this.state, JSON.parse(raw));
+    } catch (e) { /* private mode etc. — play without persistence */ }
+    this.renderDash();
+  },
+  save() {
+    try { localStorage.setItem(this.KEY, JSON.stringify(this.state)); } catch (e) {}
+  },
+  show(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    window.scrollTo({ top: 0 });
+    if (id !== "screen-l3") MazeGame.pauseTraining();
+    if (id !== "screen-l2") ClusterGame.stopAuto();
+    if (id !== "screen-l1") SpamGame.stopTimers();
+    if (id === "screen-dash") this.renderDash();
+  },
+  complete(level, score, passed) {
+    const s = this.state[level];
+    if (s.best === null || score > s.best) s.best = score;
+    if (passed) s.done = true;
+    this.save();
+    this.renderDash();
+    if (passed) this.confetti();
+  },
+  renderDash() {
+    for (const lvl of [1, 2, 3]) {
+      const s = this.state[lvl];
+      document.getElementById("best-" + lvl).textContent = s.best === null ? "—" : s.best;
+      document.getElementById("card-" + lvl).classList.toggle("completed", !!s.done);
+    }
+  },
+  confetti() {
+    const colors = ["#00f2fe", "#a06bff", "#ffb703", "#3ddc84", "#ff5470"];
+    for (let i = 0; i < 46; i++) {
+      const d = document.createElement("div");
+      d.className = "confetti";
+      d.style.left = Math.random() * 100 + "vw";
+      d.style.background = colors[i % colors.length];
+      d.style.animationDuration = 1.8 + Math.random() * 1.6 + "s";
+      d.style.animationDelay = Math.random() * 0.4 + "s";
+      d.style.transform = "rotate(" + Math.random() * 360 + "deg)";
+      document.body.appendChild(d);
+      setTimeout(() => d.remove(), 4000);
+    }
+  },
+};
+
+/* small helpers */
+const $ = id => document.getElementById(id);
+const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+/* ════════════════════════════════════════════════════════════
+   LEVEL 1 — SUPERVISED: SPAM & HAM CLASSIFIER
+   ════════════════════════════════════════════════════════════ */
+const SpamGame = {
+  TRAIN: [
+    { from: "prince@lucky-win.biz", label: "spam",
+      en: "CONGRATULATIONS!!! You WON $5,000,000 in the international lottery! Click NOW to claim your prize!!!",
+      ar: "مبروووك!!! ربحت 5,000,000 دولار في اليانصيب العالمي! اضغط الآن لاستلام جائزتك!!!" },
+    { from: "sara@university.edu", label: "ham",
+      en: "Hey, are we still meeting at the library at 5 to study for the CS exam?",
+      ar: "أهلًا، هل ما زلنا سنلتقي في المكتبة الساعة 5 للمذاكرة لامتحان البرمجة؟" },
+    { from: "deals@free-stuff.xyz", label: "spam",
+      en: "FREE iPhone 17!!! Limited offer — act FAST and click here before it's GONE!!!",
+      ar: "آيفون 17 مجااانًا!!! عرض محدود — اضغط هنا بسرعة قبل نفاد الكمية!!!" },
+    { from: "prof.adams@university.edu", label: "ham",
+      en: "Reminder: the lab report is due Friday. Submit it on the course portal.",
+      ar: "تذكير: تقرير المعمل مطلوب يوم الجمعة. سلّمه عبر بوابة المقرر." },
+    { from: "security@paypa1-alerts.com", label: "spam",
+      en: "Your account has been LOCKED. Verify your password IMMEDIATELY at this link or lose access!",
+      ar: "تم قفل حسابك! أكّد كلمة المرور فورًا من هذا الرابط وإلا ستفقد حسابك نهائيًا!" },
+    { from: "mom@gmail.com", label: "ham",
+      en: "Don't forget grandma's birthday dinner on Sunday 💛 bring the cake!",
+      ar: "لا تنسَ عشاء عيد ميلاد الجدة يوم الأحد 💛 وأحضر التورتة!" },
+    { from: "match@luv4u.click", label: "spam",
+      en: "Hot singles in YOUR area want to meet you TONIGHT!!! Click to chat now!!!",
+      ar: "أشخاص بالقرب منك يريدون التعرف عليك الليلة!!! اضغط للدردشة الآن!!!" },
+    { from: "orders@bookstore.com", label: "ham",
+      en: "Your package has shipped. You can track it anytime in your account.",
+      ar: "تم شحن طلبك. يمكنك تتبعه في أي وقت من حسابك." },
+    { from: "jobs@easy-cash.top", label: "spam",
+      en: "Make $$$ working from home!!! No experience needed — start earning TODAY!!!",
+      ar: "اكسب $$$ من البيت!!! بدون أي خبرة — ابدأ الربح اليوم!!!" },
+    { from: "omar@company.com", label: "ham",
+      en: "Heads up: team standup moved to 10:30 tomorrow, same room.",
+      ar: "تنبيه: اجتماع الفريق أصبح الساعة 10:30 غدًا، في نفس القاعة." },
+  ],
+  TEST: [
+    { from: "travel@dream-trips.win", label: "spam",
+      en: "URGENT!!! Claim your FREE vacation to Hawaii — click NOW, only 3 spots left!!!",
+      ar: "عاجل!!! استلم رحلتك المجانية إلى هاواي — اضغط الآن، تبقّى 3 أماكن فقط!!!" },
+    { from: "nour@university.edu", label: "ham",
+      en: "Can you send me the notes from today's AI lecture? I missed the last part.",
+      ar: "هل يمكنك إرسال ملاحظات محاضرة الذكاء الاصطناعي اليوم؟ فاتني الجزء الأخير." },
+    { from: "rewards@mega-prizes.biz", label: "spam",
+      en: "You've been SELECTED for a $1,000 gift card!!! Act fast, offer expires in 10 minutes!!!",
+      ar: "تم اختيارك لبطاقة هدايا بقيمة 1,000 دولار!!! أسرع، العرض ينتهي خلال 10 دقائق!!!" },
+    { from: "prof.adams@university.edu", label: "ham",
+      en: "The practice quiz for Friday is now posted on the portal. Good luck!",
+      ar: "تم نشر اختبار التدريب ليوم الجمعة على البوابة. بالتوفيق!" },
+    { from: "alerts@secure-bank1.info", label: "spam",
+      en: "FINAL WARNING: your bank account will be CLOSED today. Verify your details NOW!",
+      ar: "تحذير أخير: سيتم إغلاق حسابك البنكي اليوم. أكّد بياناتك الآن!" },
+    { from: "karim@gmail.com", label: "ham",
+      en: "Lunch tomorrow? The new shawarma place just opened 🌯 my treat.",
+      ar: "غداء غدًا؟ مطعم الشاورما الجديد افتتح 🌯 وعلى حسابي." },
+    { from: "invest@moon-coins.click", label: "spam",
+      en: "Get RICH with crypto!!! 1000% returns GUARANTEED $$$ join before it moons!!!",
+      ar: "اغتنِ بالعملات الرقمية!!! أرباح 1000% مضمووونة $$$ انضم قبل الانفجار!!!" },
+    { from: "library@university.edu", label: "ham",
+      en: "Your library book is due in 3 days. You can renew it online if needed.",
+      ar: "كتاب المكتبة مستحق الإرجاع خلال 3 أيام. يمكنك التجديد عبر الإنترنت." },
+    { from: "prince.abdul@royal-mail.top", label: "spam",
+      en: "Hello dear friend, I am a prince and I urgently need your help moving $10,000,000...",
+      ar: "صديقي العزيز، أنا أمير وأحتاج مساعدتك العاجلة لنقل 10,000,000 دولار..." },
+    { from: "dina@company.com", label: "ham",
+      en: "Meeting notes attached — I highlighted your action items in yellow.",
+      ar: "ملاحظات الاجتماع مرفقة — ظلّلت المهام المطلوبة منك باللون الأصفر." },
+    { from: "contest@futbol-prize.xyz", label: "spam",
+      en: "WIN WIN WIN!!! FREE tickets to the World Cup final — click to enter NOW!!!",
+      ar: "اربح اربح اربح!!! تذاكر مجانية لنهائي كأس العالم — اضغط للاشتراك الآن!!!" },
+    { from: "orders@bookstore.com", label: "ham",
+      en: "Your order #4482 has been delivered. Thanks for shopping with us!",
+      ar: "طلبك رقم #4482 تم توصيله. شكرًا لتسوقك معنا!" },
+  ],
+
+  TIME_PER_CARD: 12000,   /* ms to classify each email */
+  TRAIN_CARD_MS: 3000,    /* ms each training card stays up */
+  trainIdx: 0, trainTimer: null,
+  queue: [], idx: 0, score: 0, streak: 0, answered: false,
+  timerInt: null, deadline: 0,
+  tp: 0, tn: 0, fp: 0, fn: 0, misses: 0,
+
+  open() {
+    this.stopTimers();
+    App.show("screen-l1");
+    ["l1-train", "l1-play", "l1-results"].forEach(id => $(id).style.display = "none");
+    $("l1-intro").style.display = "block";
+  },
+  stopTimers() {
+    clearInterval(this.trainTimer); clearInterval(this.timerInt);
+    this.trainTimer = this.timerInt = null;
+  },
+  stampText(label) { return label === "spam" ? t("l1StampSpam") : t("l1StampHam"); },
+
+  /* ---- phase 1: training cards ---- */
+  startTraining() {
+    $("l1-intro").style.display = "none";
+    $("l1-train").style.display = "block";
+    this.trainIdx = 0;
+    this.showTrainCard();
+    this.trainTimer = setInterval(() => {
+      this.trainIdx++;
+      if (this.trainIdx >= this.TRAIN.length) this.startClassify();
+      else this.showTrainCard();
+    }, this.TRAIN_CARD_MS);
+  },
+  showTrainCard() {
+    const e = this.TRAIN[this.trainIdx];
+    $("l1-train-progress").textContent = t("l1TrainProgress", { i: this.trainIdx + 1, n: this.TRAIN.length });
+    $("l1-train-from").innerHTML = t("l1From") + " <b>" + e.from + "</b>";
+    $("l1-train-body").textContent = e[LANG] || e.en;
+    const stamp = $("l1-train-stamp");
+    stamp.textContent = this.stampText(e.label);
+    stamp.className = "stamp " + e.label;
+    const card = $("l1-train-card");
+    card.style.animation = "none"; void card.offsetWidth; card.style.animation = "";
+  },
+
+  /* ---- phase 2: classify ---- */
+  startClassify() {
+    this.stopTimers();
+    $("l1-train").style.display = "none";
+    $("l1-play").style.display = "block";
+    this.queue = shuffle(this.TEST);
+    this.idx = 0; this.score = 0; this.streak = 0;
+    this.tp = this.tn = this.fp = this.fn = this.misses = 0;
+    $("l1-score").textContent = "0";
+    $("l1-streak").textContent = "🔥 0";
+    this.nextCard();
+  },
+  nextCard() {
+    if (this.idx >= this.queue.length) return this.finish();
+    this.answered = false;
+    const e = this.queue[this.idx];
+    $("l1-count").textContent = `${this.idx + 1}/${this.queue.length}`;
+    $("l1-from").innerHTML = t("l1From") + " <b>" + e.from + "</b>";
+    $("l1-body").textContent = e[LANG] || e.en;
+    $("l1-feedback").textContent = ""; $("l1-feedback").className = "feedback-line";
+    const card = $("l1-card");
+    card.className = "email-card";
+    card.style.animation = "none"; void card.offsetWidth; card.style.animation = "";
+    $("l1-btn-ham").disabled = $("l1-btn-spam").disabled = false;
+
+    this.deadline = performance.now() + this.TIME_PER_CARD;
+    clearInterval(this.timerInt);
+    this.timerInt = setInterval(() => {
+      const left = this.deadline - performance.now();
+      $("l1-timer").style.width = clamp(left / this.TIME_PER_CARD * 100, 0, 100) + "%";
+      if (left <= 0) this.timeout();
+    }, 50);
+  },
+  answer(guess) {
+    if (this.answered) return;
+    this.answered = true;
+    clearInterval(this.timerInt);
+    $("l1-btn-ham").disabled = $("l1-btn-spam").disabled = true;
+    const truth = this.queue[this.idx].label;
+    const correct = guess === truth;
+    if (truth === "spam") { correct ? this.tp++ : this.fn++; } else { correct ? this.tn++ : this.fp++; }
+    const fb = $("l1-feedback");
+    if (correct) {
+      this.streak++;
+      this.score += 10;
+      fb.textContent = t("l1Correct");
+      fb.classList.add("good");
+      $("l1-card").classList.add("flash-good");
+    } else {
+      this.streak = 0;
+      this.score -= 5;
+      fb.textContent = truth === "spam" ? t("l1WrongSpam") : t("l1WrongHam");
+      fb.classList.add("bad");
+      $("l1-card").classList.add("flash-bad");
+    }
+    $("l1-score").textContent = this.score;
+    $("l1-streak").textContent = "🔥 " + this.streak;
+    this.idx++;
+    setTimeout(() => this.nextCard(), 1000);
+  },
+  timeout() {
+    if (this.answered) return;
+    this.answered = true;
+    clearInterval(this.timerInt);
+    $("l1-btn-ham").disabled = $("l1-btn-spam").disabled = true;
+    const truth = this.queue[this.idx].label;
+    if (truth === "spam") this.fn++; else this.fp++;
+    this.misses++;
+    this.streak = 0;
+    $("l1-streak").textContent = "🔥 0";
+    const fb = $("l1-feedback");
+    fb.textContent = t("l1TooSlow", { label: this.stampText(truth) });
+    fb.classList.add("bad");
+    $("l1-card").classList.add("flash-bad");
+    this.idx++;
+    setTimeout(() => this.nextCard(), 1000);
+  },
+  finish() {
+    this.stopTimers();
+    $("l1-play").style.display = "none";
+    $("l1-results").style.display = "block";
+    const total = this.queue.length;
+    const correct = this.tp + this.tn;
+    const acc = Math.round(correct / total * 100);
+    $("l1-res-acc").textContent = acc + "%";
+    $("l1-res-score").textContent = this.score;
+    $("l1-tp").textContent = this.tp; $("l1-tn").textContent = this.tn;
+    $("l1-fp").textContent = this.fp; $("l1-fn").textContent = this.fn;
+    const passed = acc >= 70;
+    $("l1-res-emoji").textContent = acc >= 90 ? "🏆" : passed ? "🎉" : "🧪";
+    $("l1-res-title").textContent = acc >= 90 ? t("l1TitleElite") : passed ? t("l1TitleTrained") : t("l1TitleNeeds");
+    $("l1-res-note").textContent =
+      this.fp > 0 ? t("l1NoteFp", { n: this.fp })
+      : this.fn > 0 ? t("l1NoteFn", { n: this.fn })
+      : t("l1NotePerfect");
+    App.complete(1, this.score, passed);
+  },
+};
+
+/* keyboard for level 1 */
+document.addEventListener("keydown", e => {
+  if (!document.getElementById("screen-l1").classList.contains("active")) return;
+  if ($("l1-play").style.display === "none") return;
+  if (e.key === "ArrowLeft") { e.preventDefault(); SpamGame.answer("ham"); }
+  if (e.key === "ArrowRight") { e.preventDefault(); SpamGame.answer("spam"); }
+});
+
+/* ════════════════════════════════════════════════════════════
+   LEVEL 2 — UNSUPERVISED: K-MEANS CLUSTER FINDER
+   ════════════════════════════════════════════════════════════ */
+const ClusterGame = {
+  W: 720, H: 480,
+  COLORS: ["#00f2fe", "#ff4d8d", "#ffb703", "#7cff6b"],
+  K: 3,
+  points: [], trueCenters: [],
+  centroids: [],           // {x,y,tx,ty} in normalized [0,1] coords
+  assignments: [],
+  iter: 0, converged: false, started: false, finished: false,
+  autoTimer: null, rafId: null, optimalInertia: 0,
+  lastStatus: null,
+
+  open() {
+    this.stopAuto();
+    App.show("screen-l2");
+    $("l2-results").style.display = "none";
+    this.generateData();
+    this.clearCentroids();
+    this.startRenderLoop();
+  },
+  setStatus(key, vars) {
+    this.lastStatus = [key, vars];
+    $("l2-status").innerHTML = t(key, vars);
+  },
+
+  /* ---- data generation: 3 hidden gaussian blobs ---- */
+  generateData() {
+    this.trueCenters = [];
+    let guard = 0;
+    while (this.trueCenters.length < 3 && guard++ < 500) {
+      const c = { x: 0.16 + Math.random() * 0.68, y: 0.16 + Math.random() * 0.68 };
+      if (this.trueCenters.every(o => Math.hypot(o.x - c.x, o.y - c.y) > 0.34)) this.trueCenters.push(c);
+    }
+    while (this.trueCenters.length < 3) this.trueCenters.push({ x: Math.random(), y: Math.random() });
+    const gauss = () => {
+      let u = 0, v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    };
+    this.points = [];
+    for (const c of this.trueCenters) {
+      for (let i = 0; i < 15; i++) {
+        this.points.push({
+          x: clamp(c.x + gauss() * 0.055, 0.03, 0.97),
+          y: clamp(c.y + gauss() * 0.055, 0.03, 0.97),
+        });
+      }
+    }
+    this.optimalInertia = this.computeOptimal(this.K);
+  },
+
+  /* best-achievable inertia for K via multi-restart k-means (pure math, no rendering) */
+  computeOptimal(K) {
+    let best = Infinity;
+    for (let r = 0; r < 14; r++) {
+      const idxs = shuffle(this.points.map((_, i) => i)).slice(0, K);
+      let cents = idxs.map(i => ({ x: this.points[i].x, y: this.points[i].y }));
+      for (let it = 0; it < 60; it++) {
+        const assign = this.points.map(p => this.nearest(p, cents));
+        const next = cents.map((c, k) => {
+          const mine = this.points.filter((_, i) => assign[i] === k);
+          if (!mine.length) return { x: c.x, y: c.y };
+          return { x: mine.reduce((s, p) => s + p.x, 0) / mine.length, y: mine.reduce((s, p) => s + p.y, 0) / mine.length };
+        });
+        const moved = Math.max(...cents.map((c, k) => Math.hypot(c.x - next[k].x, c.y - next[k].y)));
+        cents = next;
+        if (moved < 1e-7) break;
+      }
+      const assign = this.points.map(p => this.nearest(p, cents));
+      best = Math.min(best, this.inertiaOf(assign, cents));
+    }
+    return best;
+  },
+  nearest(p, cents) {
+    let bi = 0, bd = Infinity;
+    cents.forEach((c, i) => { const d = (p.x - c.x) ** 2 + (p.y - c.y) ** 2; if (d < bd) { bd = d; bi = i; } });
+    return bi;
+  },
+  inertiaOf(assign, cents) {
+    return this.points.reduce((s, p, i) => {
+      const c = cents[assign[i]];
+      return s + (p.x - c.x) ** 2 + (p.y - c.y) ** 2;
+    }, 0);
+  },
+
+  /* ---- controls ---- */
+  setK(k) {
+    if (this.started && !this.finished) return; // no switching mid-run
+    this.K = k;
+    document.querySelectorAll("#l2-kpicker .btn").forEach(b => b.classList.toggle("sel", +b.dataset.k === k));
+    this.optimalInertia = this.computeOptimal(k);
+    this.clearCentroids();
+  },
+  clearCentroids() {
+    this.stopAuto();
+    this.centroids = [];
+    this.assignments = this.points.map(() => -1);
+    this.iter = 0; this.converged = false; this.started = false; this.finished = false;
+    $("l2-results").style.display = "none";
+    $("l2-iter").textContent = "0";
+    $("l2-inertia").textContent = "—";
+    $("l2-step").disabled = $("l2-auto").disabled = true;
+    this.setStatus("l2StatusPlace", { k: this.K });
+  },
+  canvasClick(e) {
+    if (this.started || this.centroids.length >= this.K) return;
+    const cv = $("l2-canvas"), r = cv.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    this.centroids.push({ x, y, tx: x, ty: y });
+    const left = this.K - this.centroids.length;
+    if (left > 0) {
+      this.setStatus("l2StatusMore", { n: left, s: left > 1 ? "s" : "" });
+    } else {
+      $("l2-step").disabled = $("l2-auto").disabled = false;
+      this.setStatus("l2StatusReady", { k: this.K });
+    }
+  },
+
+  /* ---- k-means iteration (assign → move) ---- */
+  step() {
+    if (this.converged || this.centroids.length < this.K) return;
+    this.started = true;
+    this.iter++;
+    this.assignments = this.points.map(p => this.nearest(p, this.centroids.map(c => ({ x: c.tx, y: c.ty }))));
+    let moved = 0;
+    this.centroids.forEach((c, k) => {
+      const ptx = c.tx, pty = c.ty;
+      const mine = this.points.filter((_, i) => this.assignments[i] === k);
+      if (mine.length) {
+        c.tx = mine.reduce((s, p) => s + p.x, 0) / mine.length;
+        c.ty = mine.reduce((s, p) => s + p.y, 0) / mine.length;
+      }
+      moved = Math.max(moved, Math.hypot(ptx - c.tx, pty - c.ty));
+    });
+    const inertia = this.inertiaOf(this.assignments, this.centroids.map(c => ({ x: c.tx, y: c.ty })));
+    $("l2-iter").textContent = this.iter;
+    $("l2-inertia").textContent = Math.round(inertia * 1000);
+    this.setStatus("l2StatusStep", { i: this.iter });
+    if (moved < 0.002 && this.iter > 1) this.converged = true;
+    return inertia;
+  },
+  manualStep() {
+    this.stopAuto();
+    this.step();
+    if (this.converged) this.finish();
+  },
+  autoRun() {
+    this.stopAuto();
+    const loop = () => {
+      this.step();
+      if (this.converged || this.iter >= 30) return this.finish();
+      this.autoTimer = setTimeout(loop, 650);
+    };
+    loop();
+  },
+  stopAuto() { clearTimeout(this.autoTimer); this.autoTimer = null; },
+
+  finish() {
+    if (this.finished) return;
+    this.finished = true;
+    this.stopAuto();
+    $("l2-step").disabled = $("l2-auto").disabled = true;
+    const finalInertia = this.inertiaOf(this.assignments, this.centroids.map(c => ({ x: c.tx, y: c.ty })));
+    const score = clamp(Math.round(this.optimalInertia / Math.max(finalInertia, 1e-9) * 100), 0, 100);
+    this.setStatus("l2StatusConverged", { i: this.iter });
+    $("l2-res-score").textContent = score + "%";
+    $("l2-res-note").textContent =
+      score >= 95 ? t("l2NoteHigh", { i: this.iter }) :
+      score >= 75 ? t("l2NoteMid", { i: this.iter }) :
+      t("l2NoteLow", { i: this.iter });
+    $("l2-results").style.display = "block";
+    $("l2-results").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    App.complete(2, score, score >= 60);
+  },
+
+  /* ---- render loop ---- */
+  startRenderLoop() {
+    cancelAnimationFrame(this.rafId);
+    const cv = $("l2-canvas"), ctx = cv.getContext("2d");
+    const draw = () => {
+      if (!document.getElementById("screen-l2").classList.contains("active")) { this.rafId = null; return; }
+      ctx.clearRect(0, 0, this.W, this.H);
+      /* subtle grid */
+      ctx.strokeStyle = "rgba(160,107,255,.06)";
+      ctx.lineWidth = 1;
+      for (let gx = 0; gx <= this.W; gx += 48) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, this.H); ctx.stroke(); }
+      for (let gy = 0; gy <= this.H; gy += 48) { ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(this.W, gy); ctx.stroke(); }
+
+      /* reveal hidden true groups after finish */
+      if (this.finished) {
+        ctx.setLineDash([6, 6]);
+        ctx.strokeStyle = "rgba(232,238,251,.35)";
+        ctx.lineWidth = 1.5;
+        for (const c of this.trueCenters) {
+          ctx.beginPath();
+          ctx.arc(c.x * this.W, c.y * this.H, 0.13 * this.W, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+      }
+
+      /* points */
+      this.points.forEach((p, i) => {
+        const a = this.assignments[i];
+        ctx.beginPath();
+        ctx.arc(p.x * this.W, p.y * this.H, 6, 0, Math.PI * 2);
+        if (a >= 0 && this.started) {
+          ctx.fillStyle = this.COLORS[a];
+          ctx.shadowColor = this.COLORS[a];
+          ctx.shadowBlur = 8;
+        } else {
+          ctx.fillStyle = "#9aa7c4";
+          ctx.shadowBlur = 0;
+        }
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+
+      /* centroids (lerp toward targets) */
+      this.centroids.forEach((c, k) => {
+        c.x += (c.tx - c.x) * 0.12;
+        c.y += (c.ty - c.y) * 0.12;
+        const px = c.x * this.W, py = c.y * this.H;
+        ctx.strokeStyle = this.COLORS[k];
+        ctx.lineWidth = 3.5;
+        ctx.shadowColor = this.COLORS[k];
+        ctx.shadowBlur = 14;
+        ctx.beginPath();
+        ctx.moveTo(px - 11, py); ctx.lineTo(px + 11, py);
+        ctx.moveTo(px, py - 11); ctx.lineTo(px, py + 11);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.arc(px, py, 15, 0, Math.PI * 2);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+
+      /* placement hint */
+      if (!this.started && this.centroids.length < this.K) {
+        ctx.fillStyle = "rgba(232,238,251,.55)";
+        ctx.font = "600 16px 'Segoe UI', Tahoma, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(t("l2CanvasHint", { i: this.centroids.length + 1, k: this.K }), this.W / 2, this.H - 18);
+      }
+      this.rafId = requestAnimationFrame(draw);
+    };
+    this.rafId = requestAnimationFrame(draw);
+  },
+};
+$("l2-canvas").addEventListener("click", e => ClusterGame.canvasClick(e));
+
+/* ════════════════════════════════════════════════════════════
+   LEVEL 3 — REINFORCEMENT: Q-LEARNING MAZE BOT
+   ════════════════════════════════════════════════════════════ */
+const MazeGame = {
+  GW: 8, GH: 6, CELL: 80,
+  START: { x: 0, y: 0 }, GOAL: { x: 0, y: 5 },
+  WALLS: new Set(["0,2", "2,2", "3,2", "4,2", "5,2", "7,2", "3,4", "4,4"]),
+  FIRES: new Set(["1,2", "3,1", "6,4", "5,5"]),
+  OPTIMAL_SAFE: 17, OPTIMAL_FIRE: 7,
+  ACTIONS: [{ dx: 0, dy: -1 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }, { dx: 1, dy: 0 }], // up down left right
+  ALPHA: 0.5, GAMMA: 0.9,
+
+  Q: [], episodes: 0, pos: { x: 0, y: 0 }, epSteps: 0, epReward: 0,
+  rewardHistory: [],
+  training: false, rafId: null, testTimer: null, testing: false,
+  trail: [],
+  lastStatus: null,
+
+  open() {
+    App.show("screen-l3");
+    $("l3-results").style.display = "none";
+    if (!this.Q.length) this.resetBrain(true);
+    if (!this.lastStatus) this.setStatus("l3StatusStart");
+    this.syncSliders();
+    this.draw();
+  },
+  setStatus(key, vars) {
+    this.lastStatus = [key, vars];
+    $("l3-status").innerHTML = t(key, vars);
+  },
+  key(x, y) { return x + "," + y; },
+  idx(x, y) { return y * this.GW + x; },
+  isWall(x, y) { return x < 0 || y < 0 || x >= this.GW || y >= this.GH || this.WALLS.has(this.key(x, y)); },
+  isFire(x, y) { return this.FIRES.has(this.key(x, y)); },
+  isGoal(x, y) { return x === this.GOAL.x && y === this.GOAL.y; },
+
+  resetBrain(silent) {
+    this.pauseTraining();
+    this.stopTest();
+    this.Q = Array.from({ length: this.GW * this.GH }, () => [0, 0, 0, 0]);
+    this.episodes = 0; this.rewardHistory = [];
+    this.pos = { ...this.START }; this.epSteps = 0; this.epReward = 0;
+    this.trail = [];
+    $("l3-episodes").textContent = "0";
+    $("l3-eps").textContent = this.epsilon().toFixed(2);
+    if (!silent) this.setStatus("l3StatusWiped");
+    this.drawChart();
+    this.draw();
+  },
+  syncSliders() {
+    $("l3-rew-val").textContent = "+" + $("l3-rew").value;
+    $("l3-pen-val").textContent = "−" + $("l3-pen").value;
+    $("l3-speed-val").textContent = "×" + $("l3-speed").value;
+  },
+  goalReward() { return +$("l3-rew").value; },
+  firePenalty() { return -$("l3-pen").value; },
+  epsilon() { return Math.max(0.05, 0.9 * Math.exp(-this.episodes / 80)); },
+
+  /* ---- one Q-learning step ---- */
+  qStep() {
+    const s = this.idx(this.pos.x, this.pos.y);
+    const eps = this.epsilon();
+    let a;
+    if (Math.random() < eps) a = Math.floor(Math.random() * 4);
+    else {
+      const q = this.Q[s];
+      const m = Math.max(...q);
+      const best = q.map((v, i) => [v, i]).filter(([v]) => v === m).map(([, i]) => i);
+      a = best[Math.floor(Math.random() * best.length)];
+    }
+    const d = this.ACTIONS[a];
+    let nx = this.pos.x + d.dx, ny = this.pos.y + d.dy;
+    if (this.isWall(nx, ny)) { nx = this.pos.x; ny = this.pos.y; }
+    let r = -1;
+    if (this.isFire(nx, ny)) r += this.firePenalty();
+    const terminal = this.isGoal(nx, ny);
+    if (terminal) r += this.goalReward();
+    const ns = this.idx(nx, ny);
+    const target = r + (terminal ? 0 : this.GAMMA * Math.max(...this.Q[ns]));
+    this.Q[s][a] += this.ALPHA * (target - this.Q[s][a]);
+    this.pos = { x: nx, y: ny };
+    this.epSteps++;
+    this.epReward += r;
+    if (terminal || this.epSteps >= 150) {
+      this.episodes++;
+      this.rewardHistory.push(this.epReward);
+      if (this.rewardHistory.length > 90) this.rewardHistory.shift();
+      this.pos = { ...this.START };
+      this.epSteps = 0; this.epReward = 0;
+      return true; // episode ended
+    }
+    return false;
+  },
+
+  toggleTrain() {
+    if (this.training) return this.pauseTraining();
+    this.stopTest();
+    this.training = true;
+    $("l3-train").textContent = t("l3Pause");
+    this.setStatus("l3StatusTraining");
+    const loop = () => {
+      if (!this.training) return;
+      const speed = +$("l3-speed").value;
+      const steps = Math.max(1, Math.round(speed * speed / 33)); // ×1 → 1 step/frame, ×100 → ~300
+      let ended = false;
+      for (let i = 0; i < steps; i++) ended = this.qStep() || ended;
+      $("l3-episodes").textContent = this.episodes;
+      $("l3-eps").textContent = this.epsilon().toFixed(2);
+      if (ended) this.drawChart();
+      this.draw();
+      this.rafId = requestAnimationFrame(loop);
+    };
+    this.rafId = requestAnimationFrame(loop);
+  },
+  pauseTraining() {
+    this.training = false;
+    cancelAnimationFrame(this.rafId);
+    const btn = $("l3-train");
+    if (btn) btn.textContent = t("l3Train");
+  },
+
+  /* ---- greedy test run ---- */
+  testBot() {
+    this.pauseTraining();
+    this.stopTest();
+    this.testing = true;
+    this.trail = [];
+    let p = { ...this.START }, steps = 0, fires = 0;
+    const visited = new Set();
+    this.setStatus("l3StatusGreedy");
+    this.testTimer = setInterval(() => {
+      const q = this.Q[this.idx(p.x, p.y)];
+      const m = Math.max(...q);
+      const a = q.indexOf(m);
+      const d = this.ACTIONS[a];
+      let nx = p.x + d.dx, ny = p.y + d.dy;
+      if (this.isWall(nx, ny)) { nx = p.x; ny = p.y; }
+      p = { x: nx, y: ny };
+      steps++;
+      this.trail.push({ ...p });
+      if (this.isFire(nx, ny)) fires++;
+      this.pos = { ...p };
+      this.draw();
+      const stuck = visited.has(this.key(nx, ny) + ":" + a);
+      visited.add(this.key(nx, ny) + ":" + a);
+      if (this.isGoal(nx, ny)) { this.stopTest(); this.testResult(true, steps, fires); }
+      else if (steps >= 60 || stuck && steps > 20) { this.stopTest(); this.testResult(false, steps, fires); }
+    }, 170);
+  },
+  stopTest() {
+    clearInterval(this.testTimer);
+    this.testTimer = null;
+    this.testing = false;
+  },
+  testResult(reachedGoal, steps, fires) {
+    const rp = $("l3-results");
+    if (!reachedGoal) {
+      $("l3-res-emoji").textContent = "🌀";
+      $("l3-res-title").textContent = t("l3LostTitle");
+      $("l3-res-detail").textContent = t("l3LostDetail", { steps });
+      $("l3-res-score").textContent = "—";
+      rp.style.display = "block";
+      rp.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      return;
+    }
+    let score, title, detail, emoji;
+    if (fires === 0 && steps <= this.OPTIMAL_SAFE + 2) {
+      score = 100; emoji = "🏆";
+      title = t("l3OptTitle");
+      detail = t("l3OptDetail", { steps, opt: this.OPTIMAL_SAFE });
+    } else if (fires === 0) {
+      score = 80; emoji = "🔋";
+      title = t("l3SafeTitle");
+      detail = t("l3SafeDetail", { steps, opt: this.OPTIMAL_SAFE });
+    } else {
+      score = 60; emoji = "🔥";
+      title = t("l3FireTitle");
+      detail = t("l3FireDetail", { steps, fires, pen: this.firePenalty() });
+    }
+    $("l3-res-emoji").textContent = emoji;
+    $("l3-res-title").textContent = title;
+    $("l3-res-detail").textContent = detail;
+    $("l3-res-score").textContent = score + " " + t("l3Pts");
+    rp.style.display = "block";
+    rp.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    App.complete(3, score, true);
+  },
+  closeResults() {
+    $("l3-results").style.display = "none";
+    this.setStatus("l3StatusExperiment");
+  },
+
+  /* ---- rendering ---- */
+  draw() {
+    const cv = $("l3-canvas"), ctx = cv.getContext("2d");
+    const C = this.CELL;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+
+    /* Q-value heatmap scaling */
+    let maxQ = 0, minQ = 0;
+    for (let y = 0; y < this.GH; y++) for (let x = 0; x < this.GW; x++) {
+      if (this.isWall(x, y)) continue;
+      const v = Math.max(...this.Q[this.idx(x, y)]);
+      if (v > maxQ) maxQ = v;
+      if (v < minQ) minQ = v;
+    }
+
+    for (let y = 0; y < this.GH; y++) {
+      for (let x = 0; x < this.GW; x++) {
+        const px = x * C, py = y * C;
+        if (this.WALLS.has(this.key(x, y))) {
+          ctx.fillStyle = "#2a3450";
+          ctx.fillRect(px + 2, py + 2, C - 4, C - 4);
+          continue;
+        }
+        /* base cell */
+        ctx.fillStyle = "#0e1524";
+        ctx.fillRect(px + 2, py + 2, C - 4, C - 4);
+        /* heat tint */
+        const q = this.Q[this.idx(x, y)];
+        const v = Math.max(...q);
+        if (v > 0.01 && maxQ > 0) {
+          ctx.fillStyle = `rgba(255,183,3,${0.08 + 0.42 * (v / maxQ)})`;
+          ctx.fillRect(px + 2, py + 2, C - 4, C - 4);
+        } else if (v < -0.01 && minQ < 0) {
+          ctx.fillStyle = `rgba(255,84,112,${0.08 + 0.35 * (v / minQ)})`;
+          ctx.fillRect(px + 2, py + 2, C - 4, C - 4);
+        }
+        /* best-action arrow */
+        if (q.some(val => Math.abs(val) > 0.01) && !this.isGoal(x, y)) {
+          const arrows = ["▲", "▼", "◀", "▶"];
+          const a = q.indexOf(Math.max(...q));
+          ctx.fillStyle = "rgba(232,238,251,.65)";
+          ctx.font = "600 13px 'Segoe UI', sans-serif";
+          ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText(arrows[a], px + C - 14, py + 14);
+        }
+      }
+    }
+
+    /* test-run trail */
+    if (this.trail.length) {
+      ctx.strokeStyle = "rgba(255,183,3,.7)";
+      ctx.lineWidth = 4; ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.beginPath();
+      ctx.moveTo(this.START.x * C + C / 2, this.START.y * C + C / 2);
+      for (const t of this.trail) ctx.lineTo(t.x * C + C / 2, t.y * C + C / 2);
+      ctx.stroke();
+    }
+
+    /* emojis */
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = `${C * 0.5}px serif`;
+    for (const f of this.FIRES) {
+      const [fx, fy] = f.split(",").map(Number);
+      ctx.fillText("🔥", fx * C + C / 2, fy * C + C / 2 + 2);
+    }
+    ctx.fillText("🔋", this.GOAL.x * C + C / 2, this.GOAL.y * C + C / 2 + 2);
+    /* robot */
+    ctx.font = `${C * 0.56}px serif`;
+    ctx.fillText("🤖", this.pos.x * C + C / 2, this.pos.y * C + C / 2 + 2);
+
+    /* grid lines */
+    ctx.strokeStyle = "rgba(36,48,77,.9)";
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= this.GW; x++) { ctx.beginPath(); ctx.moveTo(x * C, 0); ctx.lineTo(x * C, this.GH * C); ctx.stroke(); }
+    for (let y = 0; y <= this.GH; y++) { ctx.beginPath(); ctx.moveTo(0, y * C); ctx.lineTo(this.GW * C, y * C); ctx.stroke(); }
+  },
+
+  drawChart() {
+    const cv = $("rewardChart"), ctx = cv.getContext("2d");
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    const data = this.rewardHistory;
+    if (data.length < 2) return;
+    const lo = Math.min(...data), hi = Math.max(...data);
+    const span = Math.max(hi - lo, 1);
+    ctx.strokeStyle = "#ffb703";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    data.forEach((v, i) => {
+      const x = i / (data.length - 1) * (cv.width - 8) + 4;
+      const y = cv.height - 6 - (v - lo) / span * (cv.height - 12);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    /* zero line if visible */
+    if (lo < 0 && hi > 0) {
+      const zy = cv.height - 6 - (0 - lo) / span * (cv.height - 12);
+      ctx.strokeStyle = "rgba(139,152,184,.4)";
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath(); ctx.moveTo(0, zy); ctx.lineTo(cv.width, zy); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  },
+};
+
+/* ════════════════ BOOT ════════════════ */
+MazeGame.resetBrain(true);
+MazeGame.setStatus("l3StatusStart");
+ClusterGame.setStatus("l2StatusPlace", { k: 3 });
+setLang(LANG);
+App.load();
+</script>
+</body>
+</html>
