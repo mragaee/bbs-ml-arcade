@@ -238,6 +238,97 @@
   .confetti { position: fixed; top: -20px; width: 10px; height: 14px; z-index: 999; pointer-events: none; animation: cfall linear forwards; }
   @keyframes cfall { to { transform: translateY(110vh) rotate(720deg); opacity: .2; } }
 
+  /* ══════════════ TEAMS / AUTH ══════════════ */
+  .sound-toggle {
+    position: fixed; bottom: 18px; inset-inline-end: 108px; z-index: 100;
+    background: var(--panel); border: 1px solid var(--amber); color: var(--amber);
+    border-radius: 999px; padding: 9px 14px; font-size: 15px; cursor: pointer; font-family: inherit;
+    box-shadow: 0 4px 20px rgba(0,0,0,.5);
+    transition: transform .12s ease;
+  }
+  .sound-toggle:hover { transform: translateY(-2px); }
+  .team-bar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center;
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 12px 18px; margin: 0 0 18px;
+  }
+  .team-bar .who { display: flex; align-items: center; gap: 10px; }
+  .team-photo { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; border: 2px solid var(--teal); background: var(--panel-2); }
+  .team-photo.lg { width: 92px; height: 92px; border-radius: 18px; }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--panel-2);
+    border: 1px solid var(--line); display: inline-flex; align-items: center; justify-content: center; font-size: 19px;
+  }
+  .field { display: flex; flex-direction: column; gap: 6px; text-align: start; }
+  .field label { font-size: 13px; color: var(--muted); font-weight: 700; }
+  .field input, .field select {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px;
+    color: var(--text); padding: 11px 14px; font-size: 16px; font-family: inherit; outline: none; width: 100%;
+  }
+  .field input:focus, .field select:focus { border-color: var(--teal); box-shadow: 0 0 12px rgba(0,242,254,.2); }
+  .form-stack { display: flex; flex-direction: column; gap: 14px; max-width: 420px; margin: 0 auto; }
+  .gate-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+  .member-row {
+    display: flex; align-items: center; gap: 10px; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px;
+  }
+  .member-row .name { font-weight: 700; flex: 1; text-align: start; }
+  .member-row .pts { color: var(--amber); font-weight: 700; font-size: 14px; }
+  .member-row .mini-btns { display: flex; gap: 6px; }
+  .member-row .btn { padding: 6px 12px; font-size: 13px; }
+  .pill { font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 999px; border: 1px solid; }
+  .pill.pending { color: var(--amber); border-color: var(--amber); }
+  .pill.leader { color: var(--teal); border-color: var(--teal); }
+  .pill.ok { color: var(--good); border-color: var(--good); }
+  .team-list { display: flex; flex-direction: column; gap: 10px; max-width: 460px; margin: 14px auto; }
+  .team-list .member-row { cursor: pointer; transition: border-color .12s; }
+  .team-list .member-row:hover { border-color: var(--teal); }
+  .setup-note {
+    background: rgba(255,183,3,.07); border: 1px solid var(--amber); border-radius: 12px;
+    padding: 14px 16px; font-size: 14px; color: var(--muted); text-align: start; max-width: 560px; margin: 14px auto;
+  }
+  .setup-note b { color: var(--amber); }
+  .setup-note code { background: var(--panel-2); padding: 2px 6px; border-radius: 6px; color: var(--text); direction: ltr; unicode-bidi: embed; }
+
+  /* ══════════════ LEADERBOARD ══════════════ */
+  .board-card {
+    display: flex; align-items: center; gap: 14px; background: var(--panel);
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 12px;
+  }
+  .board-card.top1 { border-color: var(--amber); box-shadow: 0 0 24px rgba(255,183,3,.18); }
+  .board-card .rank { font-size: 26px; font-weight: 800; width: 46px; text-align: center; color: var(--muted); }
+  .board-card.top1 .rank { color: var(--amber); }
+  .board-card .tinfo { flex: 1; min-width: 0; text-align: start; }
+  .board-card .tname { font-weight: 800; font-size: 17px; }
+  .board-card .tmembers { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; font-size: 12px; color: var(--muted); }
+  .board-card .tscore { font-size: 24px; font-weight: 800; color: var(--teal); white-space: nowrap; }
+
+  /* ══════════════ BADGES ══════════════ */
+  .badge-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 16px 0; }
+  .badge {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 10px; text-align: center; opacity: .35; filter: grayscale(1);
+  }
+  .badge.unlocked { opacity: 1; filter: none; border-color: var(--amber); box-shadow: 0 0 14px rgba(255,183,3,.15); }
+  .badge .bicon { font-size: 28px; }
+  .badge .bname { font-weight: 700; font-size: 13px; margin-top: 4px; }
+  .badge .bdesc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ══════════════ TOAST + JUICE ══════════════ */
+  .toast {
+    position: fixed; top: 18px; left: 50%; transform: translateX(-50%); z-index: 200;
+    background: var(--panel); border: 1px solid var(--teal); color: var(--text);
+    border-radius: 12px; padding: 12px 22px; font-weight: 700; font-size: 15px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.6), 0 0 18px rgba(0,242,254,.25);
+    animation: toastIn .25s ease;
+  }
+  @keyframes toastIn { from { opacity: 0; transform: translate(-50%, -14px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  body.shake { animation: bodyShake .35s ease; }
+  @keyframes bodyShake {
+    0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); }
+    40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); }
+  }
+
   /* ══════════════ RESPONSIVE ══════════════ */
   @media (max-width: 860px) {
     .cluster-layout, .maze-layout { grid-template-columns: 1fr; }
@@ -248,6 +339,7 @@
 </head>
 <body>
 <button class="lang-toggle" id="lang-toggle" onclick="toggleLang()">عربي</button>
+<button class="sound-toggle" id="sound-toggle" onclick="Sound.toggle()">🔊</button>
 <div class="wrap">
 
   <!-- ════════════════ DASHBOARD ════════════════ -->
@@ -255,6 +347,13 @@
     <div class="hero">
       <h1>⚡ THE ML ARCADE</h1>
       <p data-i18n="tagline">Train your brain to train the machines. Three paradigms. Three games. Let's go.</p>
+    </div>
+    <div class="team-bar" id="team-bar">
+      <div class="who" id="team-bar-who"><span class="avatar">👤</span> <span data-i18n="soloMode">Solo mode — join a team to compete!</span></div>
+      <button class="btn teal" onclick="Team.open()" data-i18n="teamBtn">👥 Teams</button>
+      <button class="btn amber" onclick="ArcadeRun.start()" data-i18n="runBtn">🏁 Arcade Run</button>
+      <button class="btn purple" onclick="Board.open()" data-i18n="boardBtn">🏆 Leaderboard</button>
+      <button class="btn teal" onclick="Badges.open()" data-i18n="badgesBtn">🎖️ Badges</button>
     </div>
     <div class="cards">
       <div class="card teal" id="card-1" onclick="SpamGame.open()">
@@ -502,10 +601,136 @@
     </div>
   </section>
 
+  <!-- ════════════════ TEAMS ════════════════ -->
+  <section id="screen-team" class="screen">
+    <div class="topbar">
+      <button class="btn teal" onclick="App.show('screen-dash')" data-i18n="back">← Arcade</button>
+      <h2 data-i18n="teamTitle">👥 Teams</h2>
+      <span class="tag teal" data-i18n="teamTag">Multiplayer</span>
+    </div>
+
+    <div id="tv-setup" class="panel center" style="display:none">
+      <div style="font-size:44px">🔌</div>
+      <h3 data-i18n="setupTitle" style="margin:8px 0">Multiplayer backend not configured</h3>
+      <div class="setup-note" data-i18n="setupBody">
+        Teams need a (free) Firebase Realtime Database:<br>
+        1. Go to <code>console.firebase.google.com</code> → Create project.<br>
+        2. Build → Realtime Database → Create (test mode).<br>
+        3. Copy the database URL (like <code>https://xxx-default-rtdb.firebaseio.com</code>).<br>
+        4. Paste it into <code>BACKEND_URL</code> at the top of the script in <code>index.html</code> and push.
+      </div>
+      <button class="btn teal" onclick="App.show('screen-dash')" data-i18n="backArcade">Back to Arcade</button>
+    </div>
+
+    <!-- gate: not logged in -->
+    <div id="tv-gate" class="panel center" style="display:none">
+      <div style="font-size:44px">🎏</div>
+      <h3 data-i18n="gateTitle" style="margin:8px 0">Play as a team!</h3>
+      <p class="muted" data-i18n="gateText" style="max-width:480px;margin:0 auto">Team Leaders create a team with a photo and approve who gets in. Members join with a username + 4-digit PIN.</p>
+      <div class="gate-btns">
+        <button class="btn teal primary big" onclick="Team.view('create')" data-i18n="gateCreate">⭐ Create a Team (Leader)</button>
+        <button class="btn purple primary big" onclick="Team.view('join')" data-i18n="gateJoin">🙋 Join a Team</button>
+      </div>
+      <p class="muted" style="margin-top:16px;font-size:13px" data-i18n="gatePinNote">⚠️ Lab game — pick a PIN you don't use anywhere else.</p>
+    </div>
+
+    <!-- create team -->
+    <div id="tv-create" class="panel" style="display:none">
+      <h3 class="center" data-i18n="createTitle" style="margin-bottom:14px">⭐ Create your team</h3>
+      <div class="form-stack">
+        <div class="field"><label data-i18n="fTeamName">Team name</label><input id="tc-name" maxlength="24" placeholder="The Overfitters"></div>
+        <div class="field"><label data-i18n="fYourName">Your username (leader)</label><input id="tc-user" maxlength="16" placeholder="mina"></div>
+        <div class="field"><label data-i18n="fPin">4-digit PIN</label><input id="tc-pin" inputmode="numeric" maxlength="4" placeholder="1234"></div>
+        <div class="field"><label data-i18n="fPhoto">Team photo</label><input id="tc-photo" type="file" accept="image/*"></div>
+        <div class="center"><img id="tc-preview" class="team-photo lg" style="display:none" alt=""></div>
+        <div class="center muted" id="tc-err" style="min-height:20px;font-size:14px;color:var(--bad)"></div>
+        <button class="btn teal primary big" id="tc-submit" onclick="Team.createTeam()" data-i18n="createBtn">🚀 Create Team</button>
+        <button class="btn teal" onclick="Team.view('gate')" data-i18n="backBtn">← Back</button>
+      </div>
+    </div>
+
+    <!-- join team -->
+    <div id="tv-join" class="panel" style="display:none">
+      <h3 class="center" data-i18n="joinTitle" style="margin-bottom:6px">🙋 Join a team</h3>
+      <p class="center muted" data-i18n="joinPick" style="font-size:14px">Pick your team:</p>
+      <div class="team-list" id="tj-list"></div>
+      <div class="form-stack" id="tj-form" style="display:none">
+        <div class="center" id="tj-picked"></div>
+        <div class="field"><label data-i18n="fYourName2">Your username</label><input id="tj-user" maxlength="16" placeholder="sara"></div>
+        <div class="field"><label data-i18n="fPin">4-digit PIN</label><input id="tj-pin" inputmode="numeric" maxlength="4" placeholder="1234"></div>
+        <div class="center muted" id="tj-err" style="min-height:20px;font-size:14px;color:var(--bad)"></div>
+        <button class="btn purple primary big" onclick="Team.requestJoin()" data-i18n="joinBtn">📨 Request to Join</button>
+        <p class="center muted" style="font-size:13px" data-i18n="joinRelogin">Already approved before? Same username + PIN logs you back in.</p>
+      </div>
+      <div class="center" style="margin-top:10px"><button class="btn purple" onclick="Team.view('gate')" data-i18n="backBtn">← Back</button></div>
+    </div>
+
+    <!-- waiting for approval -->
+    <div id="tv-wait" class="panel center" style="display:none">
+      <div style="font-size:44px">⏳</div>
+      <h3 data-i18n="waitTitle" style="margin:8px 0">Waiting for your Team Leader…</h3>
+      <p class="muted" data-i18n="waitText">Ask your leader to open the Teams screen and approve you. This page checks automatically.</p>
+      <div class="center" style="margin-top:14px"><button class="btn teal" onclick="Team.logout()" data-i18n="cancelBtn">✖ Cancel</button></div>
+    </div>
+
+    <!-- team home / manage -->
+    <div id="tv-home" style="display:none">
+      <div class="panel">
+        <div class="team-bar" style="margin:0 0 14px;border:none;padding:0">
+          <img id="th-photo" class="team-photo lg" alt="">
+          <div style="text-align:start">
+            <div id="th-name" style="font-size:22px;font-weight:800"></div>
+            <div class="muted" id="th-sub" style="font-size:14px"></div>
+          </div>
+        </div>
+        <div id="th-pending-wrap" style="display:none">
+          <h4 class="muted" style="margin:10px 0 8px" data-i18n="pendingTitle">⏳ Waiting for approval</h4>
+          <div id="th-pending" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+        <h4 class="muted" style="margin:16px 0 8px" data-i18n="rosterTitle">✅ Team roster</h4>
+        <div id="th-members" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div class="result-actions">
+          <button class="btn teal primary" onclick="App.show('screen-dash')" data-i18n="playBtn">🎮 Go Play!</button>
+          <button class="btn purple" onclick="Board.open()" data-i18n="boardBtn">🏆 Leaderboard</button>
+          <button class="btn teal" onclick="Team.logout()" data-i18n="logoutBtn">🚪 Log out</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════ LEADERBOARD ════════════════ -->
+  <section id="screen-board" class="screen">
+    <div class="topbar">
+      <button class="btn purple" onclick="App.show('screen-dash')" data-i18n="back">← Arcade</button>
+      <h2 data-i18n="boardTitle">🏆 Team Leaderboard</h2>
+      <span class="tag purple" data-i18n="boardTag">Live</span>
+    </div>
+    <p class="center muted" data-i18n="boardSub" style="margin-bottom:16px">Team score = every member's best Level 1 + 2 + 3 + Arcade Run points, added up.</p>
+    <div id="board-list"></div>
+    <p class="center muted" id="board-empty" style="display:none" data-i18n="boardEmpty">No teams yet — be the first Team Leader! 🚀</p>
+  </section>
+
+  <!-- ════════════════ BADGES ════════════════ -->
+  <section id="screen-badges" class="screen">
+    <div class="topbar">
+      <button class="btn amber" onclick="App.show('screen-dash')" data-i18n="back">← Arcade</button>
+      <h2 data-i18n="badgesTitle">🎖️ Achievements</h2>
+      <span class="tag amber" data-i18n="badgesTag">Bragging rights</span>
+    </div>
+    <div class="badge-grid" id="badge-grid"></div>
+  </section>
+
 </div>
 
 <script>
 "use strict";
+/* ════════════════════════════════════════════════════════════
+   MULTIPLAYER BACKEND (optional)
+   Paste your Firebase Realtime Database URL here to enable teams,
+   e.g. "https://ml-arcade-default-rtdb.firebaseio.com"
+   Leave empty ("") for solo mode — the game works fully without it.
+   ════════════════════════════════════════════════════════════ */
+const BACKEND_URL = "";
 /* ════════════════════════════════════════════════════════════
    I18N — English / العربية
    ════════════════════════════════════════════════════════════ */
@@ -527,7 +752,7 @@ const I18N = {
     l1Name: "📧 The Spam &amp; Ham Classifier", l1Tag: "Supervised",
     l1Explain: `<b>Supervised learning</b> means learning from examples that come with the correct answers (<b>labels</b>). First you'll see <b>training data</b> — emails already stamped SPAM or HAM (not-spam). Your brain will pick up the patterns (ALL CAPS, "FREE!!!", sketchy senders…). Then you'll classify <b>new, unlabeled</b> emails — exactly what a trained spam filter does millions of times a day.`,
     l1Mission: "Your mission",
-    l1MissionText: `Phase 1: study <b style="color:var(--text)">10 labeled training emails</b>.<br>Phase 2: classify <b style="color:var(--text)">12 mystery emails</b> — 12 seconds each.<br>+10 for a correct call, −5 for a wrong one. Misses count against your accuracy!`,
+    l1MissionText: `Phase 1: study <b style="color:var(--text)">10 labeled training emails</b>.<br>Phase 2: classify <b style="color:var(--text)">16 mystery emails</b> — 12 seconds each, and the clock <b style="color:var(--text)">shrinks as your streak grows</b>!<br>+10 for a correct call, −5 for a wrong one. Misses count against your accuracy!`,
     l1Start: "▶ Start Training Phase",
     l1TrainProgress: "Training example {i} / {n}",
     l1Memorize: "🧠 The machine memorizes patterns from labeled examples…",
@@ -594,6 +819,50 @@ const I18N = {
     l3FireDetail: "Battery reached in {steps} steps, taking {fires} fire hit(s). With your fire penalty at {pen}, the shortcut was mathematically worth it. The bot learned YOUR values — crank the penalty to −50+ and retrain to see it change its mind.",
     l3Takeaway: "🔑 <b>Takeaway:</b> Reinforcement learning = trial &amp; error guided by <b>rewards</b>. Change the rewards and you change the behavior — the bot optimizes what you <i>measure</i>, not what you <i>mean</i>.",
     l3Keep: "↻ Keep Experimenting", l3Pts: "pts",
+
+    /* Teams / multiplayer */
+    soloMode: "Solo mode — join a team to compete!",
+    teamBtn: "👥 Teams", runBtn: "🏁 Arcade Run", boardBtn: "🏆 Leaderboard", badgesBtn: "🎖️ Badges",
+    teamTitle: "👥 Teams", teamTag: "Multiplayer",
+    setupTitle: "Multiplayer backend not configured",
+    setupBody: `Teams need a (free) Firebase Realtime Database:<br>1. Go to <code>console.firebase.google.com</code> → Create project.<br>2. Build → Realtime Database → Create (test mode).<br>3. Copy the database URL (like <code>https://xxx-default-rtdb.firebaseio.com</code>).<br>4. Paste it into <code>BACKEND_URL</code> at the top of the script in <code>index.html</code> and push.`,
+    gateTitle: "Play as a team!",
+    gateText: "Team Leaders create a team with a photo and approve who gets in. Members join with a username + 4-digit PIN.",
+    gateCreate: "⭐ Create a Team (Leader)", gateJoin: "🙋 Join a Team",
+    gatePinNote: "⚠️ Lab game — pick a PIN you don't use anywhere else.",
+    createTitle: "⭐ Create your team",
+    fTeamName: "Team name", fYourName: "Your username (leader)", fYourName2: "Your username", fPin: "4-digit PIN", fPhoto: "Team photo",
+    createBtn: "🚀 Create Team", backBtn: "← Back",
+    joinTitle: "🙋 Join a team", joinPick: "Pick your team:", joinBtn: "📨 Request to Join",
+    joinRelogin: "Already approved before? Same username + PIN logs you back in.",
+    waitTitle: "Waiting for your Team Leader…",
+    waitText: "Ask your leader to open the Teams screen and approve you. This page checks automatically.",
+    cancelBtn: "✖ Cancel", pendingTitle: "⏳ Waiting for approval", rosterTitle: "✅ Team roster",
+    playBtn: "🎮 Go Play!", logoutBtn: "🚪 Log out",
+    approveBtn: "✅ Approve", rejectBtn: "✖ Reject",
+    pillLeader: "LEADER", pillPending: "PENDING", pillOk: "IN",
+    memberCount: "{n} member(s) · led by {leader}",
+    errFill: "Fill in every field!", errPin: "PIN must be exactly 4 digits.",
+    errUser: "Username: 2–16 letters/numbers only.",
+    errTeamTaken: "That team name is taken — pick another.",
+    errWrongPin: "Wrong PIN for that username.", errRejected: "The leader rejected this request.",
+    errNet: "Network problem — try again.",
+    teamBarWho: "{user} · {team}", approvedToast: "✅ You're in! Welcome to {team}",
+    noTeams: "No teams yet — go create the first one!",
+    boardTitle: "🏆 Team Leaderboard", boardTag: "Live",
+    boardSub: "Team score = every member's best Level 1 + 2 + 3 + Arcade Run points, added up.",
+    boardEmpty: "No teams yet — be the first Team Leader! 🚀",
+    badgesTitle: "🎖️ Achievements", badgesTag: "Bragging rights",
+    badge_perfectFilter: "Perfect Filter", badgeD_perfectFilter: "100% accuracy in the spam classifier",
+    badge_streakLord: "Streak Lord", badgeD_streakLord: "An 8+ answer streak in Level 1",
+    badge_clusterMaster: "Cluster Whisperer", badgeD_clusterMaster: "Converge in ≤3 steps with 95%+ score",
+    badge_fireWalker: "Fire Walker", badgeD_fireWalker: "Teach the bot to walk through fire",
+    badge_optimalBot: "Optimal Trainer", badgeD_optimalBot: "A perfect 100-point maze run",
+    badge_arcadeChamp: "Arcade Champion", badgeD_arcadeChamp: "240+ total in one Arcade Run",
+    runStart: "🏁 ARCADE RUN! All 3 levels back-to-back — go!",
+    runNext: "✅ Level done! Next up: {game}",
+    runDone: "🏁 Arcade Run complete — {total} points!",
+    badgeToast: "🎖️ Badge unlocked: {name}!",
   },
 
   ar: {
@@ -613,7 +882,7 @@ const I18N = {
     l1Name: "📧 مصنِّف السبام والرسائل السليمة", l1Tag: "تعلّم موجَّه",
     l1Explain: `<b>التعلّم الموجَّه</b> يعني التعلّم من أمثلة مرفقة بالإجابات الصحيحة (<b>التسميات</b>). أولًا سترى <b>بيانات التدريب</b> — رسائل مختومة مسبقًا «سبام» أو «سليم». سيلتقط عقلك الأنماط (حروف كبيرة، «مجاني!!!»، مرسِل مريب…). بعدها ستصنّف رسائل <b>جديدة بلا تسميات</b> — وهذا بالضبط ما يفعله فلتر السبام المدرَّب ملايين المرات يوميًا.`,
     l1Mission: "مهمتك",
-    l1MissionText: `المرحلة 1: ادرس <b style="color:var(--text)">10 رسائل تدريب معنونة</b>.<br>المرحلة 2: صنّف <b style="color:var(--text)">12 رسالة غامضة</b> — 12 ثانية لكل رسالة.<br>+10 للإجابة الصحيحة و −5 للخاطئة. والتأخير يُحسب ضد دقّتك!`,
+    l1MissionText: `المرحلة 1: ادرس <b style="color:var(--text)">10 رسائل تدريب معنونة</b>.<br>المرحلة 2: صنّف <b style="color:var(--text)">16 رسالة غامضة</b> — 12 ثانية لكل رسالة، والوقت <b style="color:var(--text)">يقصر كلما زاد تتابعك</b>!<br>+10 للإجابة الصحيحة و −5 للخاطئة. والتأخير يُحسب ضد دقّتك!`,
     l1Start: "▶ ابدأ مرحلة التدريب",
     l1TrainProgress: "مثال التدريب {i} / {n}",
     l1Memorize: "🧠 الآلة تحفظ الأنماط من الأمثلة المعنونة…",
@@ -680,6 +949,50 @@ const I18N = {
     l3FireDetail: "وصل للبطارية في {steps} خطوة متلقيًا {fires} ضربة نار. بعقوبة نار = {pen}، كان الاختصار مربحًا رياضيًا. الروبوت تعلّم قيمك أنت — ارفع العقوبة إلى −50 أو أكثر وأعد التدريب ليغيّر رأيه.",
     l3Takeaway: "🔑 <b>الخلاصة:</b> التعلّم المعزَّز = تجربة وخطأ تقودهما <b>المكافآت</b>. غيّر المكافآت يتغيّر السلوك — الروبوت يحسّن ما <i>تقيسه</i>، لا ما <i>تقصده</i>.",
     l3Keep: "↻ واصل التجارب", l3Pts: "نقطة",
+
+    /* الفرق */
+    soloMode: "وضع فردي — انضم لفريق وابدأ المنافسة!",
+    teamBtn: "👥 الفرق", runBtn: "🏁 سباق الأركيد", boardBtn: "🏆 لوحة الصدارة", badgesBtn: "🎖️ الأوسمة",
+    teamTitle: "👥 الفرق", teamTag: "لعب جماعي",
+    setupTitle: "خادم اللعب الجماعي غير مُفعَّل",
+    setupBody: `الفرق تحتاج قاعدة بيانات Firebase مجانية:<br>1. افتح <code>console.firebase.google.com</code> ← أنشئ مشروعًا.<br>2. Build ← Realtime Database ← Create (وضع الاختبار).<br>3. انسخ رابط قاعدة البيانات (مثل <code>https://xxx-default-rtdb.firebaseio.com</code>).<br>4. الصقه في <code>BACKEND_URL</code> أعلى السكربت في <code>index.html</code> وارفع التعديل.`,
+    gateTitle: "العبوا كفريق!",
+    gateText: "قائد الفريق ينشئ الفريق بصورة ويوافق على من يدخل. الأعضاء ينضمون باسم مستخدم + رقم سري من 4 أرقام.",
+    gateCreate: "⭐ أنشئ فريقًا (قائد)", gateJoin: "🙋 انضم لفريق",
+    gatePinNote: "⚠️ لعبة معمل — اختر رقمًا سريًا لا تستخدمه في أي مكان آخر.",
+    createTitle: "⭐ أنشئ فريقك",
+    fTeamName: "اسم الفريق", fYourName: "اسم المستخدم (القائد)", fYourName2: "اسم المستخدم", fPin: "رقم سري من 4 أرقام", fPhoto: "صورة الفريق",
+    createBtn: "🚀 أنشئ الفريق", backBtn: "→ رجوع",
+    joinTitle: "🙋 انضم لفريق", joinPick: "اختر فريقك:", joinBtn: "📨 اطلب الانضمام",
+    joinRelogin: "تمت الموافقة عليك من قبل؟ نفس الاسم والرقم السري يعيدان دخولك.",
+    waitTitle: "في انتظار قائد فريقك…",
+    waitText: "اطلب من القائد فتح شاشة الفرق والموافقة عليك. هذه الصفحة تتحقق تلقائيًا.",
+    cancelBtn: "✖ إلغاء", pendingTitle: "⏳ في انتظار الموافقة", rosterTitle: "✅ أعضاء الفريق",
+    playBtn: "🎮 يلا نلعب!", logoutBtn: "🚪 تسجيل الخروج",
+    approveBtn: "✅ موافقة", rejectBtn: "✖ رفض",
+    pillLeader: "قائد", pillPending: "بانتظار", pillOk: "عضو",
+    memberCount: "{n} عضو · بقيادة {leader}",
+    errFill: "املأ كل الحقول!", errPin: "الرقم السري يجب أن يكون 4 أرقام بالضبط.",
+    errUser: "اسم المستخدم: 2–16 حرفًا إنجليزيًا/أرقامًا فقط.",
+    errTeamTaken: "اسم الفريق محجوز — اختر اسمًا آخر.",
+    errWrongPin: "رقم سري خاطئ لهذا الاسم.", errRejected: "القائد رفض هذا الطلب.",
+    errNet: "مشكلة في الشبكة — حاول مرة أخرى.",
+    teamBarWho: "{user} · {team}", approvedToast: "✅ تم قبولك! أهلًا بك في {team}",
+    noTeams: "لا توجد فرق بعد — أنشئ أول فريق!",
+    boardTitle: "🏆 لوحة صدارة الفرق", boardTag: "مباشر",
+    boardSub: "نقاط الفريق = مجموع أفضل نتائج كل عضو في المستويات 1 + 2 + 3 + سباق الأركيد.",
+    boardEmpty: "لا توجد فرق بعد — كن أول قائد فريق! 🚀",
+    badgesTitle: "🎖️ الإنجازات", badgesTag: "حق التفاخر",
+    badge_perfectFilter: "الفلتر المثالي", badgeD_perfectFilter: "دقة 100% في مصنّف السبام",
+    badge_streakLord: "ملك التتابع", badgeD_streakLord: "سلسلة 8+ إجابات صحيحة في المستوى 1",
+    badge_clusterMaster: "هامس العناقيد", badgeD_clusterMaster: "تقارُب في ≤3 خطوات بنتيجة 95%+",
+    badge_fireWalker: "الماشي على النار", badgeD_fireWalker: "علّم الروبوت المشي وسط النار",
+    badge_optimalBot: "المدرّب الأمثل", badgeD_optimalBot: "جولة متاهة مثالية بـ100 نقطة",
+    badge_arcadeChamp: "بطل الأركيد", badgeD_arcadeChamp: "240+ نقطة في سباق أركيد واحد",
+    runStart: "🏁 سباق الأركيد! المستويات الثلاثة وراء بعض — انطلق!",
+    runNext: "✅ انتهى المستوى! التالي: {game}",
+    runDone: "🏁 اكتمل سباق الأركيد — {total} نقطة!",
+    badgeToast: "🎖️ وسام جديد: {name}!",
   },
 };
 
@@ -707,6 +1020,8 @@ function setLang(lang) {
   trainBtn.textContent = MazeGame.training ? t("l3Pause") : t("l3Train");
   if (ClusterGame.lastStatus) ClusterGame.setStatus(...ClusterGame.lastStatus);
   if (MazeGame.lastStatus) MazeGame.setStatus(...MazeGame.lastStatus);
+  App.renderDash();
+  if (document.getElementById("screen-badges").classList.contains("active")) Badges.render();
 }
 function toggleLang() { setLang(LANG === "ar" ? "en" : "ar"); }
 
@@ -715,7 +1030,7 @@ function toggleLang() { setLang(LANG === "ar" ? "en" : "ar"); }
    ════════════════════════════════════════════════════════════ */
 const App = {
   KEY: "mlArcadeV1",
-  state: { 1: { best: null, done: false }, 2: { best: null, done: false }, 3: { best: null, done: false } },
+  state: { 1: { best: null, done: false }, 2: { best: null, done: false }, 3: { best: null, done: false }, badges: {}, run: 0 },
 
   load() {
     try {
@@ -734,6 +1049,7 @@ const App = {
     if (id !== "screen-l3") MazeGame.pauseTraining();
     if (id !== "screen-l2") ClusterGame.stopAuto();
     if (id !== "screen-l1") SpamGame.stopTimers();
+    if (id !== "screen-team") Team.stopPolls();
     if (id === "screen-dash") this.renderDash();
   },
   complete(level, score, passed) {
@@ -743,12 +1059,20 @@ const App = {
     this.save();
     this.renderDash();
     if (passed) this.confetti();
+    Team.syncScores();
+    ArcadeRun.record(level, score);
   },
   renderDash() {
     for (const lvl of [1, 2, 3]) {
       const s = this.state[lvl];
       document.getElementById("best-" + lvl).textContent = s.best === null ? "—" : s.best;
       document.getElementById("card-" + lvl).classList.toggle("completed", !!s.done);
+    }
+    const who = document.getElementById("team-bar-who");
+    if (Team.session && Team.session.status === "approved") {
+      who.innerHTML = `<span class="avatar">${Team.avatarFor(Team.session.user)}</span> <b>${esc(t("teamBarWho", { user: Team.session.user, team: Team.session.teamName }))}</b>`;
+    } else {
+      who.innerHTML = `<span class="avatar">👤</span> <span>${t("soloMode")}</span>`;
     }
   },
   confetti() {
@@ -771,6 +1095,409 @@ const App = {
 const $ = id => document.getElementById(id);
 const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function toast(msg) {
+  const d = document.createElement("div");
+  d.className = "toast"; d.textContent = msg;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 2600);
+}
+const shake = () => { document.body.classList.remove("shake"); void document.body.offsetWidth; document.body.classList.add("shake"); };
+
+/* ════════════════════════════════════════════════════════════
+   SOUND — WebAudio bleeps, no audio files
+   ════════════════════════════════════════════════════════════ */
+const Sound = {
+  on: true, ctx: null,
+  init() {
+    try { this.on = localStorage.getItem("mlArcadeSound") !== "off"; } catch (e) {}
+    $("sound-toggle").textContent = this.on ? "🔊" : "🔇";
+  },
+  ensure() {
+    if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+    if (this.ctx && this.ctx.state === "suspended") this.ctx.resume();
+    return this.ctx;
+  },
+  beep(freq, dur, type = "sine", gain = 0.07, when = 0) {
+    if (!this.on) return;
+    const c = this.ensure(); if (!c) return;
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(gain, c.currentTime + when);
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + when + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(c.currentTime + when); o.stop(c.currentTime + when + dur + 0.02);
+  },
+  good() { this.beep(660, .12); this.beep(880, .16, "sine", .07, .09); },
+  bad() { this.beep(190, .22, "sawtooth", .05); },
+  click() { this.beep(440, .05, "square", .03); },
+  win() { [523, 659, 784, 1047].forEach((f, i) => this.beep(f, .18, "triangle", .08, i * .12)); },
+  fire() { this.beep(120, .3, "sawtooth", .07); this.beep(85, .3, "sawtooth", .05, .08); },
+  toggle() {
+    this.on = !this.on;
+    try { localStorage.setItem("mlArcadeSound", this.on ? "on" : "off"); } catch (e) {}
+    $("sound-toggle").textContent = this.on ? "🔊" : "🔇";
+    if (this.on) this.click();
+  },
+};
+
+/* ════════════════════════════════════════════════════════════
+   NET — Firebase Realtime Database over plain REST (no SDK)
+   ════════════════════════════════════════════════════════════ */
+const Net = {
+  ok: () => !!BACKEND_URL,
+  url(p) { return BACKEND_URL.replace(/\/+$/, "") + p + ".json"; },
+  async get(p) { const r = await fetch(this.url(p)); if (!r.ok) throw new Error("net"); return r.json(); },
+  async put(p, d) { const r = await fetch(this.url(p), { method: "PUT", body: JSON.stringify(d) }); if (!r.ok) throw new Error("net"); return r.json(); },
+  async patch(p, d) { const r = await fetch(this.url(p), { method: "PATCH", body: JSON.stringify(d) }); if (!r.ok) throw new Error("net"); return r.json(); },
+};
+async function pinHash(s) {
+  if (crypto && crypto.subtle) {
+    const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("mlArcade:" + s));
+    return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
+  }
+  let h = 5381; const str = "mlArcade:" + s;                     /* non-secure-context fallback */
+  for (let i = 0; i < str.length; i++) h = (h * 33) ^ str.charCodeAt(i);
+  return "djb2_" + (h >>> 0).toString(16);
+}
+
+/* ════════════════════════════════════════════════════════════
+   TEAM — create / join / approve, session in localStorage
+   ════════════════════════════════════════════════════════════ */
+const Team = {
+  session: null, waitTimer: null, homeTimer: null, joinPick: null, photoData: "",
+  AVATARS: ["🦊", "🐼", "🦁", "🐸", "🐙", "🦄", "🐯", "🐧", "🦉", "🐨", "🐵", "🦖"],
+  VIEWS: ["tv-setup", "tv-gate", "tv-create", "tv-join", "tv-wait", "tv-home"],
+
+  load() { try { this.session = JSON.parse(localStorage.getItem("mlArcadeTeam") || "null"); } catch (e) {} },
+  save() { try { localStorage.setItem("mlArcadeTeam", JSON.stringify(this.session)); } catch (e) {} },
+  stopPolls() { clearInterval(this.waitTimer); clearInterval(this.homeTimer); this.waitTimer = this.homeTimer = null; },
+  avatarFor(name) { let h = 0; for (const ch of name) h = (h * 31 + ch.codePointAt(0)) >>> 0; return this.AVATARS[h % this.AVATARS.length]; },
+
+  open() { App.show("screen-team"); this.route(); },
+  route() {
+    this.stopPolls();
+    if (!Net.ok()) return this.view("setup");
+    if (!this.session) return this.view("gate");
+    if (this.session.status === "pending") return this.view("wait");
+    this.view("home");
+  },
+  view(v) {
+    this.VIEWS.forEach(id => $(id).style.display = "none");
+    $("tv-" + v).style.display = "block";
+    if (v === "join") this.loadTeams();
+    if (v === "wait") this.pollWait();
+    if (v === "home") this.refreshHome(true);
+  },
+
+  /* ---- photo: resize to ≤240px JPEG data-url ---- */
+  handlePhoto(file) {
+    if (!file) return;
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, 240 / Math.max(img.width, img.height));
+      const cv = document.createElement("canvas");
+      cv.width = Math.round(img.width * scale); cv.height = Math.round(img.height * scale);
+      cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+      this.photoData = cv.toDataURL("image/jpeg", 0.72);
+      const prev = $("tc-preview");
+      prev.src = this.photoData; prev.style.display = "inline-block";
+      URL.revokeObjectURL(img.src);
+    };
+    img.src = URL.createObjectURL(file);
+  },
+
+  validUser(u) { return /^[a-z0-9_]{2,16}$/.test(u); },
+  slug(name) { return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 24) || "team"; },
+
+  async createTeam() {
+    const name = $("tc-name").value.trim();
+    const user = $("tc-user").value.trim().toLowerCase();
+    const pin = $("tc-pin").value.trim();
+    const err = $("tc-err");
+    err.textContent = "";
+    if (!name || !user || !pin) return err.textContent = t("errFill");
+    if (!/^\d{4}$/.test(pin)) return err.textContent = t("errPin");
+    if (!this.validUser(user)) return err.textContent = t("errUser");
+    $("tc-submit").disabled = true;
+    try {
+      const id = this.slug(name);
+      const existing = await Net.get("/teams/" + id + "/name");
+      if (existing) { err.textContent = t("errTeamTaken"); return; }
+      const hash = await pinHash(pin);
+      await Net.put("/teams/" + id, {
+        name, photo: this.photoData || "", leader: user, created: Date.now(),
+        members: { [user]: { avatar: this.avatarFor(user), pinHash: hash, status: "leader", scores: this.localScores() } },
+      });
+      this.session = { teamId: id, teamName: name, user, role: "leader", status: "approved" };
+      this.save();
+      Sound.win(); toast(t("approvedToast", { team: name }));
+      App.renderDash();
+      this.route();
+    } catch (e) { err.textContent = t("errNet"); }
+    finally { $("tc-submit").disabled = false; }
+  },
+
+  async loadTeams() {
+    const list = $("tj-list");
+    list.innerHTML = "<div class='muted center'>…</div>";
+    $("tj-form").style.display = "none";
+    try {
+      const teams = await Net.get("/teams") || {};
+      const ids = Object.keys(teams);
+      if (!ids.length) { list.innerHTML = `<div class='muted center'>${t("noTeams")}</div>`; return; }
+      list.innerHTML = "";
+      ids.forEach(id => {
+        const tm = teams[id];
+        const row = document.createElement("div");
+        row.className = "member-row";
+        const n = Object.keys(tm.members || {}).length;
+        row.innerHTML = (tm.photo ? `<img class="team-photo" src="${tm.photo}" alt="">` : `<span class="avatar">👥</span>`) +
+          `<span class="name">${esc(tm.name)}</span><span class="muted" style="font-size:12px">${t("memberCount", { n, leader: esc(tm.leader) })}</span>`;
+        row.onclick = () => {
+          this.joinPick = { id, name: tm.name, photo: tm.photo };
+          $("tj-picked").innerHTML = (tm.photo ? `<img class="team-photo lg" src="${tm.photo}" alt="">` : "") + `<div style="font-weight:800;font-size:18px;margin-top:6px">${esc(tm.name)}</div>`;
+          $("tj-form").style.display = "flex";
+          $("tj-form").scrollIntoView({ behavior: "smooth", block: "nearest" });
+          Sound.click();
+        };
+        list.appendChild(row);
+      });
+    } catch (e) { list.innerHTML = `<div class='muted center'>${t("errNet")}</div>`; }
+  },
+
+  async requestJoin() {
+    const user = $("tj-user").value.trim().toLowerCase();
+    const pin = $("tj-pin").value.trim();
+    const err = $("tj-err");
+    err.textContent = "";
+    if (!this.joinPick) return;
+    if (!user || !pin) return err.textContent = t("errFill");
+    if (!/^\d{4}$/.test(pin)) return err.textContent = t("errPin");
+    if (!this.validUser(user)) return err.textContent = t("errUser");
+    try {
+      const hash = await pinHash(pin);
+      const path = "/teams/" + this.joinPick.id + "/members/" + user;
+      const existing = await Net.get(path);
+      if (existing) {                                     /* re-login */
+        if (existing.pinHash !== hash) return err.textContent = t("errWrongPin");
+        if (existing.status === "rejected") return err.textContent = t("errRejected");
+        this.session = {
+          teamId: this.joinPick.id, teamName: this.joinPick.name, user,
+          role: existing.status === "leader" ? "leader" : "member",
+          status: existing.status === "pending" ? "pending" : "approved",
+        };
+      } else {                                            /* new join request */
+        await Net.put(path, { avatar: this.avatarFor(user), pinHash: hash, status: "pending", scores: this.localScores() });
+        this.session = { teamId: this.joinPick.id, teamName: this.joinPick.name, user, role: "member", status: "pending" };
+      }
+      this.save();
+      App.renderDash();
+      this.route();
+    } catch (e) { err.textContent = t("errNet"); }
+  },
+
+  pollWait() {
+    const check = async () => {
+      if (!this.session) return;
+      try {
+        const m = await Net.get("/teams/" + this.session.teamId + "/members/" + this.session.user);
+        if (m && (m.status === "approved" || m.status === "leader")) {
+          this.session.status = "approved";
+          if (m.status === "leader") this.session.role = "leader";
+          this.save();
+          Sound.win(); toast(t("approvedToast", { team: this.session.teamName }));
+          App.renderDash();
+          this.syncScores();
+          this.route();
+        } else if (!m || m.status === "rejected") {
+          this.logout();
+          toast(t("errRejected"));
+        }
+      } catch (e) {}
+    };
+    check();
+    this.waitTimer = setInterval(check, 4000);
+  },
+
+  async refreshHome(startPoll) {
+    if (!this.session) return this.route();
+    try {
+      const tm = await Net.get("/teams/" + this.session.teamId);
+      if (!tm) return this.logout();
+      $("th-photo").src = tm.photo || "";
+      $("th-photo").style.display = tm.photo ? "block" : "none";
+      $("th-name").textContent = tm.name;
+      const members = tm.members || {};
+      const names = Object.keys(members);
+      $("th-sub").textContent = t("memberCount", { n: names.filter(u => members[u].status !== "pending" && members[u].status !== "rejected").length, leader: tm.leader });
+      const isLeader = this.session.role === "leader";
+      const pending = names.filter(u => members[u].status === "pending");
+      $("th-pending-wrap").style.display = pending.length ? "block" : "none";
+      $("th-pending").innerHTML = pending.map(u => `
+        <div class="member-row"><span class="avatar">${members[u].avatar || "👤"}</span>
+        <span class="name">${esc(u)}</span><span class="pill pending">${t("pillPending")}</span>
+        ${isLeader ? `<span class="mini-btns">
+          <button class="btn good" onclick="Team.decide('${esc(u)}','approved')">${t("approveBtn")}</button>
+          <button class="btn danger" onclick="Team.decide('${esc(u)}','rejected')">${t("rejectBtn")}</button></span>` : ""}
+        </div>`).join("");
+      $("th-members").innerHTML = names
+        .filter(u => members[u].status === "approved" || members[u].status === "leader")
+        .map(u => {
+          const m = members[u];
+          return `<div class="member-row"><span class="avatar">${m.avatar || "👤"}</span>
+            <span class="name">${esc(u)}${u === this.session.user ? " ⭐" : ""}</span>
+            <span class="pill ${m.status === "leader" ? "leader" : "ok"}">${m.status === "leader" ? t("pillLeader") : t("pillOk")}</span>
+            <span class="pts">${this.totalOf(m.scores)} ${t("l3Pts")}</span></div>`;
+        }).join("");
+    } catch (e) {}
+    if (startPoll) {
+      clearInterval(this.homeTimer);
+      this.homeTimer = setInterval(() => {
+        if (!document.getElementById("screen-team").classList.contains("active")) return this.stopPolls();
+        this.refreshHome(false);
+      }, 6000);
+    }
+  },
+
+  async decide(user, status) {
+    try {
+      await Net.patch("/teams/" + this.session.teamId + "/members/" + user, { status });
+      Sound[status === "approved" ? "good" : "bad"]();
+      this.refreshHome(false);
+    } catch (e) { toast(t("errNet")); }
+  },
+
+  logout() {
+    this.stopPolls();
+    this.session = null;
+    this.save();
+    App.renderDash();
+    this.route();
+  },
+
+  localScores() {
+    const s = App.state;
+    return {
+      l1: Math.max(0, s[1].best || 0), l2: Math.max(0, s[2].best || 0),
+      l3: Math.max(0, s[3].best || 0), run: s.run || 0,
+      badges: Object.keys(s.badges || {}).length,
+    };
+  },
+  totalOf(sc) { sc = sc || {}; return (sc.l1 || 0) + (sc.l2 || 0) + (sc.l3 || 0) + (sc.run || 0); },
+  syncScores() {
+    if (!Net.ok() || !this.session || this.session.status !== "approved") return;
+    Net.patch("/teams/" + this.session.teamId + "/members/" + this.session.user, { scores: this.localScores() }).catch(() => {});
+  },
+};
+
+/* ════════════════════════════════════════════════════════════
+   BOARD — live team leaderboard
+   ════════════════════════════════════════════════════════════ */
+const Board = {
+  timer: null,
+  open() {
+    App.show("screen-board");
+    this.refresh();
+    clearInterval(this.timer);
+    this.timer = setInterval(() => {
+      if (!document.getElementById("screen-board").classList.contains("active")) return clearInterval(this.timer);
+      this.refresh();
+    }, 10000);
+  },
+  async refresh() {
+    const list = $("board-list"), empty = $("board-empty");
+    if (!Net.ok()) { list.innerHTML = ""; empty.style.display = "block"; empty.innerHTML = t("setupTitle"); return; }
+    try {
+      const teams = await Net.get("/teams") || {};
+      const rows = Object.keys(teams).map(id => {
+        const tm = teams[id];
+        const members = Object.entries(tm.members || {}).filter(([, m]) => m.status === "approved" || m.status === "leader");
+        return {
+          name: tm.name, photo: tm.photo,
+          score: members.reduce((s, [, m]) => s + Team.totalOf(m.scores), 0),
+          members: members.map(([u, m]) => ({ u, a: m.avatar || "👤", pts: Team.totalOf(m.scores) })),
+        };
+      }).sort((a, b) => b.score - a.score);
+      empty.style.display = rows.length ? "none" : "block";
+      if (!rows.length) empty.innerHTML = t("boardEmpty");
+      const medals = ["🥇", "🥈", "🥉"];
+      list.innerHTML = rows.map((r, i) => `
+        <div class="board-card${i === 0 ? " top1" : ""}">
+          <div class="rank">${medals[i] || "#" + (i + 1)}</div>
+          ${r.photo ? `<img class="team-photo" src="${r.photo}" alt="">` : `<span class="avatar">👥</span>`}
+          <div class="tinfo"><div class="tname">${esc(r.name)}</div>
+            <div class="tmembers">${r.members.map(m => `<span>${m.a} ${esc(m.u)} (${m.pts})</span>`).join(" · ")}</div>
+          </div>
+          <div class="tscore">${r.score}</div>
+        </div>`).join("");
+    } catch (e) { list.innerHTML = `<p class="center muted">${t("errNet")}</p>`; }
+  },
+};
+
+/* ════════════════════════════════════════════════════════════
+   BADGES — achievements
+   ════════════════════════════════════════════════════════════ */
+const Badges = {
+  DEFS: [
+    { id: "perfectFilter", icon: "🎯" }, { id: "streakLord", icon: "🔥" },
+    { id: "clusterMaster", icon: "🔮" }, { id: "fireWalker", icon: "🌶️" },
+    { id: "optimalBot", icon: "🤖" }, { id: "arcadeChamp", icon: "👑" },
+  ],
+  has(id) { return !!(App.state.badges || {})[id]; },
+  award(id) {
+    if (this.has(id)) return;
+    (App.state.badges = App.state.badges || {})[id] = true;
+    App.save();
+    toast(t("badgeToast", { name: t("badge_" + id) }));
+    Sound.win();
+    Team.syncScores();
+  },
+  open() { App.show("screen-badges"); this.render(); },
+  render() {
+    $("badge-grid").innerHTML = this.DEFS.map(b => `
+      <div class="badge${this.has(b.id) ? " unlocked" : ""}">
+        <div class="bicon">${b.icon}</div>
+        <div class="bname">${t("badge_" + b.id)}</div>
+        <div class="bdesc">${t("badgeD_" + b.id)}</div>
+      </div>`).join("");
+  },
+};
+
+/* ════════════════════════════════════════════════════════════
+   ARCADE RUN — all 3 levels back-to-back, one combined score
+   ════════════════════════════════════════════════════════════ */
+const ArcadeRun = {
+  active: false, scores: {},
+  start() {
+    this.active = true; this.scores = {};
+    toast(t("runStart")); Sound.win();
+    setTimeout(() => SpamGame.open(), 900);
+  },
+  record(level, score) {
+    if (!this.active) return;
+    this.scores["l" + level] = Math.max(0, score);
+    if (level === 1) {
+      toast(t("runNext", { game: t("card2Title").replace(/&amp;/g, "&") }));
+      setTimeout(() => { if (this.active) ClusterGame.open(); }, 2400);
+    } else if (level === 2) {
+      toast(t("runNext", { game: t("card3Title").replace(/&amp;/g, "&") }));
+      setTimeout(() => { if (this.active) MazeGame.open(); }, 2400);
+    } else this.finish();
+  },
+  finish() {
+    const total = (this.scores.l1 || 0) + (this.scores.l2 || 0) + (this.scores.l3 || 0);
+    this.active = false;
+    if (total > (App.state.run || 0)) { App.state.run = total; App.save(); }
+    if (total >= 240) Badges.award("arcadeChamp");
+    toast(t("runDone", { total }));
+    Sound.win();
+    App.confetti();
+    Team.syncScores();
+    setTimeout(() => App.show("screen-dash"), 2600);
+  },
+  abort() { this.active = false; },
+};
 
 /* ════════════════════════════════════════════════════════════
    LEVEL 1 — SUPERVISED: SPAM & HAM CLASSIFIER
@@ -845,13 +1572,27 @@ const SpamGame = {
     { from: "orders@bookstore.com", label: "ham",
       en: "Your order #4482 has been delivered. Thanks for shopping with us!",
       ar: "طلبك رقم #4482 تم توصيله. شكرًا لتسوقك معنا!" },
+    /* tricky — mixed signals */
+    { from: "prof.adams@university.edu", label: "ham",
+      en: "URGENT: tomorrow's exam moved to 9 AM — check the portal NOW!",
+      ar: "عاجل: تم نقل امتحان الغد إلى 9 صباحًا — راجع البوابة الآن!" },
+    { from: "accounts@secure-pay-invoices.info", label: "spam",
+      en: "Hi, following up on our meeting — please review the attached invoice as soon as possible.",
+      ar: "مرحبًا، متابعةً لاجتماعنا — رجاءً راجع الفاتورة المرفقة بأسرع وقت ممكن." },
+    { from: "events@university.edu", label: "ham",
+      en: "You WON the department hackathon! 🎉 Prize pickup at the CS office this week.",
+      ar: "لقد فزت في هاكاثون القسم! 🎉 استلم جائزتك من مكتب علوم الحاسب هذا الأسبوع." },
+    { from: "billing@netfIix-support.com", label: "spam",
+      en: "Netflix: your payment failed. Update your billing info within 24 hours to keep watching.",
+      ar: "نتفليكس: فشل الدفع. حدّث بيانات الفوترة خلال 24 ساعة لمواصلة المشاهدة." },
   ],
 
-  TIME_PER_CARD: 12000,   /* ms to classify each email */
+  TIME_PER_CARD: 12000,   /* base ms to classify each email */
+  MIN_TIME: 5000,         /* floor — timer shrinks as your streak grows */
   TRAIN_CARD_MS: 3000,    /* ms each training card stays up */
   trainIdx: 0, trainTimer: null,
-  queue: [], idx: 0, score: 0, streak: 0, answered: false,
-  timerInt: null, deadline: 0,
+  queue: [], idx: 0, score: 0, streak: 0, maxStreak: 0, answered: false,
+  timerInt: null, deadline: 0, curTime: 12000,
   tp: 0, tn: 0, fp: 0, fn: 0, misses: 0,
 
   open() {
@@ -896,7 +1637,7 @@ const SpamGame = {
     $("l1-train").style.display = "none";
     $("l1-play").style.display = "block";
     this.queue = shuffle(this.TEST);
-    this.idx = 0; this.score = 0; this.streak = 0;
+    this.idx = 0; this.score = 0; this.streak = 0; this.maxStreak = 0;
     this.tp = this.tn = this.fp = this.fn = this.misses = 0;
     $("l1-score").textContent = "0";
     $("l1-streak").textContent = "🔥 0";
@@ -915,11 +1656,13 @@ const SpamGame = {
     card.style.animation = "none"; void card.offsetWidth; card.style.animation = "";
     $("l1-btn-ham").disabled = $("l1-btn-spam").disabled = false;
 
-    this.deadline = performance.now() + this.TIME_PER_CARD;
+    /* difficulty ramp: each streak level shaves 800ms off the clock */
+    this.curTime = Math.max(this.MIN_TIME, this.TIME_PER_CARD - this.streak * 800);
+    this.deadline = performance.now() + this.curTime;
     clearInterval(this.timerInt);
     this.timerInt = setInterval(() => {
       const left = this.deadline - performance.now();
-      $("l1-timer").style.width = clamp(left / this.TIME_PER_CARD * 100, 0, 100) + "%";
+      $("l1-timer").style.width = clamp(left / this.curTime * 100, 0, 100) + "%";
       if (left <= 0) this.timeout();
     }, 50);
   },
@@ -934,16 +1677,19 @@ const SpamGame = {
     const fb = $("l1-feedback");
     if (correct) {
       this.streak++;
+      this.maxStreak = Math.max(this.maxStreak, this.streak);
       this.score += 10;
       fb.textContent = t("l1Correct");
       fb.classList.add("good");
       $("l1-card").classList.add("flash-good");
+      Sound.good();
     } else {
       this.streak = 0;
       this.score -= 5;
       fb.textContent = truth === "spam" ? t("l1WrongSpam") : t("l1WrongHam");
       fb.classList.add("bad");
       $("l1-card").classList.add("flash-bad");
+      Sound.bad(); shake();
     }
     $("l1-score").textContent = this.score;
     $("l1-streak").textContent = "🔥 " + this.streak;
@@ -964,6 +1710,7 @@ const SpamGame = {
     fb.textContent = t("l1TooSlow", { label: this.stampText(truth) });
     fb.classList.add("bad");
     $("l1-card").classList.add("flash-bad");
+    Sound.bad(); shake();
     this.idx++;
     setTimeout(() => this.nextCard(), 1000);
   },
@@ -985,6 +1732,9 @@ const SpamGame = {
       this.fp > 0 ? t("l1NoteFp", { n: this.fp })
       : this.fn > 0 ? t("l1NoteFn", { n: this.fn })
       : t("l1NotePerfect");
+    if (passed) Sound.win();
+    if (acc === 100) Badges.award("perfectFilter");
+    if (this.maxStreak >= 8) Badges.award("streakLord");
     App.complete(1, this.score, passed);
   },
 };
@@ -1143,6 +1893,7 @@ const ClusterGame = {
   },
   manualStep() {
     this.stopAuto();
+    Sound.click();
     this.step();
     if (this.converged) this.finish();
   },
@@ -1172,6 +1923,8 @@ const ClusterGame = {
       t("l2NoteLow", { i: this.iter });
     $("l2-results").style.display = "block";
     $("l2-results").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    Sound.win();
+    if (this.iter <= 3 && score >= 95) Badges.award("clusterMaster");
     App.complete(2, score, score >= 60);
   },
 
@@ -1392,7 +2145,7 @@ const MazeGame = {
       p = { x: nx, y: ny };
       steps++;
       this.trail.push({ ...p });
-      if (this.isFire(nx, ny)) fires++;
+      if (this.isFire(nx, ny)) { fires++; Sound.fire(); shake(); }
       this.pos = { ...p };
       this.draw();
       const stuck = visited.has(this.key(nx, ny) + ":" + a);
@@ -1413,15 +2166,19 @@ const MazeGame = {
       $("l3-res-title").textContent = t("l3LostTitle");
       $("l3-res-detail").textContent = t("l3LostDetail", { steps });
       $("l3-res-score").textContent = "—";
+      Sound.bad();
       rp.style.display = "block";
       rp.scrollIntoView({ behavior: "smooth", block: "nearest" });
       return;
     }
     let score, title, detail, emoji;
+    Sound.win();
+    if (fires > 0) Badges.award("fireWalker");
     if (fires === 0 && steps <= this.OPTIMAL_SAFE + 2) {
       score = 100; emoji = "🏆";
       title = t("l3OptTitle");
       detail = t("l3OptDetail", { steps, opt: this.OPTIMAL_SAFE });
+      Badges.award("optimalBot");
     } else if (fires === 0) {
       score = 80; emoji = "🔋";
       title = t("l3SafeTitle");
@@ -1549,11 +2306,14 @@ const MazeGame = {
 };
 
 /* ════════════════ BOOT ════════════════ */
+Team.load();
+Sound.init();
 MazeGame.resetBrain(true);
 MazeGame.setStatus("l3StatusStart");
 ClusterGame.setStatus("l2StatusPlace", { k: 3 });
-setLang(LANG);
 App.load();
+setLang(LANG);
+$("tc-photo").addEventListener("change", e => Team.handlePhoto(e.target.files[0]));
 </script>
 </body>
 </html>
