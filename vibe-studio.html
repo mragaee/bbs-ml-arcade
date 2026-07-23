@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Warm-Up 3 — Vibe Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&family=Cairo:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/core.css">
+</head>
+<body>
+<div class="wrap">
+  <section id="screen-l10" class="screen active">
+    <div class="topbar">
+      <button class="btn cyan" onclick="location.href='index.html'" data-i18n="back">← Arcade</button>
+      <h2><svg class="ic"><use href="#i-cpu"/></svg> <span data-i18n="card10Title">Vibe Studio</span></h2>
+      <span class="tag cyan" data-i18n="s10Tag">Ship It</span>
+    </div>
+
+    <details class="explain">
+      <summary><svg class="ic"><use href="#i-bulb"/></svg> <span data-i18n="explainTitle">What's the ML idea here?</span></summary>
+      <p data-i18n="s10Explain"></p>
+    </details>
+
+    <div id="s10-intro" class="panel center email-stage">
+      <div class="res-icon" style="color:#38e1ff"><svg class="ic"><use href="#i-cpu"/></svg></div>
+      <h3 style="margin:10px 0 6px" data-i18n="s10Mission">Build “Space Clicker” — with words only</h3>
+      <p class="muted" style="max-width:500px;margin:0 auto 18px" data-i18n="s10MissionText"></p>
+      <div class="field" style="max-width:280px;margin:0 auto 18px">
+        <label data-i18n="diffLabel">Difficulty</label>
+        <select id="l10-diff" onchange="Difficulty.change(10, this.value)"></select>
+      </div>
+      <button class="btn cyan primary big" onclick="StudioGame.start()"><svg class="ic"><use href="#i-play"/></svg> <span data-i18n="s10Start">Open the Studio</span></button>
+    </div>
+
+    <div id="s10-build" style="display:none">
+      <div class="studio-layout">
+        <div class="panel">
+          <p class="muted" style="font-size:13px;letter-spacing:1.5px;text-transform:uppercase" id="s10-stage-label"></p>
+          <h3 id="s10-stage-title" style="margin:4px 0 12px"></h3>
+          <div class="slot-opts" id="s10-opts" style="grid-template-columns:1fr"></div>
+          <div class="build-log" id="s10-log" data-i18n="s10LogIdle">The AI is waiting for your prompt…</div>
+          <div class="result-actions" style="justify-content:flex-start">
+            <button class="btn cyan primary" id="s10-next" onclick="StudioGame.nextStage()" style="display:none"></button>
+            <button class="btn amber" id="s10-reprompt" onclick="StudioGame.reprompt()" style="display:none"><svg class="ic"><use href="#i-refresh"/></svg> <span data-i18n="s10Reprompt">Re-prompt (1 left)</span></button>
+          </div>
+        </div>
+        <div class="panel">
+          <p class="muted center" style="font-size:13px;letter-spacing:1.5px;text-transform:uppercase" data-i18n="s10Preview">Live preview</p>
+          <div class="preview-frame" id="s10-preview">
+            <p class="muted" data-i18n="s10PreviewEmpty">Nothing built yet — send your first prompt.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="s10-results" class="panel center result-panel" style="display:none">
+      <div class="res-icon" id="s10-res-icon"></div>
+      <h3 id="s10-res-title"></h3>
+      <p class="muted" data-i18n="s10ResLabel">Build quality:</p>
+      <div class="big-metric" style="color:#38e1ff;text-shadow:0 0 24px rgba(56,225,255,.4)" id="s10-res-score">0</div>
+      <p class="muted" id="s10-res-note" style="margin-top:6px"></p>
+      <div class="takeaway" style="border-color:#38e1ff" data-i18n="s10Takeaway"></div>
+      <div class="result-actions">
+        <button class="btn cyan primary" onclick="StudioGame.open()"><svg class="ic"><use href="#i-replay"/></svg> <span data-i18n="l1Again">Play Again</span></button>
+        <button class="btn cyan" onclick="location.href='index.html'" data-i18n="backArcade">Back to Arcade</button>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="assets/core.js"></script>
+<script>
+"use strict";
+Object.assign(I18N.en, {
+  s10Tag: "Ship It",
+  s10Explain: `This is <b>vibe coding</b> in miniature: you never touch the code — you describe, the AI builds, you look at the result, and you <b>iterate</b>. Three build rounds: the skeleton, the fun, the polish. Your prompt quality directly controls what appears in the live preview — vague prompts ship real bugs. Exactly like the session you're about to start, just with a simulated AI.`,
+  s10Mission: "Build “Space Clicker” — with words only",
+  s10MissionText: `3 iterations: <b style="color:var(--text)">v1 skeleton → v2 features → v3 polish</b>.<br>Pick your prompt each round and watch the LIVE preview obey it.<br>You get <b style="color:var(--text)">one re-prompt</b> for the whole build — spend it wisely.`,
+  s10Start: "Open the Studio",
+  s10Stage1: "Iteration 1 — the skeleton", s10Stage2: "Iteration 2 — make it fun", s10Stage3: "Iteration 3 — polish & ship",
+  s10StageOf: "BUILD {i} OF 3",
+  s10Next2: "Next iteration", s10Ship: "Ship it!",
+  s10Reprompt: "Re-prompt (1 left)",
+  s10Preview: "Live preview", s10PreviewEmpty: "Nothing built yet — send your first prompt.",
+  s10LogIdle: "The AI is waiting for your prompt…",
+  s10Log2: "AI: On it… built exactly what you specified. Try it on the right ✓",
+  s10Log1: "AI: Done-ish. I guessed the parts you didn't mention ⚠",
+  s10Log0: "AI: “make game now plz” received. I did… something. Good luck ☠",
+  s10ClickLost: "bug: click not registered…",
+  s10Combo: "x2 COMBO!",
+  s10HighSaved: "HIGH SCORE saved ✓",
+  s10NaN: "score is now NaN. oops.",
+  s10ResLabel: "Build quality:",
+  s10TitlePerfect: "App Shipped!", s10TitleGood: "It ships… with quirks.", s10TitleNeeds: "The users want a refund…",
+  s10NotePerfect: "Three precise prompts, zero bugs. You're ready for the real thing.",
+  s10Note: "Strong prompts: {n}/3 iterations. Every vague prompt shipped a real bug into the preview.",
+  s10Takeaway: `<b>Takeaway:</b> that loop — <b>describe → build → look → iterate</b> — is vibe coding. Next up you'll do it with a real AI: same 5-part prompts, same small steps, same golden rule (test everything). Go ship something.`,
+});
+Object.assign(I18N.ar, {
+  s10Tag: "أطلقه",
+  s10Explain: `هذه <b>البرمجة بالذوق</b> مصغّرة: لا تلمس الكود أبدًا — أنت تصف، والذكاء يبني، وأنت تنظر إلى النتيجة ثم <b>تكرر وتحسّن</b>. ثلاث جولات بناء: الهيكل، ثم المتعة، ثم الصقل. جودة أوامرك تتحكم مباشرة فيما يظهر في المعاينة الحيّة — والأوامر الغامضة تُطلق أخطاءً حقيقية. تمامًا مثل الجلسة التي توشك أن تبدأها، لكن بذكاء اصطناعي محاكى.`,
+  s10Mission: "ابنِ «سبيس كليكر» — بالكلمات فقط",
+  s10MissionText: `3 تكرارات: <b style="color:var(--text)">v1 الهيكل ← v2 الميزات ← v3 الصقل</b>.<br>اختر أمرك في كل جولة وشاهد المعاينة الحيّة تطيعه.<br>لديك <b style="color:var(--text)">إعادة أمر واحدة</b> للبناء كله — أنفقها بحكمة.`,
+  s10Start: "افتح الاستوديو",
+  s10Stage1: "التكرار 1 — الهيكل", s10Stage2: "التكرار 2 — المتعة", s10Stage3: "التكرار 3 — الصقل والإطلاق",
+  s10StageOf: "بناء {i} من 3",
+  s10Next2: "التكرار التالي", s10Ship: "أطلقه!",
+  s10Reprompt: "أعد الأمر (متبقٍ 1)",
+  s10Preview: "معاينة حيّة", s10PreviewEmpty: "لم يُبنَ شيء بعد — أرسل أمرك الأول.",
+  s10LogIdle: "الذكاء الاصطناعي ينتظر أمرك…",
+  s10Log2: "الذكاء: تم… بنيت ما حددته بالضبط. جرّبه على الجانب ✓",
+  s10Log1: "الذكاء: تم تقريبًا. خمّنت الأجزاء التي لم تذكرها ⚠",
+  s10Log0: "الذكاء: وصلني «اعمل لعبة حالًا». فعلت… شيئًا ما. حظًا موفقًا ☠",
+  s10ClickLost: "خطأ: النقرة لم تُسجَّل…",
+  s10Combo: "كومبو x2!",
+  s10HighSaved: "حُفظت أعلى نتيجة ✓",
+  s10NaN: "النتيجة أصبحت NaN. عذرًا.",
+  s10ResLabel: "جودة البناء:",
+  s10TitlePerfect: "أُطلق التطبيق!", s10TitleGood: "يعمل… مع غرابات.", s10TitleNeeds: "المستخدمون يطلبون استرداد أموالهم…",
+  s10NotePerfect: "ثلاثة أوامر دقيقة، صفر أخطاء. أنت جاهز للتجربة الحقيقية.",
+  s10Note: "أوامر قوية: {n}/3 تكرارات. كل أمر غامض أطلق خطأً حقيقيًا في المعاينة.",
+  s10Takeaway: `<b>الخلاصة:</b> تلك الحلقة — <b>صِف ← ابنِ ← انظر ← كرر</b> — هي البرمجة بالذوق. تاليًا ستفعلها مع ذكاء اصطناعي حقيقي: نفس أوامر الأجزاء الخمسة، نفس الخطوات الصغيرة، نفس القاعدة الذهبية (اختبر كل شيء). اذهب وأطلق شيئًا.`,
+});
+
+const StudioGame = {
+  STAGES: [
+    { key: "s10Stage1", opts: [
+      { q: 2, en: "Build “Space Clicker”: a page titled SPACE CLICKER, one glowing teal button labeled LAUNCH, and a score that goes up by 1 per click. Dark space theme.",
+        ar: "ابنِ «سبيس كليكر»: صفحة بعنوان SPACE CLICKER وزر فيروزي متوهج بعنوان انطلق، ونتيجة تزيد 1 مع كل نقرة. طابع فضائي داكن." },
+      { q: 1, en: "Make a clicker game page with a button and a score.", ar: "اعمل صفحة لعبة نقر فيها زر ونتيجة." },
+      { q: 0, en: "make game now plz", ar: "اعمل لعبة حالًا لو سمحت" }] },
+    { key: "s10Stage2", opts: [
+      { q: 2, en: "Add a combo: clicks within 1 second of each other are worth 2 points and show “x2 COMBO!”. Slower clicks reset to 1 point. Keep v1 working.",
+        ar: "أضف كومبو: النقرات المتتالية خلال ثانية تساوي نقطتين وتعرض «كومبو x2!». النقر البطيء يعود لنقطة واحدة. أبقِ v1 يعمل." },
+      { q: 1, en: "Add some kind of bonus points system.", ar: "أضف نظام نقاط إضافية من نوع ما." },
+      { q: 0, en: "add everything fun you can think of, surprise me", ar: "أضف كل شيء ممتع يخطر ببالك، فاجئني" }] },
+    { key: "s10Stage3", opts: [
+      { q: 2, en: "Polish: pulse the button on click, play a click sound, celebrate at 15 points, and save the high score. Then tell me exactly what to test.",
+        ar: "اصقل: اجعل الزر ينبض عند النقر، وشغّل صوت نقرة، واحتفل عند 15 نقطة، واحفظ أعلى نتيجة. ثم أخبرني بما أختبره بالضبط." },
+      { q: 1, en: "Make it nicer and double-check it works.", ar: "حسّنها شكليًا وتأكد أنها تعمل." },
+      { q: 0, en: "done? whatever, ship it", ar: "خلصت؟ لا يهم، أطلقها" }] },
+  ],
+
+  stage: 0, qualities: [], reprompts: 1, counting: false,
+  pv: { score: 0, best: 0, lastClick: 0, celebrated: false },
+
+  open() {
+    $("s10-build").style.display = $("s10-results").style.display = "none";
+    $("s10-intro").style.display = "block";
+  },
+  start() {
+    this.stage = 0; this.qualities = []; this.reprompts = 1;
+    this.pv = { score: 0, best: 0, lastClick: 0, celebrated: false };
+    $("s10-intro").style.display = "none";
+    $("s10-build").style.display = "block";
+    $("s10-preview").innerHTML = `<p class="muted">${t("s10PreviewEmpty")}</p>`;
+    $("s10-preview").className = "preview-frame";
+    this.renderStage();
+  },
+  renderStage() {
+    const st = this.STAGES[this.stage];
+    $("s10-stage-label").textContent = t("s10StageOf", { i: this.stage + 1 });
+    $("s10-stage-title").textContent = t(st.key);
+    const order = shuffle([0, 1, 2]);
+    $("s10-opts").innerHTML = order.map(i =>
+      `<button onclick="StudioGame.choose(${i})">${esc(st.opts[i][LANG] || st.opts[i].en)}</button>`).join("");
+    $("s10-log").textContent = t("s10LogIdle");
+    $("s10-log").classList.remove("typing");
+    $("s10-next").style.display = "none";
+    $("s10-reprompt").style.display = "none";
+  },
+  choose(i) {
+    Sound.click();
+    const q = this.STAGES[this.stage].opts[i].q;
+    this.qualities[this.stage] = q;
+    document.querySelectorAll("#s10-opts button").forEach(b => b.disabled = true);
+    const log = $("s10-log");
+    log.textContent = "";
+    log.classList.add("typing");
+    setTimeout(() => {
+      log.classList.remove("typing");
+      log.textContent = t(q === 2 ? "s10Log2" : q === 1 ? "s10Log1" : "s10Log0");
+      this.renderPreview();
+      const last = this.stage === this.STAGES.length - 1;
+      const nextBtn = $("s10-next");
+      nextBtn.style.display = "inline-flex";
+      nextBtn.innerHTML = `${icon(last ? "check" : "ff")} <span>${t(last ? "s10Ship" : "s10Next2")}</span>`;
+      if (q < 2 && this.reprompts > 0) $("s10-reprompt").style.display = "inline-flex";
+      (q === 2 ? Sound.good : Sound.bad).call(Sound);
+    }, 900);
+  },
+  reprompt() {
+    if (this.reprompts <= 0) return;
+    this.reprompts--;
+    Sound.click();
+    this.renderStage();
+  },
+  nextStage() {
+    Sound.click();
+    if (this.stage >= this.STAGES.length - 1) return this.finish();
+    this.stage++;
+    this.renderStage();
+  },
+
+  /* ---- the live preview: a real mini-game whose quality follows your prompts ---- */
+  renderPreview() {
+    const [q1, q2, q3] = [this.qualities[0], this.qualities[1], this.qualities[2]];
+    const frame = $("s10-preview");
+    frame.className = "preview-frame q" + q1;
+    const title = q1 === 2 ? "SPACE CLICKER" : q1 === 1 ? "Clicker" : "gAmE ???";
+    const btnLabel = q3 === 0 ? "STRAT" : q1 === 2 ? "LAUNCH ▸" : q1 === 1 ? "Click" : "btn";
+    frame.innerHTML = `
+      <div class="pv-title" style="font-size:${q1 === 2 ? 22 : 17}px">${title}</div>
+      <div class="pv-score" id="pv-score">0</div>
+      <button class="pv-btn" id="pv-btn" style="${q3 === 0 ? "transform:rotate(4deg)" : ""}">${btnLabel}</button>
+      <div id="pv-msg" style="min-height:20px;font-size:13px"></div>
+      ${q3 === 2 ? `<div class="muted" style="font-size:12px" id="pv-best">${t("s10HighSaved")} — 0</div>` : ""}`;
+    this.pv.score = 0; this.pv.lastClick = 0; this.pv.celebrated = false;
+    $("pv-btn").onclick = () => this.pvClick(q1, q2, q3);
+  },
+  pvClick(q1, q2, q3) {
+    const msg = $("pv-msg"), scoreEl = $("pv-score");
+    msg.textContent = ""; msg.style.color = "";
+    /* v1 quality: vague prompts shipped a click-loss bug */
+    if (q1 === 0 && Math.random() < 0.4) {
+      msg.textContent = t("s10ClickLost");
+      msg.style.color = "var(--bad)";
+      return;
+    }
+    let pts = 1;
+    const now = performance.now();
+    if (q2 === 2 && now - this.pv.lastClick < 1000) {
+      pts = 2;
+      msg.textContent = t("s10Combo");
+      msg.style.color = "#38e1ff";
+    } else if (q2 === 0 && Math.random() < 0.25) {
+      scoreEl.textContent = "NaN";
+      msg.textContent = t("s10NaN");
+      msg.style.color = "var(--bad)";
+      this.pv.lastClick = now;
+      return;
+    }
+    this.pv.lastClick = now;
+    this.pv.score += pts;
+    scoreEl.textContent = this.pv.score;
+    if (q3 === 2) {
+      Sound.click();
+      const btn = $("pv-btn");
+      btn.style.transform = "scale(1.12)";
+      setTimeout(() => btn.style.transform = "", 110);
+      this.pv.best = Math.max(this.pv.best, this.pv.score);
+      const bestEl = $("pv-best");
+      if (bestEl) bestEl.textContent = t("s10HighSaved") + " — " + this.pv.best;
+      if (this.pv.score >= 15 && !this.pv.celebrated) {
+        this.pv.celebrated = true;
+        App.confetti();
+        Sound.win();
+      }
+    }
+  },
+
+  finish() {
+    const sum = this.qualities.reduce((s, q) => s + q, 0);
+    const score = Math.round(sum / 6 * 100);
+    $("s10-build").style.display = "none";
+    $("s10-results").style.display = "block";
+    countUp($("s10-res-score"), score);
+    const passed = score >= 60;
+    const strong = this.qualities.filter(q => q === 2).length;
+    resIcon($("s10-res-icon"), score === 100 ? "trophy" : passed ? "checkc" : "xc", score === 100 ? "amber" : passed ? "good" : "bad");
+    $("s10-res-title").textContent = score === 100 ? t("s10TitlePerfect") : passed ? t("s10TitleGood") : t("s10TitleNeeds");
+    $("s10-res-note").textContent = score === 100 ? t("s10NotePerfect") : t("s10Note", { n: strong });
+    if (passed) Sound.win();
+    if (score === 100) Badges.award("appShipper");
+    App.complete(10, Difficulty.applyBonus(10, score), passed);
+  },
+};
+
+Core.boot();
+StudioGame.open();
+</script>
+</body>
+</html>

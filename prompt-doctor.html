@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Warm-Up 1 — Prompt Doctor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&family=Cairo:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/core.css">
+</head>
+<body>
+<div class="wrap">
+  <section id="screen-l8" class="screen active">
+    <div class="topbar">
+      <button class="btn cyan" onclick="location.href='index.html'" data-i18n="back">← Arcade</button>
+      <h2><svg class="ic"><use href="#i-checkc"/></svg> <span data-i18n="card8Title">Prompt Doctor</span></h2>
+      <span class="tag cyan" data-i18n="s8Tag">Prompt Recap</span>
+    </div>
+
+    <details class="explain">
+      <summary><svg class="ic"><use href="#i-bulb"/></svg> <span data-i18n="explainTitle">What's the ML idea here?</span></summary>
+      <p data-i18n="s8Explain"></p>
+    </details>
+
+    <div id="s8-intro" class="panel center email-stage">
+      <div class="res-icon" style="color:#38e1ff"><svg class="ic"><use href="#i-checkc"/></svg></div>
+      <h3 style="margin:10px 0 6px" data-i18n="s8Mission">Your mission</h3>
+      <p class="muted" style="max-width:480px;margin:0 auto 18px" data-i18n="s8MissionText"></p>
+      <div class="field" style="max-width:280px;margin:0 auto 18px">
+        <label data-i18n="diffLabel">Difficulty</label>
+        <select id="l8-diff" onchange="Difficulty.change(8, this.value)"></select>
+      </div>
+      <button class="btn cyan primary big" onclick="DoctorGame.start()"><svg class="ic"><use href="#i-play"/></svg> <span data-i18n="s8Start">Open the Clinic</span></button>
+    </div>
+
+    <div id="s8-play" class="email-stage" style="display:none">
+      <div class="hud" style="justify-content:center">
+        <span class="chip"><span data-i18n="s8ChipCase">Case</span> <b id="s8-count">1/12</b></span>
+        <span class="chip"><span data-i18n="l1ChipScore">Score</span> <b id="s8-score">0</b></span>
+        <span class="chip"><span data-i18n="l1ChipStreak">Streak</span> <svg class="ic fill" style="color:var(--amber)"><use href="#i-flame"/></svg> <b id="s8-streak">0</b></span>
+      </div>
+      <div class="email-card" id="s8-card">
+        <div class="from" data-i18n="s8Diagnose">This prompt is sick — what part is MISSING?</div>
+        <div class="body" id="s8-body" style="font-style:italic"></div>
+      </div>
+      <div class="timer-track"><div class="timer-fill" id="s8-timer"></div></div>
+      <div class="sort-grid" id="s8-btns" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))"></div>
+      <div class="feedback-line" id="s8-feedback"></div>
+    </div>
+
+    <div id="s8-results" class="panel center result-panel" style="display:none">
+      <div class="res-icon" id="s8-res-icon"></div>
+      <h3 id="s8-res-title"></h3>
+      <p class="muted" data-i18n="s8AccLabel">Your diagnosis accuracy:</p>
+      <div class="big-metric" style="color:#38e1ff;text-shadow:0 0 24px rgba(56,225,255,.4)" id="s8-res-acc">0%</div>
+      <p class="muted" style="margin-top:4px"><span data-i18n="l1FinalScore">Final score:</span> <b id="s8-res-score" style="color:var(--text)">0</b></p>
+      <div class="takeaway" style="border-color:#38e1ff" data-i18n="s8Takeaway"></div>
+      <div class="result-actions">
+        <button class="btn cyan primary" onclick="DoctorGame.open()"><svg class="ic"><use href="#i-replay"/></svg> <span data-i18n="l1Again">Play Again</span></button>
+        <button class="btn cyan" onclick="location.href='vibe-check.html'"><svg class="ic"><use href="#i-ff"/></svg> <span data-i18n="s8Next">Next: Vibe Check</span></button>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="assets/core.js"></script>
+<script>
+"use strict";
+Object.assign(I18N.en, {
+  s8Tag: "Prompt Recap",
+  s8Explain: `Yesterday's formula, today's reflexes: every great prompt = <b>Role + Task + Context + Requirements + Format</b>. Each patient-prompt in this clinic has exactly <b>one part missing</b>. Diagnose it fast — in the vibe coding session you'll be writing these prompts yourself, and spotting the missing piece is the difference between generic AI output and exactly what you wanted.`,
+  s8Mission: "Your mission",
+  s8MissionText: `Prompts arrive with <b style="color:var(--text)">one of the 5 parts missing</b>.<br>Diagnose which one before the timer runs out.<br>+10 correct, −5 wrong.`,
+  s8Start: "Open the Clinic", s8ChipCase: "Case",
+  s8Diagnose: "This prompt is sick — what part is MISSING?",
+  s8pRole: "Role", s8pTask: "Task", s8pContext: "Context", s8pReq: "Requirements", s8pFormat: "Format",
+  s8Correct: "Correct diagnosis! +10", s8Wrong: "Wrong — it was missing {part}! −5", s8TooSlow: "Too slow — the patient left! It was {part}",
+  s8AccLabel: "Your diagnosis accuracy:",
+  s8TitleElite: "Prompt Surgeon!", s8TitleGood: "Solid diagnosis!", s8TitleNeeds: "Back to prompt school…",
+  s8Next: "Next: Vibe Check",
+  s8Takeaway: `<b>Takeaway:</b> Role + Task + Context + Requirements + Format — if a prompt underperforms, one of these is usually missing. In vibe coding you'll run this checklist on your own prompts before every send.`,
+});
+Object.assign(I18N.ar, {
+  s8Tag: "مراجعة الأوامر",
+  s8Explain: `معادلة الأمس، ردود فعل اليوم: كل أمر عظيم = <b>دور + مهمة + سياق + متطلبات + تنسيق</b>. كل أمر-مريض في هذه العيادة ينقصه <b>جزء واحد بالضبط</b>. شخّصه بسرعة — في جلسة البرمجة بالذوق ستكتب هذه الأوامر بنفسك، واكتشاف الجزء الناقص هو الفرق بين مخرجات عامة وما تريده تمامًا.`,
+  s8Mission: "مهمتك",
+  s8MissionText: `تصل أوامر ينقص كلًا منها <b style="color:var(--text)">جزء واحد من الأجزاء الخمسة</b>.<br>شخّص أيها قبل انتهاء الوقت.<br>+10 للصحيح و −5 للخطأ.`,
+  s8Start: "افتح العيادة", s8ChipCase: "حالة",
+  s8Diagnose: "هذا الأمر مريض — ما الجزء الناقص؟",
+  s8pRole: "الدور", s8pTask: "المهمة", s8pContext: "السياق", s8pReq: "المتطلبات", s8pFormat: "التنسيق",
+  s8Correct: "تشخيص صحيح! +10", s8Wrong: "خطأ — كان الناقص {part}! −5", s8TooSlow: "متأخر — غادر المريض! كان الناقص {part}",
+  s8AccLabel: "دقة تشخيصك:",
+  s8TitleElite: "جرّاح الأوامر!", s8TitleGood: "تشخيص متين!", s8TitleNeeds: "عودة إلى مدرسة الأوامر…",
+  s8Next: "التالي: فحص الذوق",
+  s8Takeaway: `<b>الخلاصة:</b> دور + مهمة + سياق + متطلبات + تنسيق — إذا ضعُف أمر ما، فغالبًا أحد هذه ناقص. في البرمجة بالذوق ستراجع هذه القائمة في أوامرك قبل كل إرسال.`,
+});
+
+const DoctorGame = {
+  PARTS: ["role", "task", "context", "req", "format"],
+  PART_KEY: { role: "s8pRole", task: "s8pTask", context: "s8pContext", req: "s8pReq", format: "s8pFormat" },
+  ITEMS: [
+    { m: "format", en: "“You are a fitness coach. Create a 3-day workout plan for a total beginner. Keep it safe and simple, no equipment needed.”", ar: "«أنت مدرب لياقة. صمّم خطة تمارين 3 أيام لمبتدئ تمامًا. اجعلها آمنة وبسيطة وبدون معدات.»" },
+    { m: "task", en: "“You are a history teacher. This is for curious 12-year-olds. Use fun facts and simple words. Answer as a short story.”", ar: "«أنت معلم تاريخ. هذا لأطفال فضوليين عمرهم 12 عامًا. استخدم حقائق ممتعة وكلمات بسيطة. أجب على شكل قصة قصيرة.»" },
+    { m: "role", en: "“Summarize this article for busy managers. Focus on the 3 key decisions, neutral tone. Present it as a table.”", ar: "«لخّص هذا المقال لمديرين مشغولين. ركّز على القرارات الثلاثة الأهم بنبرة محايدة. اعرضه في جدول.»" },
+    { m: "context", en: "“You are a travel expert. Plan a 3-day trip to Cairo. Budget-friendly, walking distances, local food. Day-by-day list.”", ar: "«أنت خبير سفر. خطط رحلة 3 أيام إلى القاهرة. اقتصادية، مسافات مشي، أكل محلي. قائمة يومًا بيوم.»" },
+    { m: "req", en: "“You are a chef. Write a koshari recipe for students living in a dorm. Present it as numbered steps.”", ar: "«أنت طاهٍ. اكتب وصفة كشري لطلاب يسكنون في سكن جامعي. اعرضها كخطوات مرقمة.»" },
+    { m: "format", en: "“You are a Python tutor. Explain loops to someone who has never coded. Use one everyday analogy and zero jargon.”", ar: "«أنت مدرس بايثون. اشرح الحلقات التكرارية لشخص لم يبرمج قط. استخدم تشبيهًا واحدًا من الحياة اليومية وبدون مصطلحات.»" },
+    { m: "req", en: "“You are a doctor. Explain why sleep matters, for teenagers. Answer in exactly 3 bullet points.”", ar: "«أنت طبيب. اشرح لماذا النوم مهم، لمراهقين. أجب في 3 نقاط بالضبط.»" },
+    { m: "role", en: "“Write a birthday poem for my grandmother who loves gardening. Warm and funny, mention roses. 8 short lines.”", ar: "«اكتب قصيدة عيد ميلاد لجدتي التي تعشق البستنة. دافئة ومضحكة، اذكر الورود. 8 أسطر قصيرة.»" },
+    { m: "task", en: "“You are a car mechanic. This is for a first-time car owner. Use simple words, no brand names. Present as a checklist.”", ar: "«أنت ميكانيكي سيارات. هذا لمالك سيارة لأول مرة. كلمات بسيطة وبدون أسماء شركات. اعرضه كقائمة تدقيق.»" },
+    { m: "context", en: "“You are a storyteller. Tell a bedtime story. Calm tone, animals as characters, a happy ending. About 5 minutes long.”", ar: "«أنت حكواتي. احكِ قصة قبل النوم. نبرة هادئة، الشخصيات حيوانات، نهاية سعيدة. مدتها 5 دقائق تقريبًا.»" },
+    { m: "format", en: "“You are a nutritionist. Design a school lunch menu for one week, for 10-year-olds, with a strict no-nuts rule.”", ar: "«أنت أخصائي تغذية. صمّم قائمة غداء مدرسي لأسبوع كامل، لأطفال عمرهم 10 سنوات، مع منع صارم للمكسرات.»" },
+    { m: "context", en: "“You are an English teacher. Fix the grammar in this essay. Keep my writing style. Show corrections in bold.”", ar: "«أنت معلم لغة. صحّح قواعد هذا المقال. حافظ على أسلوبي في الكتابة. أظهر التصحيحات بخط عريض.»" },
+  ],
+
+  queue: [], idx: 0, score: 0, streak: 0, correct: 0,
+  answered: false, timerInt: null, curTime: 12000, counting: false,
+
+  open() {
+    clearInterval(this.timerInt);
+    $("s8-play").style.display = $("s8-results").style.display = "none";
+    $("s8-intro").style.display = "block";
+  },
+  start() {
+    if (this.counting) return;
+    const d = Difficulty.get(8);
+    this.curTime = clamp(15000 - d * 1100, 4000, 14000);
+    const count = d <= 2 ? 8 : d <= 5 ? 10 : 12;
+    this.queue = shuffle(this.ITEMS).slice(0, count);
+    this.idx = 0; this.score = 0; this.streak = 0; this.correct = 0;
+    $("s8-intro").style.display = "none";
+    $("s8-play").style.display = "block";
+    $("s8-score").textContent = "0"; $("s8-streak").textContent = "0";
+    $("s8-btns").innerHTML = this.PARTS.map(p =>
+      `<button class="btn cyan" onclick="DoctorGame.answer('${p}')">${t(this.PART_KEY[p])}</button>`).join("");
+    this.counting = true;
+    countdown(() => { this.counting = false; this.next(); });
+  },
+  next() {
+    if (this.idx >= this.queue.length) return this.finish();
+    this.answered = false;
+    const item = this.queue[this.idx];
+    $("s8-count").textContent = `${this.idx + 1}/${this.queue.length}`;
+    $("s8-body").textContent = item[LANG] || item.en;
+    $("s8-feedback").textContent = ""; $("s8-feedback").className = "feedback-line";
+    const card = $("s8-card");
+    card.className = "email-card";
+    card.style.animation = "none"; void card.offsetWidth; card.style.animation = "";
+    const bar = $("s8-timer");
+    bar.classList.remove("warn", "danger");
+    const deadline = performance.now() + this.curTime;
+    clearInterval(this.timerInt);
+    this.timerInt = setInterval(() => {
+      const left = deadline - performance.now();
+      const pct = left / this.curTime;
+      bar.style.width = clamp(pct * 100, 0, 100) + "%";
+      bar.classList.toggle("warn", pct < .5 && pct >= .25);
+      bar.classList.toggle("danger", pct < .25);
+      if (left <= 0) this.timeout();
+    }, 50);
+  },
+  answer(p) {
+    if (this.answered) return;
+    this.answered = true;
+    clearInterval(this.timerInt);
+    const item = this.queue[this.idx];
+    const fb = $("s8-feedback");
+    if (p === item.m) {
+      this.correct++; this.streak++; this.score += 10;
+      fb.textContent = t("s8Correct"); fb.classList.add("good");
+      $("s8-card").classList.add("flash-good");
+      Sound.good(); scorePop("+10", "var(--good)", $("s8-card"));
+    } else {
+      this.streak = 0; this.score -= 5;
+      fb.textContent = t("s8Wrong", { part: t(this.PART_KEY[item.m]) }); fb.classList.add("bad");
+      $("s8-card").classList.add("flash-bad");
+      Sound.bad(); shake(); scorePop("−5", "var(--bad)", $("s8-card"));
+    }
+    $("s8-score").textContent = this.score;
+    $("s8-streak").textContent = this.streak;
+    this.idx++;
+    setTimeout(() => this.next(), 1100);
+  },
+  timeout() {
+    if (this.answered) return;
+    this.answered = true;
+    clearInterval(this.timerInt);
+    const item = this.queue[this.idx];
+    this.streak = 0; $("s8-streak").textContent = "0";
+    const fb = $("s8-feedback");
+    fb.textContent = t("s8TooSlow", { part: t(this.PART_KEY[item.m]) }); fb.classList.add("bad");
+    $("s8-card").classList.add("flash-bad");
+    Sound.bad(); shake();
+    this.idx++;
+    setTimeout(() => this.next(), 1100);
+  },
+  finish() {
+    clearInterval(this.timerInt);
+    $("s8-play").style.display = "none";
+    $("s8-results").style.display = "block";
+    const acc = Math.round(this.correct / this.queue.length * 100);
+    countUp($("s8-res-acc"), acc, v => v + "%");
+    $("s8-res-score").textContent = this.score;
+    const passed = acc >= 70;
+    resIcon($("s8-res-icon"), acc === 100 ? "trophy" : passed ? "checkc" : "flask", acc === 100 ? "amber" : passed ? "good" : "muted");
+    $("s8-res-title").textContent = acc === 100 ? t("s8TitleElite") : passed ? t("s8TitleGood") : t("s8TitleNeeds");
+    if (passed) Sound.win();
+    if (acc === 100) Badges.award("promptDoctor");
+    App.complete(8, Difficulty.applyBonus(8, this.score), passed);
+  },
+};
+
+Core.boot();
+DoctorGame.open();
+</script>
+</body>
+</html>

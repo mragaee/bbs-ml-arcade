@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Warm-Up 2 — Vibe Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&family=Cairo:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/core.css">
+</head>
+<body>
+<div class="wrap">
+  <section id="screen-l9" class="screen active">
+    <div class="topbar">
+      <button class="btn cyan" onclick="location.href='index.html'" data-i18n="back">← Arcade</button>
+      <h2><svg class="ic"><use href="#i-zap"/></svg> <span data-i18n="card9Title">Vibe Check</span></h2>
+      <span class="tag cyan" data-i18n="s9Tag">Code Prompts</span>
+    </div>
+
+    <details class="explain">
+      <summary><svg class="ic"><use href="#i-bulb"/></svg> <span data-i18n="explainTitle">What's the ML idea here?</span></summary>
+      <p data-i18n="s9Explain"></p>
+    </details>
+
+    <div id="s9-intro" class="panel center email-stage">
+      <div class="res-icon" style="color:#38e1ff"><svg class="ic"><use href="#i-zap"/></svg></div>
+      <h3 style="margin:10px 0 6px" data-i18n="s9Mission">Your mission</h3>
+      <p class="muted" style="max-width:480px;margin:0 auto 18px" data-i18n="s9MissionText"></p>
+      <div class="field" style="max-width:280px;margin:0 auto 18px">
+        <label data-i18n="diffLabel">Difficulty</label>
+        <select id="l9-diff" onchange="Difficulty.change(9, this.value)"></select>
+      </div>
+      <button class="btn cyan primary big" onclick="CheckGame.start()"><svg class="ic"><use href="#i-play"/></svg> <span data-i18n="s9Start">Start the Vibe Check</span></button>
+    </div>
+
+    <div id="s9-play" style="display:none">
+      <div class="hud" style="justify-content:center">
+        <span class="chip"><span data-i18n="s5ChipRound">Round</span> <b id="s9-count">1/10</b></span>
+        <span class="chip"><span data-i18n="l1ChipScore">Score</span> <b id="s9-score">0</b></span>
+        <span class="chip"><span data-i18n="l1ChipStreak">Streak</span> <svg class="ic fill" style="color:var(--amber)"><use href="#i-flame"/></svg> <b id="s9-streak">0</b></span>
+      </div>
+      <div class="panel">
+        <p class="center muted" style="font-size:13px;letter-spacing:1.5px;text-transform:uppercase" data-i18n="s9TaskLabel">The coding task</p>
+        <h3 class="center" id="s9-task" style="margin:6px 0 4px"></h3>
+        <p class="center muted" style="font-size:14px" data-i18n="s9WhichLabel">Which prompt would a real vibe coder send?</p>
+        <div class="timer-track"><div class="timer-fill" id="s9-timer"></div></div>
+        <div class="ab-grid" id="s9-ab"></div>
+        <div class="feedback-line" id="s9-feedback"></div>
+      </div>
+    </div>
+
+    <div id="s9-results" class="panel center result-panel" style="display:none">
+      <div class="res-icon" id="s9-res-icon"></div>
+      <h3 id="s9-res-title"></h3>
+      <p class="muted" data-i18n="s9AccLabel">Your vibe accuracy:</p>
+      <div class="big-metric" style="color:#38e1ff;text-shadow:0 0 24px rgba(56,225,255,.4)" id="s9-res-acc">0%</div>
+      <p class="muted" style="margin-top:4px"><span data-i18n="l1FinalScore">Final score:</span> <b id="s9-res-score" style="color:var(--text)">0</b></p>
+      <div class="takeaway" style="border-color:#38e1ff" data-i18n="s9Takeaway"></div>
+      <div class="result-actions">
+        <button class="btn cyan primary" onclick="CheckGame.open()"><svg class="ic"><use href="#i-replay"/></svg> <span data-i18n="l1Again">Play Again</span></button>
+        <button class="btn cyan" onclick="location.href='vibe-studio.html'"><svg class="ic"><use href="#i-ff"/></svg> <span data-i18n="s9Next">Next: Vibe Studio</span></button>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="assets/core.js"></script>
+<script>
+"use strict";
+Object.assign(I18N.en, {
+  s9Tag: "Code Prompts",
+  s9Explain: `<b>Vibe coding</b> = building software by describing what you want and letting AI write the code. Your prompt IS your skill. The habits that separate pros from beginners: <b>be specific</b>, <b>give examples</b>, <b>start with the smallest working version</b>, <b>paste errors back instead of starting over</b>, and <b>test after every change</b>. Every round shows two prompts for the same coding task — spot the pro's.`,
+  s9Mission: "Your mission",
+  s9MissionText: `Two prompts, one coding task, one timer.<br>Pick the prompt that gets <b style="color:var(--text)">better code</b> from the AI.<br>+10 correct, −5 wrong.`,
+  s9Start: "Start the Vibe Check",
+  s9TaskLabel: "The coding task", s9WhichLabel: "Which prompt would a real vibe coder send?",
+  s9Correct: "That's the vibe! +10", s9Wrong: "Nope — the other one. {why} −5", s9TooSlow: "Too slow — the deadline shipped without you!",
+  s9AccLabel: "Your vibe accuracy:",
+  s9TitleElite: "Vibe Certified!", s9TitleGood: "Strong vibes!", s9TitleNeeds: "The vibes are off…",
+  s9Next: "Next: Vibe Studio",
+  s9Takeaway: `<b>Takeaway:</b> in vibe coding, the prompt is the craft — specific beats vague, examples beat adjectives, small steps beat mega-prompts, and pasting the error back beats rage-deleting. Keep these instincts for the session ahead.`,
+});
+Object.assign(I18N.ar, {
+  s9Tag: "أوامر الكود",
+  s9Explain: `<b>البرمجة بالذوق (Vibe Coding)</b> = بناء البرمجيات بوصف ما تريده وترك الذكاء الاصطناعي يكتب الكود. أمرك هو مهارتك. العادات التي تفرق المحترف عن المبتدئ: <b>كن محددًا</b>، <b>أعطِ أمثلة</b>، <b>ابدأ بأصغر نسخة تعمل</b>، <b>ألصق الأخطاء بدل البدء من الصفر</b>، و<b>اختبر بعد كل تغيير</b>. كل جولة تعرض أمرين لنفس المهمة البرمجية — اكتشف أمر المحترف.`,
+  s9Mission: "مهمتك",
+  s9MissionText: `أمران، مهمة برمجية واحدة، ومؤقت واحد.<br>اختر الأمر الذي ينتج <b style="color:var(--text)">كودًا أفضل</b> من الذكاء الاصطناعي.<br>+10 للصحيح و −5 للخطأ.`,
+  s9Start: "ابدأ فحص الذوق",
+  s9TaskLabel: "المهمة البرمجية", s9WhichLabel: "أي أمر يرسله مبرمج الذوق الحقيقي؟",
+  s9Correct: "هذا هو الذوق! +10", s9Wrong: "لا — الآخر. {why} −5", s9TooSlow: "متأخر — الموعد النهائي رحل بدونك!",
+  s9AccLabel: "دقة ذوقك:",
+  s9TitleElite: "معتمَد الذوق!", s9TitleGood: "ذوق قوي!", s9TitleNeeds: "الذوق مضطرب…",
+  s9Next: "التالي: استوديو الذوق",
+  s9Takeaway: `<b>الخلاصة:</b> في البرمجة بالذوق، الأمر هو الحرفة — المحدد يغلب الغامض، والأمثلة تغلب الصفات، والخطوات الصغيرة تغلب الأوامر العملاقة، ولصق الخطأ يغلب الحذف الغاضب. احتفظ بهذه الغرائز للجلسة القادمة.`,
+});
+
+const CheckGame = {
+  ROUNDS: [
+    { task: { en: "Add a button to your game", ar: "أضف زرًا للعبتك" },
+      good: { en: "Add an HTML button labeled “Start”: teal background, rounded corners, glows on hover, centered under the title.", ar: "أضف زر HTML بعنوان «ابدأ»: خلفية فيروزية وزوايا مستديرة، يتوهج عند المرور، في المنتصف تحت العنوان." },
+      bad: { en: "make button", ar: "اعمل زر" },
+      why: { en: "Specific beats vague.", ar: "المحدد يغلب الغامض." } },
+    { task: { en: "The AI's code has a bug", ar: "كود الذكاء فيه خطأ" },
+      good: { en: "The score resets when I click twice fast. Console says: “TypeError: score is undefined (line 42)”. Fix only that.", ar: "النتيجة تُصفَّر عند النقر مرتين بسرعة. الكونسول يقول: «TypeError: score is undefined (line 42)». أصلح هذا فقط." },
+      bad: { en: "it's broken. delete everything and rewrite the whole app.", ar: "الكود بايظ. امسح كل شيء وأعد كتابة التطبيق كله." },
+      why: { en: "Paste the error back — don't rage-delete.", ar: "ألصق الخطأ — لا تحذف بغضب." } },
+    { task: { en: "Start a brand-new app", ar: "ابدأ تطبيقًا جديدًا" },
+      good: { en: "Build the simplest working version first: a page with a title and one button that shows an alert. We'll add features one by one.", ar: "ابنِ أبسط نسخة تعمل أولًا: صفحة بعنوان وزر واحد يعرض تنبيهًا. سنضيف الميزات واحدة واحدة." },
+      bad: { en: "Build the complete game with menus, 10 levels, multiplayer, a shop and cloud saves. One prompt, go.", ar: "ابنِ اللعبة الكاملة بقوائم و10 مستويات ولعب جماعي ومتجر وحفظ سحابي. أمر واحد، هيا." },
+      why: { en: "Small steps beat mega-prompts.", ar: "الخطوات الصغيرة تغلب الأوامر العملاقة." } },
+    { task: { en: "Style the page", ar: "نسّق الصفحة" },
+      good: { en: "Match this style: dark navy background #0b0f19, neon teal buttons, Orbitron font for headings — like the screenshot I attached.", ar: "طابق هذا النمط: خلفية كحلية داكنة #0b0f19، أزرار فيروزية نيون، خط عريض للعناوين — مثل الصورة المرفقة." },
+      bad: { en: "make it pretty and modern and clean and nice", ar: "اجعلها جميلة وعصرية ونظيفة ولطيفة" },
+      why: { en: "Examples beat adjectives.", ar: "الأمثلة تغلب الصفات." } },
+    { task: { en: "Add a new feature", ar: "أضف ميزة جديدة" },
+      good: { en: "Add a high score that saves in the browser (localStorage) so it survives refresh. Show it under the current score.", ar: "أضف أعلى نتيجة تُحفظ في المتصفح (localStorage) لتبقى بعد التحديث. اعرضها تحت النتيجة الحالية." },
+      bad: { en: "add more cool stuff that players usually like", ar: "أضف أشياء رائعة يحبها اللاعبون عادة" },
+      why: { en: "Name the feature and where it lives.", ar: "سمِّ الميزة وحدد مكانها." } },
+    { task: { en: "The code works — but you don't get it", ar: "الكود يعمل — لكنك لا تفهمه" },
+      good: { en: "Before we change anything: explain what this function does in simple words, line by line.", ar: "قبل أن نغير شيئًا: اشرح ماذا تفعل هذه الدالة بكلمات بسيطة، سطرًا بسطر." },
+      bad: { en: "whatever, just keep changing it until it looks right", ar: "لا يهم، استمر في تغييره حتى يبدو صحيحًا" },
+      why: { en: "Understand before you build on it.", ar: "افهم قبل أن تبني فوقه." } },
+    { task: { en: "Handle the data", ar: "تعامل مع البيانات" },
+      good: { en: "Use exactly this shape: player = { name: 'Sara', score: 120 }. Build the leaderboard around it and show me sample output.", ar: "استخدم هذا الشكل بالضبط: player = { name: 'Sara', score: 120 }. ابنِ لوحة الصدارة حوله وأرني عينة من الناتج." },
+      bad: { en: "store the data somehow, you decide, surprise me", ar: "خزّن البيانات بطريقة ما، أنت قرر، فاجئني" },
+      why: { en: "A concrete example locks the structure.", ar: "المثال الملموس يثبّت البنية." } },
+    { task: { en: "A big feature (login system)", ar: "ميزة كبيرة (نظام دخول)" },
+      good: { en: "Let's do login in steps: 1) the form UI only. Then I'll test it, and we do validation next, then saving.", ar: "لننفذ الدخول على خطوات: 1) واجهة النموذج فقط. سأختبرها، ثم ننفذ التحقق، ثم الحفظ." },
+      bad: { en: "Add full login with validation, password reset, email codes and admin roles in one shot.", ar: "أضف دخولًا كاملًا مع تحقق واستعادة كلمة مرور وأكواد بريد وصلاحيات مدير دفعة واحدة." },
+      why: { en: "Slice big features into testable steps.", ar: "قسّم الميزات الكبيرة إلى خطوات قابلة للاختبار." } },
+    { task: { en: "After the AI makes a change", ar: "بعد أن يعدّل الذكاء شيئًا" },
+      good: { en: "Tell me exactly what to click to verify this change works — and what should happen when I do.", ar: "أخبرني بالضبط على ماذا أنقر لأتحقق أن التعديل يعمل — وماذا يجب أن يحدث عندها." },
+      bad: { en: "no red text = it works. moving on!", ar: "لا يوجد نص أحمر = يعمل. لنكمل!" },
+      why: { en: "Test every change — the golden rule again.", ar: "اختبر كل تغيير — القاعدة الذهبية مجددًا." } },
+    { task: { en: "The AI misunderstood you", ar: "الذكاء أساء فهمك" },
+      good: { en: "Not quite: I wanted the timer to count DOWN from 60, not up. Keep everything else exactly as it is.", ar: "ليس تمامًا: أردت المؤقت يعد تنازليًا من 60، لا تصاعديًا. أبقِ كل شيء آخر كما هو بالضبط." },
+      bad: { en: "wrong!! try again and hope for the best", ar: "خطأ!! حاول مرة أخرى ولنأمل الأفضل" },
+      why: { en: "Correct precisely; protect what already works.", ar: "صحّح بدقة واحمِ ما يعمل بالفعل." } },
+  ],
+
+  queue: [], idx: 0, score: 0, streak: 0, correct: 0,
+  answered: false, timerInt: null, curTime: 14000, counting: false,
+
+  open() {
+    clearInterval(this.timerInt);
+    $("s9-play").style.display = $("s9-results").style.display = "none";
+    $("s9-intro").style.display = "block";
+  },
+  start() {
+    if (this.counting) return;
+    const d = Difficulty.get(9);
+    this.curTime = clamp(17000 - d * 1200, 5000, 16000);
+    const count = d <= 3 ? 8 : 10;
+    this.queue = shuffle(this.ROUNDS).slice(0, count);
+    this.idx = 0; this.score = 0; this.streak = 0; this.correct = 0;
+    $("s9-intro").style.display = "none";
+    $("s9-play").style.display = "block";
+    $("s9-score").textContent = "0"; $("s9-streak").textContent = "0";
+    this.counting = true;
+    countdown(() => { this.counting = false; this.next(); });
+  },
+  next() {
+    if (this.idx >= this.queue.length) return this.finish();
+    this.answered = false;
+    const r = this.queue[this.idx];
+    $("s9-count").textContent = `${this.idx + 1}/${this.queue.length}`;
+    $("s9-task").textContent = r.task[LANG] || r.task.en;
+    $("s9-feedback").textContent = ""; $("s9-feedback").className = "feedback-line";
+    const goodFirst = Math.random() < 0.5;
+    const cards = goodFirst ? [["good", r.good], ["bad", r.bad]] : [["bad", r.bad], ["good", r.good]];
+    $("s9-ab").innerHTML = cards.map(([kind, txt], i) => `
+      <button onclick="CheckGame.answer('${kind}')">
+        <span class="ab-label">${i === 0 ? "A" : "B"}</span>${esc(txt[LANG] || txt.en)}
+      </button>`).join("");
+    const bar = $("s9-timer");
+    bar.classList.remove("warn", "danger");
+    const deadline = performance.now() + this.curTime;
+    clearInterval(this.timerInt);
+    this.timerInt = setInterval(() => {
+      const left = deadline - performance.now();
+      const pct = left / this.curTime;
+      bar.style.width = clamp(pct * 100, 0, 100) + "%";
+      bar.classList.toggle("warn", pct < .5 && pct >= .25);
+      bar.classList.toggle("danger", pct < .25);
+      if (left <= 0) this.timeout();
+    }, 50);
+  },
+  answer(kind) {
+    if (this.answered) return;
+    this.answered = true;
+    clearInterval(this.timerInt);
+    const r = this.queue[this.idx];
+    const fb = $("s9-feedback");
+    if (kind === "good") {
+      this.correct++; this.streak++; this.score += 10;
+      fb.textContent = t("s9Correct"); fb.classList.add("good");
+      Sound.good(); scorePop("+10", "var(--good)", $("s9-task"));
+    } else {
+      this.streak = 0; this.score -= 5;
+      fb.textContent = t("s9Wrong", { why: r.why[LANG] || r.why.en }); fb.classList.add("bad");
+      Sound.bad(); shake(); scorePop("−5", "var(--bad)", $("s9-task"));
+    }
+    $("s9-score").textContent = this.score;
+    $("s9-streak").textContent = this.streak;
+    this.idx++;
+    setTimeout(() => this.next(), 1400);
+  },
+  timeout() {
+    if (this.answered) return;
+    this.answered = true;
+    clearInterval(this.timerInt);
+    this.streak = 0; $("s9-streak").textContent = "0";
+    const fb = $("s9-feedback");
+    fb.textContent = t("s9TooSlow"); fb.classList.add("bad");
+    Sound.bad(); shake();
+    this.idx++;
+    setTimeout(() => this.next(), 1100);
+  },
+  finish() {
+    clearInterval(this.timerInt);
+    $("s9-play").style.display = "none";
+    $("s9-results").style.display = "block";
+    const acc = Math.round(this.correct / this.queue.length * 100);
+    countUp($("s9-res-acc"), acc, v => v + "%");
+    $("s9-res-score").textContent = this.score;
+    const passed = acc >= 70;
+    resIcon($("s9-res-icon"), acc === 100 ? "trophy" : passed ? "checkc" : "flask", acc === 100 ? "amber" : passed ? "good" : "muted");
+    $("s9-res-title").textContent = acc === 100 ? t("s9TitleElite") : passed ? t("s9TitleGood") : t("s9TitleNeeds");
+    if (passed) Sound.win();
+    if (acc === 100) Badges.award("vibeChecker");
+    App.complete(9, Difficulty.applyBonus(9, this.score), passed);
+  },
+};
+
+Core.boot();
+CheckGame.open();
+</script>
+</body>
+</html>

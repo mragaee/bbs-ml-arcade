@@ -144,6 +144,17 @@ const I18N = {
     diffSet: "Difficulty: {name}",
     diffBonus: "Difficulty bonus \u00d7{m} \u2014 {pts} pts recorded!",
     progressRestored: "Welcome back, {user} \u2014 your badges and scores are restored!",
+    wingVibe: "Vibe Coding Warm-Up",
+    lvl8: "Warm-Up 1 \u00b7 Prompt Recap", lvl9: "Warm-Up 2 \u00b7 Code Prompts", lvl10: "Warm-Up 3 \u00b7 Ship It",
+    card8Title: "Prompt Doctor", card8Sub: "Diagnose the missing ingredient",
+    card8Desc: "A prompt rolls in with one of the 5 parts missing \u2014 Role, Task, Context, Requirements or Format. Name it before the timer.",
+    card9Title: "Vibe Check", card9Sub: "Which prompt gets better code?",
+    card9Desc: "Two prompts, one coding task. Pick the one a real vibe coder would send \u2014 specific, iterative, example-driven.",
+    card10Title: "Vibe Studio", card10Sub: "Build an app with words only",
+    card10Desc: "Ship a tiny game in 3 prompt iterations \u2014 and watch a LIVE preview improve (or hilariously break) with your prompt quality.",
+    badge_promptDoctor: "Prompt Surgeon", badgeD_promptDoctor: "Perfect diagnosis run in Prompt Doctor",
+    badge_vibeChecker: "Vibe Certified", badgeD_vibeChecker: "Perfect score in Vibe Check",
+    badge_appShipper: "App Shipped", badgeD_appShipper: "A flawless 3-iteration build in Vibe Studio",
     loggedOutReset: "Logged out. This device is reset \u2014 your progress stays saved with your player.",
     wingML: "The ML Arcade", wingLab: "The Prompt Lab",
     lvl4: "Lab 1 \u00b7 AI Fields", lvl5: "Lab 2 \u00b7 Generative AI", lvl6: "Lab 3 \u00b7 Prompt Engineering", lvl7: "Lab 4 \u00b7 Responsible AI",
@@ -302,6 +313,17 @@ const I18N = {
     diffSet: "الصعوبة: {name}",
     diffBonus: "مكافأة الصعوبة \u00d7{m} \u2014 سُجِّلت {pts} نقطة!",
     progressRestored: "أهلًا بعودتك يا {user} \u2014 استُعيدت أوسمتك ونتائجك!",
+    wingVibe: "إحماء البرمجة بالذوق",
+    lvl8: "إحماء 1 \u00b7 مراجعة الأوامر", lvl9: "إحماء 2 \u00b7 أوامر الكود", lvl10: "إحماء 3 \u00b7 أطلقه",
+    card8Title: "طبيب الأوامر", card8Sub: "شخّص المكوّن الناقص",
+    card8Desc: "أمر يصل ومكوّن واحد من الخمسة ناقص \u2014 دور أو مهمة أو سياق أو متطلبات أو تنسيق. سمِّه قبل انتهاء الوقت.",
+    card9Title: "فحص الذوق", card9Sub: "أي أمر ينتج كودًا أفضل؟",
+    card9Desc: "أمران ومهمة برمجية واحدة. اختر ما يرسله مبرمج الذوق الحقيقي \u2014 محدد وتكراري ومدعوم بالأمثلة.",
+    card10Title: "استوديو الذوق", card10Sub: "ابنِ تطبيقًا بالكلمات فقط",
+    card10Desc: "أطلق لعبة صغيرة في 3 تكرارات من الأوامر \u2014 وشاهد معاينة حيّة تتحسن (أو تنكسر بشكل مضحك) حسب جودة أوامرك.",
+    badge_promptDoctor: "جرّاح الأوامر", badgeD_promptDoctor: "جولة تشخيص مثالية في طبيب الأوامر",
+    badge_vibeChecker: "معتمَد الذوق", badgeD_vibeChecker: "علامة كاملة في فحص الذوق",
+    badge_appShipper: "أطلق التطبيق", badgeD_appShipper: "بناء مثالي من 3 تكرارات في استوديو الذوق",
     loggedOutReset: "تم تسجيل الخروج. هذا الجهاز أصبح نظيفًا \u2014 تقدمك محفوظ مع لاعبك.",
     wingML: "أركيد تعلّم الآلة", wingLab: "مختبر الأوامر",
     lvl4: "مختبر 1 \u00b7 مجالات الذكاء الاصطناعي", lvl5: "مختبر 2 \u00b7 الذكاء التوليدي", lvl6: "مختبر 3 \u00b7 هندسة الأوامر", lvl7: "مختبر 4 \u00b7 الاستخدام المسؤول",
@@ -370,7 +392,7 @@ const App = {
       const raw = localStorage.getItem(this.KEY);
       if (raw) Object.assign(this.state, JSON.parse(raw));
     } catch (e) { /* private mode etc. — play without persistence */ }
-    for (let g = 1; g <= 7; g++) if (!this.state[g]) this.state[g] = { best: null, done: false };
+    for (let g = 1; g <= 10; g++) if (!this.state[g]) this.state[g] = { best: null, done: false };
     this.renderDash();
   },
   save() {
@@ -398,7 +420,7 @@ const App = {
     ArcadeRun.record(level, score);
   },
   renderDash() {
-    for (const lvl of [1, 2, 3, 4, 5, 6, 7]) {
+    for (const lvl of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
       const s = this.state[lvl] || { best: null, done: false };
       const bestEl = document.getElementById("best-" + lvl);
       if (!bestEl) continue;
@@ -541,7 +563,7 @@ const Difficulty = {
   },
   renderAll() {
     const names = this.names();
-    [["l1-diff", 1], ["l2-diff", 2], ["l3-diff", 3], ["l4-diff", 4], ["l5-diff", 5], ["l6-diff", 6], ["l7-diff", 7]].forEach(([id, g]) => {
+    [["l1-diff", 1], ["l2-diff", 2], ["l3-diff", 3], ["l4-diff", 4], ["l5-diff", 5], ["l6-diff", 6], ["l7-diff", 7], ["l8-diff", 8], ["l9-diff", 9], ["l10-diff", 10]].forEach(([id, g]) => {
       const sel = $(id);
       if (!sel) return;
       sel.innerHTML = names.map((n, i) => `<option value="${i + 1}">${i + 1} — ${n}</option>`).join("");
@@ -842,19 +864,19 @@ const Team = {
   localScores() {
     const s = App.state;
     const out = { run: s.run || 0, badges: Object.keys(s.badges || {}).length };
-    for (let g = 1; g <= 7; g++) out["l" + g] = Math.max(0, (s[g] && s[g].best) || 0);
+    for (let g = 1; g <= 10; g++) out["l" + g] = Math.max(0, (s[g] && s[g].best) || 0);
     return out;
   },
   /* ---- per-player progress stored in the member's Firebase record ---- */
   progressPayload() {
     const s = App.state;
     const games = {};
-    for (let g = 1; g <= 7; g++) games[g] = { best: (s[g] && s[g].best) || 0, done: !!(s[g] && s[g].done) };
+    for (let g = 1; g <= 10; g++) games[g] = { best: (s[g] && s[g].best) || 0, done: !!(s[g] && s[g].done) };
     return { games, run: s.run || 0, badges: s.badges || {} };
   },
   mergeProgress(p) {
     if (!p) return;
-    for (let g = 1; g <= 7; g++) {
+    for (let g = 1; g <= 10; g++) {
       const sv = (p.games && p.games[g]) || {};
       const loc = App.state[g] = App.state[g] || { best: null, done: false };
       if (sv.best != null && sv.best > 0 && (loc.best === null || sv.best > loc.best)) loc.best = sv.best;
@@ -874,7 +896,7 @@ const Team = {
     } catch (e) {}
   },
   resetLocal() {
-    for (let g = 1; g <= 7; g++) App.state[g] = { best: null, done: false };
+    for (let g = 1; g <= 10; g++) App.state[g] = { best: null, done: false };
     App.state.run = 0;
     App.state.badges = {};
     App.state.careerShown = false;
@@ -884,7 +906,7 @@ const Team = {
   totalOf(sc) {
     sc = sc || {};
     let sum = sc.run || 0;
-    for (let g = 1; g <= 7; g++) sum += sc["l" + g] || 0;
+    for (let g = 1; g <= 10; g++) sum += sc["l" + g] || 0;
     return sum;
   },
   syncScores() {
@@ -949,6 +971,8 @@ const Badges = {
     { id: "spotterAce", icon: "grid" }, { id: "llmProphet", icon: "bulb" },
     { id: "forgeMaster", icon: "key" }, { id: "factChecker", icon: "search" },
     { id: "polymath", icon: "star" },
+    { id: "promptDoctor", icon: "checkc" }, { id: "vibeChecker", icon: "zap" },
+    { id: "appShipper", icon: "cpu" },
   ],
   has(id) { return !!(App.state.badges || {})[id]; },
   award(id) {
@@ -1050,9 +1074,10 @@ const Career = {
      showLab : show/hide The Prompt Lab wing
    ════════════════════════════════════════════════════════════ */
 const RemoteConfig = {
-  data: { showML: 1, showLab: 1 },
+  data: { showML: 1, showLab: 1, showVibe: 1 },
   ML_PAGES: ["supervised.html", "unsupervised.html", "reinforcement.html"],
   LAB_PAGES: ["ai-spotter.html", "llm.html", "prompt-forge.html", "hallucination.html"],
+  VIBE_PAGES: ["prompt-doctor.html", "vibe-check.html", "vibe-studio.html"],
   load() { try { Object.assign(this.data, JSON.parse(localStorage.getItem("mlArcadeCfg") || "{}")); } catch (e) {} },
   save() { try { localStorage.setItem("mlArcadeCfg", JSON.stringify(this.data)); } catch (e) {} },
   async fetch() {
@@ -1062,6 +1087,7 @@ const RemoteConfig = {
       if (cfg) {
         this.data.showML = cfg.showML === 0 ? 0 : 1;
         this.data.showLab = cfg.showLab === 0 ? 0 : 1;
+        this.data.showVibe = cfg.showVibe === 0 ? 0 : 1;
         this.save();
       }
     } catch (e) {}
@@ -1070,11 +1096,13 @@ const RemoteConfig = {
   apply() {
     document.querySelectorAll(".wing-ml").forEach(el => el.style.display = this.data.showML ? "" : "none");
     document.querySelectorAll(".wing-lab").forEach(el => el.style.display = this.data.showLab ? "" : "none");
+    document.querySelectorAll(".wing-vibe").forEach(el => el.style.display = this.data.showVibe ? "" : "none");
     const runBtn = document.getElementById("btn-run");
     if (runBtn) runBtn.style.display = this.data.showML ? "" : "none";
     const page = ((location.pathname || "").split("/").pop() || "index.html").toLowerCase();
     if ((!this.data.showML && this.ML_PAGES.includes(page)) ||
-        (!this.data.showLab && this.LAB_PAGES.includes(page))) {
+        (!this.data.showLab && this.LAB_PAGES.includes(page)) ||
+        (!this.data.showVibe && this.VIBE_PAGES.includes(page))) {
       location.href = "index.html";
     }
   },
